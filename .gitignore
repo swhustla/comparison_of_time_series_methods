@@ -1,0 +1,4 @@
+air-quality-data-in-india.zip
+air-quality-data-in-india/*.csv
+data/*
+.ipynb_checkpoints/*
