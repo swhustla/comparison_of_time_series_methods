@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "india_air_pollution_study"
+version = "0.1.0"
+description = ""
+authors = ["swhustla <fdkelly@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+jupyterlab = "^3.4.3"
+pandas = "^1.4.2"
+kaggle = "^1.5.12"
+torch = "^1.11.0"
+matplotlib = "^3.5.2"
+black = "^22.3.0"
+nb-black = "^1.0.7"
+prophet = "^1.0.1"
+plotly = "^5.8.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
