@@ -11,15 +11,12 @@ Prediction = TypeVar("Prediction")
 from .predict import Predict
 
 def linear_regression(
-    stationarity: Callable[[Data], bool],
-    fit_linear_regression_model: Callable[[Data], Model],
-    forecast: Callable[[Model, int], Prediction],
+    train: Callable[[Data], Model],
+    test: Callable[[Model, int], Prediction],
 ) -> Predict[Data, Prediction]:
     def predict(
         data: Data,
     ) -> Prediction:
-        if stationarity(data):
-            return
-        trained_model = fit_linear_regression_model(data)
-        return forecast(trained_model, 1)
+        trained_model = train(data)
+        return test(trained_model, len(data))
     return predict

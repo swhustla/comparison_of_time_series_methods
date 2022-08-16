@@ -31,7 +31,7 @@ def __data_length(data):
     return len(data)
 
 
-__theta = np.zeros((__data_length, 1))
+__theta = np.zeros((__data_length(), 1))
 __learning_rate = 0.1
 __num_epochs = 50
 
