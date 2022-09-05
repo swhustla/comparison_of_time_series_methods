@@ -11,13 +11,15 @@ from .plot import Figure, Plot
 
 def comparison_plot(
     plot: Callable[[Data, Prediction, ConfidenceInterval, Title], Figure],
-) -> Plot[Data, Prediction, ConfidenceInterval, Title, Figure]:
+    save_plot: Callable[[Figure, Title], None],
+) -> Plot[Data, Prediction, ConfidenceInterval, Title]:
     def draw_plot(
         ground_truth: Data,
         prediction: Data,
         confidence_interval: ConfidenceInterval,
         title: Title,
     ) -> Figure:
-        return plot(ground_truth, prediction, confidence_interval, title)
+        figure = plot(ground_truth, prediction, confidence_interval, title)
+        return save_plot(figure, title)
 
     return draw_plot

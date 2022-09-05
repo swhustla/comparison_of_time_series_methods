@@ -5,13 +5,14 @@ from matplotlib import pyplot as plt
 
 from methods.plot import Figure, Plot
 from data.Data import Dataset 
+from predictions.Prediction import PredictionData
 
 from methods.comparison_plot import comparison_plot as method
 
 
 def __plot(
-    ground_truth_series: Dataset,
-    prediction_series: Dataset,
+    ground_truth_series: pd.Series,
+    prediction_series: pd.Series,
     confidence_interval_df: Optional[pd.DataFrame],
     title: str,
 ) -> Figure:
@@ -35,5 +36,11 @@ def __plot(
 
     return figure
 
+def __save_plot(figure: Figure, title: str) -> None:
+    """Save the plot to disk."""
+    print(f"Saving plot for {title}")
+    snake_case_title = title.replace(" ", "_").lower()
+    figure.savefig(f"plots/{snake_case_title}.png")
 
-comparison_plot = method(__plot)
+
+comparison_plot = method(__plot, __save_plot)
