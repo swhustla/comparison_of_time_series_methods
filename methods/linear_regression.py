@@ -2,7 +2,7 @@
     A simple machine learning algorithm that 
     fits a linear model to the data."""
 
-from typing import TypeVar, Callable
+from typing import TypeVar, Callable, Tuple
 
 Data = TypeVar("Data", contravariant=True)
 Model = TypeVar("Model")
@@ -13,11 +13,12 @@ from .predict import Predict
 
 def linear_regression(
     train: Callable[[Data], Model],
-    test: Callable[[Model, Data], Prediction],
+    test: Callable[[Data, Model], Tuple[Prediction, Data]],
     ) -> Predict[Data, Prediction]:
     def predict(
         data: Data,
     ) -> Prediction:
-        trained_model, _ = train(data)
-        return test(trained_model, data)
+        trained_model = train(data)
+        return test(data, trained_model)
     return predict
+    
