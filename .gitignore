@@ -3,3 +3,4 @@ air-quality-data-in-india/*.csv
 data/*
 .ipynb_checkpoints/*
 *.cpython*
+.vscode/settings.json
