@@ -13,12 +13,14 @@ torch = "^1.11.0"
 matplotlib = "^3.5.2"
 black = "^22.3.0"
 nb-black = "^1.0.7"
-prophet = "^1.0.1"
+prophet = "1.0"
 plotly = "^5.8.2"
 tensorflow-macos = "^2.9.2"
 scipy = "^1.8.1"
 arch = "^5.3.1"
 pmdarima = "^1.8.5"
+pandas-datareader = "^0.10.0"
+pystan = "2.19.1.1"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^22.6.0", allow-prereleases = true}
