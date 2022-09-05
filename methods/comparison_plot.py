@@ -2,21 +2,22 @@
 
 from typing import Callable, TypeVar
 
-from methods.linear_regression import Prediction
-
 Data = TypeVar("Data", contravariant=True)
 Prediction = TypeVar("Prediction")
-Plot = TypeVar("Plot", covariant=True)
+ConfidenceInterval = TypeVar("ConfidenceInterval")
+Title = TypeVar("Title", covariant=True)
 
-from .plot import Plot
+from .plot import Figure, Plot
 
 def comparison_plot(
-    plot: Callable[[Data, Prediction], Plot],
-) -> Plot[Data, Prediction, Plot]:
-    def plot_comparison(
+    plot: Callable[[Data, Prediction, ConfidenceInterval, Title], Figure],
+) -> Plot[Data, Prediction, ConfidenceInterval, Title, Figure]:
+    def draw_plot(
         ground_truth: Data,
         prediction: Data,
-    ) -> Plot:
-        return plot(ground_truth, prediction)
+        confidence_interval: ConfidenceInterval,
+        title: Title,
+    ) -> Figure:
+        return plot(ground_truth, prediction, confidence_interval, title)
 
-    return plot_comparison
+    return draw_plot
