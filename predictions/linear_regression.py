@@ -1,47 +1,54 @@
-from methods.linear_regression import linear_regression as method
 
 import numpy as np
+from typing import Tuple, Dict
 
-""" for our current problem the model is:
-`y = theta_0 + theta_1 * x` """
+from data.Data import Dataset, Result, Error, Output
 
-
-def __model(x, theta):
-    return np.matmul(x, theta)
+from methods.linear_regression import linear_regression as method
 
 
-def __cost_function(x, y, theta):
-    return np.sum((y - __model(x, theta)) ** 2)
 
 
-def __gradient_descent(x, y, theta, learning_rate=0.1, num_epochs=10):
-    m = x.shape[0]
-    all_costs = []
 
-    for _ in range(num_epochs):
-        f_x = __model(x, theta)
-        cost_ = (1 / m) * (x.T @ (f_x - y))
-        theta = theta - learning_rate * cost_
-        all_costs.append(__cost_function(x, y, theta))
-
-    return (theta, all_costs)
+""" 
+the linear model is:
+`y = beta0 + beta1 * x + epsilon`
+for our current problem the model is:
+`B= (XT. X)-1. XT. Y` """
 
 
-def __data_length(data):
-    return len(data)
+def __get_x_matrix(data: Dataset):
+    x = data.index.values
+    return np.vstack((np.ones(len(x)), x)).T
+
+def __get_y_matrix(data: Dataset):
+    return data.values
+
+def __get_beta_hat(x, y):
+    return np.linalg.inv(x.T @ x) @ x.T @ y
+
+def __predict_using_coefficients(x, coefficients):
+    return x.dot(coefficients)
 
 
-__theta = np.zeros((__data_length(), 1))
-__learning_rate = 0.1
-__num_epochs = 50
+__percent_test = 0.1
 
 
-def __train(x, y):
-    return __gradient_descent(x, y, __theta, __learning_rate, __num_epochs)
+def __get_training_data(data: Dataset) -> Tuple[np.ndarray, np.ndarray]:
+    number_of_points = int(len(data) * (1 - __percent_test))
+    return __get_x_matrix(data)[:number_of_points], __get_y_matrix(data)[:number_of_points]
+
+def __get_test_data(data: Dataset) -> Tuple[np.ndarray, np.ndarray]:
+    number_of_points = int(len(data) * __percent_test)
+    return __get_x_matrix(data)[-number_of_points:], __get_y_matrix(data)[-number_of_points:]
+
+def __train(data: Dataset) -> np.ndarray:
+    x, y = __get_training_data(data)
+    return __get_beta_hat(x, y)
+
+def __test(data: Dataset, theta) -> Tuple[Dataset, np.ndarray]:
+    x, y = __get_test_data(data)
+    return __predict_using_coefficients(x, theta), y
 
 
-def __predict(x, theta):
-    return __model(x, theta)
-
-
-linear_regression = method(__train, __predict)
+linear_regression = method(__train, __test)
