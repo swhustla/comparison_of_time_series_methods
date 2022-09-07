@@ -10,7 +10,9 @@ from data.list_of_tuples import list_of_tuples
 from predictions.ARIMA import arima
 from predictions.linear_regression import linear_regression
 from measurements.get_metrics import get_metrics
+from measurements.store_metrics import store_metrics
 from plots.comparison_plot import comparison_plot
+import time
 
 
 __dataset_loaders: dict[str, Load[Dataset]] = {
@@ -34,23 +36,23 @@ def load_dataset(dataset_name: str):
     return __dataset_loaders[dataset_name]()
 
 
-def calculate_metrics(data: Dataset, prediction: PredictionData):
+def calculate_metrics(prediction: PredictionData):
     """
     Calculate the metrics for the given data and prediction.
     """
-    return get_metrics(data.values, prediction.values)
+    return get_metrics(prediction.ground_truth_values.values , prediction.values)
 
-def predict_measure_plot(data: Dataset, method_name: str, plot: bool = True) -> Report:
+def predict_measure_plot(data: Dataset, method_name: str) -> Report:
     """Generate a report for the given data and method."""
 
-    prediction, ground_truth = __predictors[method_name](data)
+    start_time = time.time()
+    prediction  = __predictors[method_name](data)
 
-    metrics = calculate_metrics(ground_truth, prediction)
+    metrics = calculate_metrics(prediction)
 
-    if plot:
-        comparison_plot(ground_truth.values, prediction.values, prediction.confidence_columns, prediction.title)
+    comparison_plot(prediction)
  
-    return Report(method_name, data, prediction, metrics)
+    return Report(start_time, method_name, data, prediction, metrics)
 
 
 def generate_predictions(methods: list[str], datasets: list[str]):
@@ -59,9 +61,10 @@ def generate_predictions(methods: list[str], datasets: list[str]):
     """
     for method_name in methods:
         for dataset_name in datasets:
-            data, time_unit, number_columns, subset_row_name, subset_column_name = load_dataset(dataset_name)
-            yield predict_measure_plot(Dataset(data, time_unit, number_columns, subset_row_name, subset_column_name), method_name)
-
+            data = load_dataset(dataset_name)
+            report = predict_measure_plot(data, method_name)
+            store_metrics(report)
+            yield report
 
 
 
@@ -76,7 +79,6 @@ __methods = [
     # "arima"
     ]
 
-# TODO: datasets is akin to board size
 
 for report in generate_predictions(__methods, __datasets):
     print(report)

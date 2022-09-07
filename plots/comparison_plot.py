@@ -3,20 +3,21 @@ from typing import Tuple, Optional
 
 from matplotlib import pyplot as plt
 
-from methods.plot import Figure, Plot
-from data.Data import Dataset 
+from methods.plot import Figure
 from predictions.Prediction import PredictionData
 
 from methods.comparison_plot import comparison_plot as method
 
 
 def __plot(
-    ground_truth_series: pd.Series,
-    prediction_series: pd.Series,
-    confidence_interval_df: Optional[pd.DataFrame],
-    title: str,
+    prediction: PredictionData,
 ) -> Figure:
     """Plot the data, optionally with confidence intervals."""
+    ground_truth_series = prediction.ground_truth_values
+    prediction_series = prediction.values
+    confidence_interval_df = prediction.confidence_columns
+    title = prediction.title
+
     figure, ax = plt.subplots(figsize=(12, 6))
 
     ground_truth_series.plot(ax=ax, label="Ground truth")

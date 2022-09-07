@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from typing import Tuple, Dict
+from typing import Tuple
 
-from data.Data import Dataset, Result, Error, Output
+from data.Data import Dataset
 from predictions.Prediction import PredictionData
 
 from methods.linear_regression import linear_regression as method
@@ -37,6 +37,8 @@ __percent_test = 0.1
 
 
 def __get_training_data(data: Dataset) -> Tuple[np.ndarray, np.ndarray]:
+    print(type(data))
+    print(data)
     number_of_points = int(len(data.values) * (1 - __percent_test))
     return (
         __get_x_matrix(data.values)[:number_of_points],
@@ -66,8 +68,11 @@ def __test(data: Dataset, theta) -> Tuple[PredictionData, Dataset]:
     prediction = __predict_using_coefficients(x, theta)
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with Linear Regression"
     return PredictionData(
-        __convert_to_pandas_series(prediction), None, title
-    ), Dataset(__convert_to_pandas_series(y), None, None, None, None)
+        __convert_to_pandas_series(prediction),
+        __convert_to_pandas_series(y),
+        None,
+        title,
+    )
 
 
 linear_regression = method(__train, __test)

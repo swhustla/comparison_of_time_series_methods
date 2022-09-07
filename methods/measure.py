@@ -10,3 +10,4 @@ class Measure(Protocol[Data, Prediction, Metrics]):
     def __call__(self, predict: Predict[Data, Prediction]) -> Metrics:
         pass
 
+
