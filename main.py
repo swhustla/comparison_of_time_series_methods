@@ -69,14 +69,17 @@ def generate_predictions(methods: list[str], datasets: list[str]):
 
 
 __datasets = [
-    "india_pollution", 
-    "stock_prices", 
+    # "india_pollution", 
+    # "stock_prices", 
     "list_of_tuples"
     ]
 
 __methods = [
     "linear_regression", 
-    # "arima"
+    "ARIMA"
+    # "Prophet",
+    # "BSTM",
+    # "LSTM"
     ]
 
 

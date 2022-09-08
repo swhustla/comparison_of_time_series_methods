@@ -14,15 +14,19 @@ def __plot(
 ) -> Figure:
     """Plot the data, optionally with confidence intervals."""
     ground_truth_series = prediction.ground_truth_values
-    prediction_series = prediction.values
-    confidence_interval_df = prediction.confidence_columns
+    if type(prediction.values) is pd.DataFrame:
+        prediction_series = prediction.values.iloc[:, 0]
+    else:
+        prediction_series = prediction.values
+
     title = prediction.title
 
     figure, ax = plt.subplots(figsize=(12, 6))
 
     ground_truth_series.plot(ax=ax, label="Ground truth")
     prediction_series.plot(ax=ax, label="Forecast")
-    if confidence_interval_df is not None:
+    if prediction.confidence_columns is not None:
+        confidence_interval_df = prediction.values.loc[:, prediction.confidence_columns]
         ax.fill_between(
             x=prediction_series.index,
             y1=confidence_interval_df.iloc[:, 0],
@@ -36,6 +40,7 @@ def __plot(
     ax.legend()
 
     return figure
+
 
 def __save_plot(figure: Figure, title: str) -> None:
     """Save the plot to disk."""

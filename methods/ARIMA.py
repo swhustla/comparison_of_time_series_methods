@@ -5,6 +5,8 @@
 """
 
 from typing import TypeVar, Callable
+from data.Data import Dataset, Result
+from predictions.Prediction import PredictionData
 
 
 Data = TypeVar("Data", contravariant=True)
@@ -16,17 +18,17 @@ from .predict import Predict
 
 
 def arima(
-    stationarity: Callable[[Data], bool],
-    fit_auto_regressive_model: Callable[[Data, int], Model],
-    number_of_steps: Callable[[Data], int],
-    forecast: Callable[[Model, int], Prediction],
-) -> Predict[Data, Prediction]:
+    stationarity: Callable[[Dataset], bool],
+    fit_auto_regressive_model: Callable[[Dataset], Model],
+    forecast: Callable[[Model, Dataset], PredictionData],
+) -> Predict[Dataset, PredictionData]:
     def predict(
-        data: Data,
+        data: Dataset,
     ) -> Prediction:
         if stationarity(data):
             return
+
         trained_model = fit_auto_regressive_model(data)
-        return forecast(trained_model, number_of_steps(data))
+        return forecast(trained_model, data)
 
     return predict
