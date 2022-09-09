@@ -10,6 +10,7 @@ from data.list_of_tuples import list_of_tuples
 from data.airline_passengers import airline_passengers
 from predictions.ARIMA import arima
 from predictions.linear_regression import linear_regression
+from predictions.prophet import prophet
 from measurements.get_metrics import get_metrics
 from measurements.store_metrics import store_metrics
 from plots.comparison_plot import comparison_plot
@@ -28,6 +29,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 __predictors: dict[str, Predict[Dataset, Result]] = {
     "linear_regression": linear_regression,
     "ARIMA": arima,
+    "Prophet": prophet,
 }
 
 
@@ -78,11 +80,12 @@ __datasets = [
     ]
 
 __methods = [
-    "linear_regression", 
-    "ARIMA"
-    # "Prophet",
+    # "linear_regression", 
+    # "ARIMA"
+    "Prophet",
     # "BSTM",
     # "LSTM"
+    # "MSTSD"
     ]
 
 
