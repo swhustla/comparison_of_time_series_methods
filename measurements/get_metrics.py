@@ -3,6 +3,8 @@ from typing import Dict
 
 from methods.get_metrics import get_metrics as method
 
+from predictions.Prediction import PredictionData
+
 #TODO: Add time taken to metrics
 
 def __get_root_mean_squared_error(ground_truth: np.ndarray, prediction: np.ndarray) -> float:
@@ -23,7 +25,12 @@ __dict_of_metrics = {
 def __round_to_4dp(value: float) -> float:
     return round(value, 4)
 
-def __metrics(ground_truth: np.ndarray, prediction: np.ndarray) -> Dict[str, float]:
+def __metrics(prediction: PredictionData) -> Dict[str, float]:
+    ground_truth = prediction.ground_truth_values.values
+    if prediction.prediction_column_name is not None:
+        prediction = prediction.values[prediction.prediction_column_name].values
+    else:
+        prediction = prediction.values
     return dict(map(lambda metric: (metric, __round_to_4dp(__dict_of_metrics[metric](ground_truth, prediction))), __dict_of_metrics))
 
 

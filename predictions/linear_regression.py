@@ -68,10 +68,11 @@ def __test(data: Dataset, theta) -> Tuple[PredictionData, Dataset]:
     prediction = __predict_using_coefficients(x, theta)
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with Linear Regression"
     return PredictionData(
-        __convert_to_pandas_series(prediction),
-        __convert_to_pandas_series(y),
-        None,
-        title,
+        values=__convert_to_pandas_series(prediction),
+        prediction_column_name=None,
+        ground_truth_values=__convert_to_pandas_series(y),
+        confidence_columns=None,
+        title=title,
     )
 
 

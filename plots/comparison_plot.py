@@ -15,7 +15,10 @@ def __plot(
     """Plot the data, optionally with confidence intervals."""
     ground_truth_series = prediction.ground_truth_values
     if type(prediction.values) is pd.DataFrame:
-        prediction_series = prediction.values.iloc[:, 0]
+        if prediction.prediction_column_name is not None:
+            prediction_series = prediction.values[prediction.prediction_column_name]
+        else:
+            prediction_series = prediction.values.iloc[:, 0]
     else:
         prediction_series = prediction.values
 

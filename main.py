@@ -44,7 +44,8 @@ def calculate_metrics(prediction: PredictionData):
     """
     Calculate the metrics for the given data and prediction.
     """
-    return get_metrics(prediction.ground_truth_values.values , prediction.values.values)
+    print(f"\n\nPrediction: {prediction}")
+    return get_metrics(prediction)
 
 def predict_measure_plot(data: Dataset, method_name: str) -> Report:
     """Generate a report for the given data and method."""
@@ -72,10 +73,10 @@ def generate_predictions(methods: list[str], datasets: list[str]):
 
 
 __datasets = [
-    # "india_pollution", 
-    # "stock_prices", 
+    "india_pollution", 
+    "stock_prices", 
     "airline_passengers",
-    # "list_of_tuples"
+    "list_of_tuples"
     ]
 
 __methods = [

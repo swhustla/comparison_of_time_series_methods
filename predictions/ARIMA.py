@@ -52,6 +52,7 @@ def __forecast(model: Model, data:Dataset) -> PredictionData:
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with ARIMA"
     return PredictionData(
         values=model.get_forecast(steps=__number_of_steps(data)).summary_frame(),
+        prediction_column_name=None,
         ground_truth_values=__get_test_set(data),
         confidence_columns=["mean_ci_lower", "mean_ci_upper"],
         title=title,
