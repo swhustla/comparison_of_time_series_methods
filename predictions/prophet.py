@@ -1,21 +1,20 @@
-from os import rename
-from time import time
+
 from typing import TypeVar
 from prophet import Prophet
 import pandas as pd
 
 from methods.prophet import prophet as method
 
-from data.Data import Dataset, Result
+from data.Data import Dataset
 from predictions.Prediction import PredictionData
 
 Model = TypeVar("Model")
 
 def __get_dataframe_with_date_column(dataframe: pd.Dataframe) -> pd.DataFrame:
-    return dataframe.reset_index()
+    return dataframe.reset_index(inplace = True)
 
 def __number_of_steps(data: Dataset) -> int:
-    return len(data.values) // 5
+    return int(len(data.values) // 5)
 
 
 def __get_training_set(data: Dataset) -> pd.DataFrame:

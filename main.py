@@ -51,7 +51,6 @@ def predict_measure_plot(data: Dataset, method_name: str) -> Report:
 
     start_time = time.time()
     prediction  = __predictors[method_name](data)
-    print (f"\n\nPrediction output: {prediction}")
     metrics = calculate_metrics(prediction)
 
     comparison_plot(prediction)
