@@ -33,7 +33,7 @@ def __predict_using_coefficients(x, coefficients):
     return x.dot(coefficients)
 
 
-__percent_test = 0.1
+__percent_test = 0.2
 
 
 def __get_training_data(data: Dataset) -> Tuple[np.ndarray, np.ndarray]:
