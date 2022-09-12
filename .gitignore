@@ -6,3 +6,4 @@ data/*.csv
 .vscode/settings.json
 plots/*.png
 reports/*.csv
+data/*.zip
