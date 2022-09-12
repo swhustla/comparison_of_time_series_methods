@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 from methods.predict import Predict
 from data.Data import Dataset, Result

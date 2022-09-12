@@ -1,5 +1,4 @@
 
-from os import rename
 from typing import TypeVar
 from prophet import Prophet
 import pandas as pd
@@ -27,9 +26,9 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
 
 def __fit_prophet_model(data: Dataset) -> Model:
     """Fit a Prophet model to the first 80% of the data"""
-    df = __get_training_set(data)
+    train_df = __get_training_set(data)
     model = Prophet()
-    renamed_df = df.rename(columns={"Date": "ds", data.subset_column_name: "y"})
+    renamed_df = train_df.rename(columns={"Date": "ds", data.subset_column_name: "y"})
     model.fit(renamed_df)
     return model
 
