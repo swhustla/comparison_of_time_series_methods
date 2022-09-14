@@ -21,6 +21,7 @@ arch = "^5.3.1"
 pmdarima = "^1.8.5"
 pandas-datareader = "^0.10.0"
 pystan = "2.19.1.1"
+wheel = "^0.37.1"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^22.6.0", allow-prereleases = true}
