@@ -8,3 +8,4 @@ plots/*.png
 reports/*.csv
 data/*.zip
 
+plots/*/*.png

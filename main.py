@@ -37,6 +37,8 @@ __predictors: dict[str, Predict[Dataset, Result]] = {
     "FCNN_embedding": fcnn_embedding,
 }
 
+__testset_size = 0.2
+
 
 def load_dataset(dataset_name: str):
     """
@@ -59,7 +61,8 @@ def predict_measure_plot(data: Dataset, method_name: str) -> Report:
     prediction  = __predictors[method_name](data)
     metrics = calculate_metrics(prediction)
 
-    comparison_plot(prediction)
+    training_index = data.values.index[:int(len(data.values.index) * (1 - __testset_size))]
+    comparison_plot(data.values.loc[training_index, :], prediction)
  
     return Report(start_time, method_name, data, prediction, metrics)
 
