@@ -13,6 +13,7 @@ from predictions.ARIMA import arima
 from predictions.linear_regression import linear_regression
 from predictions.prophet import prophet
 from predictions.FCNN import fcnn
+from predictions.FCNN_embedding import fcnn_embedding
 from measurements.get_metrics import get_metrics
 from measurements.store_metrics import store_metrics
 from plots.comparison_plot import comparison_plot
@@ -33,6 +34,7 @@ __predictors: dict[str, Predict[Dataset, Result]] = {
     "ARIMA": arima,
     "Prophet": prophet,
     "FCNN": fcnn,
+    "FCNN_embedding": fcnn_embedding,
 }
 
 
@@ -47,7 +49,6 @@ def calculate_metrics(prediction: PredictionData):
     """
     Calculate the metrics for the given data and prediction.
     """
-    print(f"\n\nPrediction: {prediction}")
     return get_metrics(prediction)
 
 def predict_measure_plot(data: Dataset, method_name: str) -> Report:
@@ -84,10 +85,11 @@ __datasets = [
     ]
 
 __methods = [
-    # "linear_regression", 
+    "linear_regression", 
     "ARIMA",
-    # "Prophet",
-    # "FCNN"
+    "Prophet",
+    "FCNN",
+    "FCNN_embedding",
     # "BSTM",
     # "LSTM"
     # "MSTSD"

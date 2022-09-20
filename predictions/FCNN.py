@@ -45,6 +45,19 @@ def __create_model(data: Dataset) -> Model:
 
     return model
 
+def __add_features(data: Dataset) -> Dataset:
+    """
+    Add features to the given data.
+    """
+    data.values = pd.DataFrame(data.values[data.subset_column_name], columns=[data.subset_column_name], index=data.values.index)
+
+    
+    data.values["year"] = data.values.index.isocalendar().year.astype(int)
+    data.values["month"] = data.values.index.month.astype(int)
+
+
+    return data
+
 
 def __split_data(
     data: Dataset,
@@ -52,23 +65,25 @@ def __split_data(
     """
     Split the given data into training and testing data.
     """
-    shift_amount = int(__test_size * len(data.values))
+    if data.time_unit == "days":
+        shift_amount = 30
+    elif data.time_unit == "weeks":
+        shift_amount = 4
+    elif data.time_unit == "months":
+        shift_amount = 1
+    else:
+        raise ValueError(f"Unknown time unit {data.time_unit}")
 
-    x_train, x_test_val, y_train, y_test_val = train_test_split(
+
+    x_train, x_test, y_train, y_test = train_test_split(
         data.values,
-        data.values[data.subset_column_name].shift(-1 * shift_amount),
-        test_size=__test_size * 2,
+        data.values.shift(-1 * shift_amount),
+        test_size=__test_size,
         shuffle=False,
     )
 
-    x_test = x_test_val[:int(len(x_test_val) // 2)]
-    x_val = x_test_val[int(len(x_test_val) // 2):]
-    y_test = y_test_val[:int(len(y_test_val) // 2)]
-    y_val = y_test_val[int(len(y_test_val) // 2):]
 
-    print(f"\n\ny_val: {y_val}")
-
-    return x_train, x_test, y_train, y_test, x_val, y_val
+    return x_train, x_test, y_train, y_test
 
 
 def __learn_model(model: Model, x_train: pd.DataFrame, y_train: pd.DataFrame) -> Model:
@@ -88,24 +103,23 @@ def __learn_model(model: Model, x_train: pd.DataFrame, y_train: pd.DataFrame) ->
 
 
 def __get_predictions(
-    model: Model, data: Dataset, x_test: pd.DataFrame, y_val: pd.DataFrame
-) -> pd.DataFrame:
+    model: Model, data: Dataset, x_test: pd.DataFrame, y_test: pd.DataFrame) -> pd.DataFrame:
     """
     Predict using the given data with the given model.
     """
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with FCNN"
     prediction = model.predict(x_test)
-    print(f"prediction_values: {prediction}, y_val: {y_val}")
     prediction_series = pd.Series(
-        prediction.reshape(-1), index=y_val.index
+        prediction.reshape(-1), index=y_test.index
     )
+
     return PredictionData(
         values=prediction_series,
         prediction_column_name=None,
-        ground_truth_values=y_val,
+        ground_truth_values=y_test[data.subset_column_name],
         confidence_columns=None,
         title=title,
     )
 
 
-fcnn = method(__create_model, __split_data, __learn_model, __get_predictions)
+fcnn = method(__create_model, __add_features, __split_data, __learn_model, __get_predictions)

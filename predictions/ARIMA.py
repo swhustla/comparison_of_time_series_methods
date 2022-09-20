@@ -51,7 +51,6 @@ def __fit_auto_regressive_model(data: Dataset) -> Model:
 def __forecast(model: Model, data:Dataset) -> PredictionData:
     """ Forecast the next 20% of the data """
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with ARIMA"
-    print(f"\n\ntestset: {__get_test_set(data)}")
     return PredictionData(
         values=model.get_forecast(steps=__number_of_steps(data)).summary_frame(),
         prediction_column_name="mean",
