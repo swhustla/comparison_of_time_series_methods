@@ -7,6 +7,7 @@
 from typing import TypeVar, Callable
 from data.Data import Dataset, Result
 from predictions.Prediction import PredictionData
+import logging
 
 
 Data = TypeVar("Data", contravariant=True)
@@ -26,7 +27,7 @@ def arima(
         data: Dataset,
     ) -> Prediction:
         if stationarity(data):
-            return
+            logging.info("Data is stationary")
 
         trained_model = fit_auto_regressive_model(data)
         return forecast(trained_model, data)

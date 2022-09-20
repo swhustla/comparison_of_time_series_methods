@@ -2,7 +2,7 @@ from typing import TypeVar
 from methods.ARIMA import arima as method
 import pandas as pd
 
-from arch.unitroot import KPSS, ADF
+from arch.unitroot import ADF
 from pmdarima.arima.utils import ndiffs
 from statsmodels.tsa.forecasting.stl import STLForecast
 import statsmodels.api as sm
@@ -18,21 +18,22 @@ def __number_of_steps(data: Dataset) -> int:
 
 
 def __get_training_set(data: Dataset) -> pd.DataFrame:
-    return data.values[: -__number_of_steps(data)]
+    return data.values[: -__number_of_steps(data)][data.subset_column_name]
 
 
 def __get_test_set(data: Dataset) -> pd.DataFrame:
-    return data.values[-__number_of_steps(data) :]
+    return data.values[-__number_of_steps(data) :][data.subset_column_name]
 
 
 def __stationarity(data: Dataset) -> bool:
     """Determines if the data is stationary"""
-    return ADF(data.values).pvalue < 0.05
+    data_to_check = data.values[data.subset_column_name]
+    return ADF(data_to_check).pvalue < 0.05
 
 
 def __get_differencing_term(data: Dataset) -> int:
     """Get the differencing term for the ARIMA model"""
-    return ndiffs(data.values, test="adf")
+    return ndiffs(data.values[data.subset_column_name], test="adf")
 
 
 def __fit_auto_regressive_model(data: Dataset) -> Model:
@@ -52,7 +53,7 @@ def __forecast(model: Model, data:Dataset) -> PredictionData:
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with ARIMA"
     return PredictionData(
         values=model.get_forecast(steps=__number_of_steps(data)).summary_frame(),
-        prediction_column_name=None,
+        prediction_column_name="mean",
         ground_truth_values=__get_test_set(data),
         confidence_columns=["mean_ci_lower", "mean_ci_upper"],
         title=title,
