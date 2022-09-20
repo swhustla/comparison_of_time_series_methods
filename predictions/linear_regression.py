@@ -59,18 +59,19 @@ def __train(data: Dataset) -> np.ndarray:
     return __get_beta_hat(x, y)
 
 
-def __convert_to_pandas_series(data: np.ndarray) -> pd.Series:
-    return pd.Series(data=data[:, 0], index=range(len(data)))
+def __convert_to_pandas_series(data: np.ndarray, start_value: int = 0) -> pd.Series:
+    return pd.Series(data=data[:, 0], index=range(start_value, start_value + len(data)))
 
 
 def __test(data: Dataset, theta) -> Tuple[PredictionData, Dataset]:
     x, y = __get_test_data(data)
     prediction = __predict_using_coefficients(x, theta)
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with Linear Regression"
+    start_value = len(data.values) - len(prediction)
     return PredictionData(
-        values=__convert_to_pandas_series(prediction),
+        values=__convert_to_pandas_series(prediction, start_value=start_value),
         prediction_column_name=None,
-        ground_truth_values=__convert_to_pandas_series(y),
+        ground_truth_values=__convert_to_pandas_series(y, start_value=start_value),
         confidence_columns=None,
         title=title,
     )
