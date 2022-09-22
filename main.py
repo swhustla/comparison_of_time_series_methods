@@ -90,11 +90,11 @@ __datasets = [
     ]
 
 __methods = [
-    # "linear_regression", 
-    # "ARIMA",
-    # "Prophet",
-    # "FCNN",
-    # "FCNN_embedding",
+    "linear_regression", 
+    "ARIMA",
+    "Prophet",
+    "FCNN",
+    "FCNN_embedding",
     "SES",
     # "LSTM"
     # "MSTSD"
