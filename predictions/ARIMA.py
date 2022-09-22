@@ -1,3 +1,34 @@
+"""
+The ARIMA method
+
+This method uses the ARIMA model to predict the next 20% of the data.
+ARIMA stands for AutoRegressive Integrated Moving Average. It was created by Box and Jenkins 
+in 1970, building on techniques used by statisticians to forecast economic data.
+
+It was shown to be a very effective model for time series data, in particular on financial data.
+Accurate forecasting is important in finance, as it allows investors to make better decisions.
+
+Downsides to the ARIMA model are that it is not very flexible, and it is not very good at
+forecasting long term trends. It is also not very good at forecasting data with a seasonal 
+component, such as weather data.
+
+The ARIMA model is a combination of three models:
+- AutoRegressive (AR): A linear regression model that uses the dependent relationship between 
+an observation and some number of lagged observations.
+- Integrated (I): The use of differencing of raw observations in order to make the time series
+stationary.
+- Moving Average (MA): A model that uses the dependency between an observation and a residual
+error from a moving average model applied to lagged observations.
+
+The ARIMA model works by fitting a linear regression model to the data, and then using the 
+residuals from that model to fit a moving average model. The coefficients from both of these
+models are then used to predict the next values in the time series.
+
+The training data is the first 80% of the dataset, and the model is then used to predict the 
+next 20% of the data.
+
+"""
+
 from typing import TypeVar
 from methods.ARIMA import arima as method
 import pandas as pd

@@ -1,3 +1,29 @@
+""" 
+Facebook Prophet 
+
+    https://facebook.github.io/prophet/docs/quick_start.html#python-api
+
+This is a wrapper around the Prophet library, released by Facebook in 2017.
+A quick summary of the library is as follows: 
+    Prophet is a procedure for forecasting time series data based on an additive model 
+    where non-linear trends are fit with yearly, weekly, and daily seasonality, plus 
+    holiday effects.
+    It has been used for forecasting retail foot traffic with RMSPE of 25% on a 
+    hold-out set, and for macroeconomic forecasting with MAPE of 2.5% on a hold-out set.
+    It works best with daily periodicity data with at least one year of historical data.
+    Prophet is robust to missing data and shifts in the trend, and typically handles outliers
+    well.
+
+    A great introduction to Prophet can be found on Towards Data Science:
+    https://towardsdatascience.com/an-end-to-end-project-on-time-series-analysis-and-forecasting-with-python-4835e6bf050b
+
+
+Downsides of Prophet:
+    - It is not very flexible, and it is not possible to change the model parameters
+    - It is not possible to use it for forecasting multiple time series at the same time
+
+"""
+
 
 from typing import TypeVar
 from prophet import Prophet

@@ -24,14 +24,12 @@ def __full_data_plus_prediction_plot(training_data: pd.DataFrame, prediction: Pr
     title = prediction.title
     figure, axes = plt.subplots(figsize=(10, 5))
 
-    print(f"Training data sample: {training_data.head()}")
-    print(f"Prediction data sample: {prediction.values.head()}")
-
     training_data_series = training_data.iloc[:, 0]
     training_data_series.plot(ax=axes, label="Training data", style=".")
 
     prediction_series = __get_prediction_series(prediction)
     prediction_series.plot(ax=axes, label="Forecast", style="-")
+
     if prediction.confidence_columns is not None:
         confidence_interval_df = prediction.values.loc[:, prediction.confidence_columns]
         axes.fill_between(

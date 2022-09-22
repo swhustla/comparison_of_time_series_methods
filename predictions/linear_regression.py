@@ -1,3 +1,36 @@
+""" 
+Linear Regression model
+
+This model uses linear regression to predict the future values of a given dataset. 
+This technique was first used by Sir Francis Galton in 1886 to predict the height of a 
+child based on the height of their parents.
+
+It is based on the idea that there is a linear relationship between the independent variable
+and the dependent variable. This relationship is expressed as a linear equation, which can
+be used to predict the value of the dependent variable given the value of the independent
+variable.
+
+It is the simplest model that we have implemented, and it is used as a baseline for 
+the more complex models.
+
+It's main advantage is that it is very easy to implement, and it is very fast to train.
+
+The negative side of this model is that it is very limited in its ability to predict 
+the future values of a time series. It is also very sensitive to outliers.
+
+The training data is the first 80% of the dataset, and the test data is the last 20%.
+
+The linear model used in this implementation is the Ordinary Least Squares model:
+https://en.wikipedia.org/wiki/Ordinary_least_squares
+
+`y = beta0 + beta1 * x + epsilon`
+for our current problem the model is:
+`B= (XT. X)-1. XT. Y` 
+
+
+"""
+
+
 import numpy as np
 import pandas as pd
 from typing import Tuple
@@ -8,11 +41,7 @@ from predictions.Prediction import PredictionData
 from methods.linear_regression import linear_regression as method
 
 
-""" 
-the linear model is:
-`y = beta0 + beta1 * x + epsilon`
-for our current problem the model is:
-`B= (XT. X)-1. XT. Y` """
+
 
 
 def __get_x_matrix(data: Dataset):
