@@ -10,6 +10,7 @@ from data.stock_prices import stock_prices
 from data.list_of_tuples import list_of_tuples
 from data.airline_passengers import airline_passengers
 from predictions.ARIMA import arima
+from predictions.SARIMA import sarima
 from predictions.linear_regression import linear_regression
 from predictions.prophet import prophet
 from predictions.FCNN import fcnn
@@ -37,6 +38,7 @@ __predictors: dict[str, Predict[Dataset, Result]] = {
     "FCNN": fcnn,
     "FCNN_embedding": fcnn_embedding,
     "SES": ses,
+    "SARIMA": sarima,
 }
 
 __testset_size = 0.2
@@ -84,18 +86,19 @@ def generate_predictions(methods: list[str], datasets: list[str]):
 
 __datasets = [
     "india_pollution", 
-    "stock_prices", 
+    # "stock_prices", 
     "airline_passengers",
     "list_of_tuples"
     ]
 
 __methods = [
-    "linear_regression", 
-    "ARIMA",
-    "Prophet",
-    "FCNN",
-    "FCNN_embedding",
-    "SES",
+    # "linear_regression", 
+    # "ARIMA",
+    # "Prophet",
+    # "FCNN",
+    # "FCNN_embedding",
+    # "SES",
+    "SARIMA",
     # "LSTM"
     # "MSTSD"
     ]

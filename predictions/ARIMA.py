@@ -33,6 +33,8 @@ from typing import TypeVar
 from methods.ARIMA import arima as method
 import pandas as pd
 
+import logging
+
 from arch.unitroot import ADF
 from pmdarima.arima.utils import ndiffs
 from statsmodels.tsa.forecasting.stl import STLForecast
@@ -69,10 +71,17 @@ def __get_differencing_term(data: Dataset) -> int:
 
 def __fit_auto_regressive_model(data: Dataset) -> Model:
     """Fit an ARIMA model to the first 80% of the data"""
+    if __stationarity(data):
+        logging.info(f"Data {data.name} is stationary")
+        differencing_term = 0
+    else:
+        logging.info(f"Data {data.name} is not stationary")
+        differencing_term = __get_differencing_term(data)
+
     model = STLForecast(
         __get_training_set(data),
         sm.tsa.arima.ARIMA,
-        model_kwargs=dict(order=(1, __get_differencing_term(data), 0), trend="t"),
+        model_kwargs=dict(order=(1, differencing_term, 0), trend="t"),
     )
 
     model_result = model.fit().model_result
@@ -92,5 +101,5 @@ def __forecast(model: Model, data:Dataset) -> PredictionData:
 
 
 arima = method(
-    __stationarity, __fit_auto_regressive_model, __forecast
+    __fit_auto_regressive_model, __forecast
 )
