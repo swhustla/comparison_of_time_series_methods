@@ -1,3 +1,37 @@
+""" 
+Fully connected neural network (FCNN) prediction model.
+
+This model uses a fully connected neural network to predict the future values
+ of a given time series. 
+A fully connected neural network is a neural network where each node in one
+    layer is connected to each node in the next layer.
+
+Its layers are:
+    - Input layer (size of the number of features)
+    - Dropout layer (to prevent overfitting)
+    - Dense layer (with relu activation function)
+    - Dropout layer (to prevent overfitting)
+    - Dense layer (with linear activation function)
+
+The model is trained on the given data using the Adam optimizer and two loss
+    functions:
+    - Mean squared error (MSE)
+    - Mean absolute error (MAE)
+
+The model is trained for a fixed number of epochs (see __number_of_epochs).
+
+Model training involves a validation step, where the model is evaluated on a
+    validation set. If the validation loss does not improve for a fixed number
+    of epochs (see __patience), the training is stopped early.
+
+The data is split into training and testing data using a fixed test size and
+    without shuffling (see __test_size).
+A fixed test size is used to ensure that the same data is used for testing.
+
+
+"""
+
+
 from typing import TypeVar
 from methods.FCNN import fcnn as method
 import pandas as pd

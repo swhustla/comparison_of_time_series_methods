@@ -14,6 +14,7 @@ from predictions.linear_regression import linear_regression
 from predictions.prophet import prophet
 from predictions.FCNN import fcnn
 from predictions.FCNN_embedding import fcnn_embedding
+from predictions.SES import ses
 from measurements.get_metrics import get_metrics
 from measurements.store_metrics import store_metrics
 from plots.comparison_plot import comparison_plot
@@ -35,6 +36,7 @@ __predictors: dict[str, Predict[Dataset, Result]] = {
     "Prophet": prophet,
     "FCNN": fcnn,
     "FCNN_embedding": fcnn_embedding,
+    "SES": ses,
 }
 
 __testset_size = 0.2
@@ -88,12 +90,12 @@ __datasets = [
     ]
 
 __methods = [
-    "linear_regression", 
-    "ARIMA",
-    "Prophet",
-    "FCNN",
-    "FCNN_embedding",
-    # "BSTM",
+    # "linear_regression", 
+    # "ARIMA",
+    # "Prophet",
+    # "FCNN",
+    # "FCNN_embedding",
+    "SES",
     # "LSTM"
     # "MSTSD"
     ]

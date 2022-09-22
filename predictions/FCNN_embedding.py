@@ -1,3 +1,31 @@
+""" 
+
+Fully Connected Neural Network with Embedding method
+
+This approach uses a fully connected neural network with an embedding layer 
+to handle categorical data.
+A neural network is a machine learning model that is inspired by the human brain.
+It consists of multiple layers of neurons that are connected to each other.
+The neurons in a layer are connected to all neurons in the next layer.
+
+The model has 3 inputs: the continuous data, the month and the year.
+* The month data is categorical, so it is passed through an embedding layer.
+* The year data is also categorical, but it is passed through a dense layer.
+* The output of the embedding layer and the dense layer are concatenated with the continuous data.
+* The output of the concatenation is passed through a dense layer.
+* The output of the dense layer is multiplied by the standard deviation of the continuous data. 
+    This is done to scale the output to the same range as the continuous data.
+* The output of the dense layer is then added to the continuous data. This is done to shift 
+    the output to the same range as the continuous data.
+* The output of the addition is the prediction.
+    Loss is calculated using the root mean squared error and the mean absolute error.
+* The model is trained using the Adam optimizer. This is a gradient descent algorithm that
+    is able to adapt the learning rate during training.
+
+
+
+"""
+
 from typing import TypeVar
 from methods.FCNN_embedding import fcnn_embedding as method
 import pandas as pd
