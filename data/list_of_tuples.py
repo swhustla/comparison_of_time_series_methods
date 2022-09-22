@@ -9,12 +9,12 @@ from data.Data import Dataset
 
 from .load import Load
 
-__chosen_length = 200
+__chosen_length = 1096
 
 
 def __increasing_value_with_random_noise(count: int = __chosen_length) -> np.ndarray:
     """Generate an increasing value with random noise."""
-    return np.arange(count) + np.random.randint(-3, 3, count)
+    return np.arange(count) + np.random.randint(-10, 10, count)
 
 
 def __convert_index_to_datetime(df: pd.DataFrame) -> pd.DataFrame:
