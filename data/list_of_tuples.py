@@ -9,12 +9,14 @@ from data.Data import Dataset
 
 from .load import Load
 
-__chosen_length = 1096
-
+# 6 seasons of 365.25 days = 2191.5 days
+__chosen_length = int(6 * 365.25)
+# noise magnitude set at one thirtieth of the chosen length
+__random_noise_magnitude = int(__chosen_length / 30)
 
 def __increasing_value_with_random_noise(count: int = __chosen_length) -> np.ndarray:
     """Generate an increasing value with random noise."""
-    return np.arange(count) + np.random.randint(-10, 10, count)
+    return np.arange(count) + np.random.randint(-__random_noise_magnitude, __random_noise_magnitude, count)
 
 
 def __convert_index_to_datetime(df: pd.DataFrame) -> pd.DataFrame:
