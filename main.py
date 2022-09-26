@@ -78,10 +78,9 @@ def generate_predictions(methods: list[str], datasets: list[str]):
     for method_name in methods:
         for dataset_name in datasets:
             data = load_dataset(dataset_name)
-            if method_name in ["SARIMA"]:
-                if data.time_unit == "days":
-                    print(f"Skipping {method_name} on {data.name} because it does not support daily data.")
-                    continue
+            if method_name in ["SARIMA"] & data.time_unit == "days":
+                print(f"Skipping {method_name} on {data.name} because it does not support daily data.")
+                continue
             report = predict_measure_plot(data, method_name)
             store_metrics(report)
             yield report
