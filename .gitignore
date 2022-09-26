@@ -9,3 +9,6 @@ reports/*.csv
 data/*.zip
 
 plots/*/*.png
+write_up/*.pdf
+write_up/*.synctex*.gz
+
