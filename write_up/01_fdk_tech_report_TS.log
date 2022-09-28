@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.9.26)  27 SEP 2022 00:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.9.26)  28 SEP 2022 10:37
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -817,6 +817,7 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 25.
 LaTeX Info: Redefining \pageref on input line 25.
 LaTeX Info: Redefining \nameref on input line 25.
+ (./01_fdk_tech_report_TS.out) (./01_fdk_tech_report_TS.out)
 \@outlinefile=\write5
 \openout5 = `01_fdk_tech_report_TS.out'.
 
@@ -905,11 +906,11 @@ LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/n' will be
 (Font)              scaled to size 10.0pt on input line 50.
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/b/n' will be
 (Font)              scaled to size 10.95pt on input line 53.
-LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/b/n' will be
-(Font)              scaled to size 10.95pt on input line 81.
+LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/it' will be
+(Font)              scaled to size 10.95pt on input line 69.
 
 
-Package fancyhdr Warning: \fancyfoot's `E' option without twoside option is useless on input line 82.
+Package fancyhdr Warning: \fancyfoot's `E' option without twoside option is useless on input line 80.
 
 
 Package fancyhdr Warning: \footskip is too small (12.0pt): 
@@ -917,388 +918,85 @@ Package fancyhdr Warning: \footskip is too small (12.0pt):
 (fancyhdr)                \setlength{\footskip}{12.3pt}.
 
 [1.1{/usr/local/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/it' will be
-(Font)              scaled to size 10.95pt on input line 86.
+LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/b/n' will be
+(Font)              scaled to size 10.95pt on input line 93.
 LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 10.95pt on input line 98.
+(Font)              scaled to size 10.95pt on input line 111.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `LinuxLibertineT-TLF' (encoding: OT1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 8.0pt on input line 98.
+(Font)              scaled to size 8.0pt on input line 111.
 LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 6.1pt on input line 98.
+(Font)              scaled to size 6.1pt on input line 111.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 ) (/usr/local/texlive/2022/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 8.0pt on input line 122.
+(Font)              scaled to size 8.0pt on input line 114.
  [2.2] [3.3]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 4531) has occurred while \output is active []
 
- [4.4]
-Underfull \vbox (badness 2726) has occurred while \output is active []
-
- [5.5]
-LaTeX Font Info:    Trying to load font information for T1+zi4 on input line 280.
+ [4.4] [5.5] [6.6] [7.7]
+LaTeX Font Info:    Trying to load font information for T1+zi4 on input line 331.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/inconsolata/t1zi4.fd
 File: t1zi4.fd 2018/01/14 T1/zi4 (Inconsolata)
 )
 LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
-(Font)              scaled to size 10.95pt on input line 280.
+(Font)              scaled to size 10.95pt on input line 331.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `zi4' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
- [6.6]
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
+ [8.8]
 
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Extra }, or forgotten $.
-<template> \unskip \hfil }
-                          \hskip \tabcolsep \hskip -.5\arrayrulewidth \vrule...
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've deleted a group-closing symbol because it seems to be
-spurious, as in `$x}$'. But perhaps the } is legitimate and
-you forgot something else, as in `\hbox{$x}'. In such cases
-the way to recover is to insert both the forgotten and the
-deleted material, e.g., by typing `I$}'.
+LaTeX Warning: No positions in optional float specifier.
+               Default added (so using `tbp') on input line 378.
 
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
+LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
+(Font)              scaled to size 10.0pt on input line 409.
+<../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png, id=187, 722.7pt x 361.35pt>
+File: ../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png Graphic file (type png)
+<use ../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png>
+Package pdftex.def Info: ../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png  used on input line 418.
+(pdftex.def)             Requested size: 387.00153pt x 193.49954pt.
 
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing } inserted.
-<inserted text> 
-                }
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Extra }, or forgotten $.
-<template> \unskip \hfil }
-                          \hskip \tabcolsep \hskip -.5\arrayrulewidth \vrule...
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've deleted a group-closing symbol because it seems to be
-spurious, as in `$x}$'. But perhaps the } is legitimate and
-you forgot something else, as in `\hbox{$x}'. In such cases
-the way to recover is to insert both the forgotten and the
-deleted material, e.g., by typing `I$}'.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing } inserted.
-<inserted text> 
-                }
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Extra }, or forgotten $.
-<template> \unskip \hfil }
-                          \hskip \tabcolsep \hskip -.5\arrayrulewidth \vrule...
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've deleted a group-closing symbol because it seems to be
-spurious, as in `$x}$'. But perhaps the } is legitimate and
-you forgot something else, as in `\hbox{$x}'. In such cases
-the way to recover is to insert both the forgotten and the
-deleted material, e.g., by typing `I$}'.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing } inserted.
-<inserted text> 
-                }
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Extra }, or forgotten $.
-<template> \unskip \hfil }
-                          \hskip \tabcolsep \hskip -.5\arrayrulewidth \vrule...
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've deleted a group-closing symbol because it seems to be
-spurious, as in `$x}$'. But perhaps the } is legitimate and
-you forgot something else, as in `\hbox{$x}'. In such cases
-the way to recover is to insert both the forgotten and the
-deleted material, e.g., by typing `I$}'.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing } inserted.
-<inserted text> 
-                }
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Extra }, or forgotten $.
-<template> \unskip \hfil }
-                          \hskip \tabcolsep \hskip -.5\arrayrulewidth \vrule...
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've deleted a group-closing symbol because it seems to be
-spurious, as in `$x}$'. But perhaps the } is legitimate and
-you forgot something else, as in `\hbox{$x}'. In such cases
-the way to recover is to insert both the forgotten and the
-deleted material, e.g., by typing `I$}'.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing } inserted.
-<inserted text> 
-                }
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Extra }, or forgotten $.
-<template> \unskip \hfil }
-                          \hskip \tabcolsep \hskip -.5\arrayrulewidth \vrule...
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've deleted a group-closing symbol because it seems to be
-spurious, as in `$x}$'. But perhaps the } is legitimate and
-you forgot something else, as in `\hbox{$x}'. In such cases
-the way to recover is to insert both the forgotten and the
-deleted material, e.g., by typing `I$}'.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing } inserted.
-<inserted text> 
-                }
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Extra }, or forgotten $.
-<template> \unskip \hfil }
-                          \hskip \tabcolsep \hskip -.5\arrayrulewidth \vrule...
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've deleted a group-closing symbol because it seems to be
-spurious, as in `$x}$'. But perhaps the } is legitimate and
-you forgot something else, as in `\hbox{$x}'. In such cases
-the way to recover is to insert both the forgotten and the
-deleted material, e.g., by typing `I$}'.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing } inserted.
-<inserted text> 
-                }
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Extra }, or forgotten $.
-<template> \unskip \hfil }
-                          \hskip \tabcolsep \hskip -.5\arrayrulewidth \vrule...
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've deleted a group-closing symbol because it seems to be
-spurious, as in `$x}$'. But perhaps the } is legitimate and
-you forgot something else, as in `\hbox{$x}'. In such cases
-the way to recover is to insert both the forgotten and the
-deleted material, e.g., by typing `I$}'.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing $ inserted.
-<inserted text> 
-                $
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted a begin-math/end-math symbol since I think
-you left one out. Proceed, with fingers crossed.
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:304: Missing } inserted.
-<inserted text> 
-                }
-l.304 	{\\\Model & \Dataset & \MAE & \RMSE}
-                                           %
-I've inserted something that you may have forgotten.
-(See the <inserted text> above.)
-With luck, this will get me unwedged. But if you
-really didn't forget anything, try typing `2' now; then
-my insertion and my current dilemma will both disappear.
+Class acmart Warning: A possible image without description on input line 421.
 
 
+Underfull \vbox (badness 3657) has occurred while \output is active []
+
+ [9.9]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [7.7]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [8.8] (/usr/local/texlive/2022/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
+ [10.10 <../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png>] (/usr/local/texlive/2022/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 ) (/usr/local/texlive/2022/texmf-dist/tex/generic/stringenc/se-utf8.def
 File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
-) [9.9] (./01_fdk_tech_report_TS.aux
-
-Package natbib Warning: Citation(s) may have changed.
-(natbib)                Rerun to get citations correct.
-
 )
 
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+Class acmart Warning: Some images may lack descriptions.
 
-
-Package rerunfilecheck Warning: File `01_fdk_tech_report_TS.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `01_fdk_tech_report_TS.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  25E979F1061F8357A7E7D7932345D9F2;5093.
+[11.11] (./01_fdk_tech_report_TS.aux)
+Package rerunfilecheck Info: File `01_fdk_tech_report_TS.out' has not changed.
+(rerunfilecheck)             Checksum: EE953E6F9F8E27EBCFF0479A851D7D98;5688.
  ) 
 Here is how much of TeX's memory you used:
- 22474 strings out of 478268
- 379157 string characters out of 5846347
- 724686 words of memory out of 5000000
- 39758 multiletter control sequences out of 15000+600000
- 592997 words of font info for 280 fonts, out of 8000000 for 9000
+ 22521 strings out of 478268
+ 380327 string characters out of 5846347
+ 733698 words of memory out of 5000000
+ 39755 multiletter control sequences out of 15000+600000
+ 601742 words of font info for 299 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
- 84i,11n,131p,1092b,513s stack positions out of 10000i,1000n,20000p,200000b,200000s
-{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_oexx6f.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_nh77jq.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_76gpa5.enc}</usr/local/texlive/2022/texmf-dist/fonts/type1/public/inconsolata/Inconsolata-zi4r.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/LibertineMathMI.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/LibertineMathMI7.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumT.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumTB.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumTI.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinLibertineT.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinLibertineTB.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txmiaX.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txsys.pfb>
-Output written on 01_fdk_tech_report_TS.pdf (9 pages, 395551 bytes).
+ 84i,11n,131p,1092b,548s stack positions out of 10000i,1000n,20000p,200000b,200000s
+{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_oexx6f.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_nh77jq.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_76gpa5.enc}</usr/local/texlive/2022/texmf-dist/fonts/type1/public/inconsolata/Inconsolata-zi4r.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/LibertineMathMI.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/LibertineMathMI7.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumT.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumTB.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumTI.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinLibertineT.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinLibertineTB.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txexs.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txmiaX.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txsys.pfb>
+Output written on 01_fdk_tech_report_TS.pdf (11 pages, 443363 bytes).
 PDF statistics:
- 159 PDF objects out of 1000 (max. 8388607)
- 122 compressed objects within 2 object streams
- 47 named destinations out of 1000 (max. 500000)
- 55825 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 284 PDF objects out of 1000 (max. 8388607)
+ 240 compressed objects within 3 object streams
+ 66 named destinations out of 1000 (max. 500000)
+ 60158 words of extra memory for PDF output out of 61914 (max. 10000000)
 
