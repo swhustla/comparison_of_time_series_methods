@@ -27,4 +27,5 @@ def airline_passengers() -> pd.DataFrame:
         ["passengers"],
         "all",
         "passengers",
+        True,
     )

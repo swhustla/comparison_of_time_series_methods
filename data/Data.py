@@ -15,4 +15,5 @@ class Dataset:
     number_columns: list[str]
     subset_row_name: str
     subset_column_name: str
+    seasonality: bool
 

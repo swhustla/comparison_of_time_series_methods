@@ -65,4 +65,4 @@ def india_pollution(city: list = __city_choice, pollution_columns : list = __col
     data = data[data["City"].isin(city)][pollution_columns]
     data = __preprocess(data)
     data = __resample(data)
-    return Dataset("Indian city pollution", data, "weeks", pollution_columns, city[0], pollution_columns[0])
+    return Dataset("Indian city pollution", data, "weeks", pollution_columns, city[0], pollution_columns[0], True)

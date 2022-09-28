@@ -39,4 +39,4 @@ def stock_prices(stock_choice=__stock_choice) -> Dataset:
     """Load in stock market data."""
     data = __load_data(stock_choice)
     data = __resample(data)
-    return Dataset("Stock price", data, "days", ["Adj Close"], "JPM", "Adj Close")
+    return Dataset("Stock price", data, "days", ["Adj Close"], "JPM", "Adj Close", False)
