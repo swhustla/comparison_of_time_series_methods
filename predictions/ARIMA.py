@@ -47,7 +47,7 @@ Model = TypeVar("Model")
 
 
 def __number_of_steps(data: Dataset) -> int:
-    return len(data.values) // 5
+    return int(len(data.values) // 5) 
 
 
 def __get_training_set(data: Dataset) -> pd.DataFrame:
@@ -59,7 +59,10 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
 
 
 def __stationarity(data: Dataset) -> bool:
-    """Determines if the data is stationary"""
+    """
+    Checks if the data is stationary using the Augmented Dickey-Fuller test.
+    A p-value of less than 0.05 indicates that the data is stationary.
+    """
     data_to_check = data.values[data.subset_column_name]
     return ADF(data_to_check).pvalue < 0.05
 
@@ -78,10 +81,17 @@ def __fit_auto_regressive_model(data: Dataset) -> Model:
         logging.info(f"Data {data.name} is not stationary")
         differencing_term = __get_differencing_term(data)
 
+    ar_order = 1
+    ma_order = 1
+
     model = STLForecast(
         __get_training_set(data),
         sm.tsa.arima.ARIMA,
-        model_kwargs=dict(order=(1, differencing_term, 0), trend="t"),
+        model_kwargs=dict(order=(
+            ar_order,
+            differencing_term,
+            ma_order,
+        ), trend="t"),
     )
 
     model_result = model.fit().model_result
