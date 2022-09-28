@@ -31,6 +31,7 @@ import logging
 
 from arch.unitroot import ADF
 from statsmodels.tsa.ar_model import AutoReg
+from statsmodels.tsa.ar_model import ar_select_order
 from statsmodels.tsa.forecasting.stl import STLForecast
 import statsmodels.api as sm
 from statsmodels.graphics.tsaplots import plot_pacf
@@ -64,18 +65,16 @@ def __quick_check_for_auto_correlation(data: Dataset) -> bool:
 
 def __get_number_of_lags(data: Dataset) -> int:
     """
-    Returns the number of lags to use in the partial autocorrelation function.
-    The number of lags is important for the model to be able to 
-    capture the auto-correlation in the data.
+    Returns the maximum number of lags to use for determining the lag order.
     """
-    if data.time_unit == "days":
-        return 30
-    elif data.time_unit == "weeks":
-        return 51
+    if data.time_unit == "years":
+        return 13
     elif data.time_unit == "months":
-        return 11
-    else:
-        return 1
+        return 24
+    elif data.time_unit == "weeks":
+        return 52
+    elif data.time_unit == "days":
+        return 365
 
 
 def __transform_data(data: Dataset) -> pd.DataFrame:
@@ -84,22 +83,40 @@ def __transform_data(data: Dataset) -> pd.DataFrame:
     """
     return pd.DataFrame(data.values[data.subset_column_name])
 
-def __determine_order_using_pacf(data: Dataset) -> int:
+def __get_period_of_seasonality(data: Dataset) -> int:
     """
-    Determines the order of the model using the partial autocorrelation function.
-    A plot of the partial autocorrelation function is shown.
-    The user can then determine the order of the model by looking at the plot.
+    Returns the period of seasonality.
     """
-    plot_pacf(__transform_data(data), lags=__get_number_of_lags(data), method="ywm")
-    plt.show()
-    return int(input("Enter the order of the model: "))
+    if data.time_unit == "years":
+        return 12
+    elif data.time_unit == "months":
+        return 4
+    elif data.time_unit == "weeks":
+        return 52
+    elif data.time_unit == "days":
+        return 365
+
+def __determine_lag_order(data: Dataset) -> int:
+    """
+    Determines the lag order of the model.
+    https://www.statsmodels.org/stable/generated/statsmodels.tsa.ar_model.ar_select_order.html
+    """
+    max_lag = __get_number_of_lags(data)
+    logging.info(f"Max lag: {max_lag}")
+    if data.seasonality:
+        max_lag = 1
+        ar_order = ar_select_order(__get_training_set(data), maxlag=max_lag, seasonal=data.seasonality, period=__get_period_of_seasonality(data))
+    else:
+        ar_order = ar_select_order(__get_training_set(data), maxlag=max_lag)
+    logging.info(f"AR lag order for {data.name} {data.subset_column_name}: {ar_order.ar_lags}")
+    return ar_order.ar_lags[0]
 
 
 def __train_auto_regressive_model(data: Dataset) -> Model:
     """
     Trains an auto-regressive model using the training set.
     """
-    ar_order = __determine_order_using_pacf(data)
+    ar_order = __determine_lag_order(data)
     ma_order = 0
     int_order = 0
 

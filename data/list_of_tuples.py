@@ -43,4 +43,4 @@ def __build_data(count: int) -> Data:
 def list_of_tuples(count: int = __chosen_length) -> Dataset:
     """Generate a list of tuples for a simple linear regression."""
 
-    return Dataset("Straight line", __build_data(count), "days", ["y"], "random", "y")
+    return Dataset("Straight line", __build_data(count), "days", ["y"], "random", "y", False)
