@@ -9,6 +9,8 @@ from data.india_pollution import india_pollution
 from data.stock_prices import stock_prices
 from data.list_of_tuples import list_of_tuples
 from data.airline_passengers import airline_passengers
+from predictions.AR import ar
+from predictions.MA import ma
 from predictions.ARIMA import arima
 from predictions.SARIMA import sarima
 from predictions.linear_regression import linear_regression
@@ -33,12 +35,14 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 __predictors: dict[str, Predict[Dataset, Result]] = {
     "linear_regression": linear_regression,
+    "AR": ar,
     "ARIMA": arima,
     "Prophet": prophet,
     "FCNN": fcnn,
     "FCNN_embedding": fcnn_embedding,
     "SES": ses,
     "SARIMA": sarima,
+    "MA": ma,
 }
 
 __testset_size = 0.2
@@ -78,9 +82,10 @@ def generate_predictions(methods: list[str], datasets: list[str]):
     for method_name in methods:
         for dataset_name in datasets:
             data = load_dataset(dataset_name)
-            if method_name in ["SARIMA"] & data.time_unit == "days":
-                print(f"Skipping {method_name} on {data.name} because it does not support daily data.")
-                continue
+            if method_name in ["SARIMA"]:
+                if data.time_unit == "days":
+                    print(f"Skipping {method_name} on {data.name} because it does not support daily data.")
+                    continue
             report = predict_measure_plot(data, method_name)
             store_metrics(report)
             yield report
@@ -95,13 +100,15 @@ __datasets = [
     ]
 
 __methods = [
-    "linear_regression", 
-    "ARIMA",
-    "Prophet",
-    "FCNN",
-    "FCNN_embedding",
-    "SES",
-    "SARIMA",
+    # "MA",
+    "AR",
+    # "linear_regression", 
+    # "ARIMA",
+    # "Prophet",
+    # "FCNN",
+    # "FCNN_embedding",
+    # "SES",
+    # "SARIMA",
     # "LSTM"
     # "MSTSD"
     ]
