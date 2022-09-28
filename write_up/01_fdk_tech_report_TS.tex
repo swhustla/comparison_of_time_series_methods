@@ -1,0 +1,445 @@
+% ----- DO NOT CHANGE WITHIN THIS BLOCK ---------------------------------------------
+\documentclass[manuscript,screen,nonacm,11pt]{acmart}                                                       																
+%% \BibTeX command to typeset BibTeX logo in the docs														
+\AtBeginDocument{%																											
+  \providecommand\BibTeX{{%																							
+    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}							
+																																		
+\usepackage{geometry}																			\geometry{twoside=false}																		
+\usepackage{xcolor}																												
+\usepackage{framed}																											
+\colorlet{shadecolor}{blue!30}																								
+% ----- DO NOT CHANGE WITHIN THIS BLOCK --------------------------------------------
+\usepackage{amsmath}
+\numberwithin{equation}{section}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{subcaption,graphicx}
+\usepackage{caption}
+\usepackage{multirow,multicol}
+% add any more custom packages as required
+\usepackage{csvsimple} % for reading csv files
+
+\graphicspath{{./plots/}}
+
+\begin{document}
+
+\title{Time Series Prediction - A Comparison of Methods}
+
+\author{Frank Kelly}\email{frankk@sahaj.ai}
+
+\affiliation{
+\institution{Sahaj.AI}
+ \country{United Kingdom}
+ \city{London}
+ }
+
+
+%\state{stateName}
+
+\begin{abstract}
+\begin{shaded}
+In this report, Frank Kelly examines the performance of various time series prediction methods on four different datasets.
+\end{shaded}
+\end{abstract}
+
+\keywords{Time Series, Prediction, LSTM, ARIMA, Prophet, 
+SES, Holt-Winters, PyTorch, TensorFlow, Keras, Scikit-Learn}
+
+
+\maketitle
+\pagestyle{plain}
+
+\section{Introduction}
+\label{sec:intro}
+To the uninitiated, time series prediction is a difficult problem.
+For many data scientists, it is a problem that they have often
+avoided looking into too deeply, or simply used a black box solution.
+In this report, I will examine the performance of various
+time series prediction methods, and compare them.
+\subsection{What are Time Series (TS)?}
+Time series are a sequence of data points, where each data point
+is a measurement of a variable at a particular time.
+For example, the temperature at a particular time, or the number of
+people in a room at a particular time.
+\subsection{What is Time Series Prediction?}
+Time series prediction is the task of predicting future values of a time series. For example, predicting the temperature at a particular time in the future.
+There are two main approaches to modelling and forecasting time series: with regression and with time series analysis.
+\subsubsection{Regression}
+Regression is a mathematical method for modelling the relationship between a dependent variable and one or more independent variables.
+In the case of time series, the dependent variable is the value of the time series at a particular time, and the independent variables are the values of the time series at previous times.
+Regression can work with a single time series, or with multiple time series.
+The quality of the predictions depends on the degree of correlation between the dependent variable and the independent variables.
+
+
+\subsubsection{Time Series Analysis}
+Time Series Analysis involves the statistical analysis of historical data; the time course of a variable is analysed to extract meaningful statistics and other characteristics of the data.
+Usually we are looking for patterns in the data, and we use these patterns to predict future values.
+
+
+\subsection{Why is Time Series Prediction Important?}
+Time series prediction is important because it is used in many applications.
+For example, it is used in weather forecasting, stock market prediction, and in the medical field to predict the spread of diseases.
+\subsection{What is the Goal of this Report?}
+The goal of this report is to compare the performance of various
+time series prediction methods, and to determine which method is the best,
+for a given type of time series. As not all time series are structurally
+the same. As usual with Data Science, there is no one size fits all solution,
+and the key lies in understanding and preparing the data, and then
+choosing the right method for the job.
+\section{A broad overview of time series prediction methods}
+\label{sec:overview}
+There are many time series prediction methods, and they can be broadly
+categorized into three groups: \textbf{statistical or classic}, \textbf{probabilistic} and \textbf{machine learning}.
+\subsection{Statistical or Classic Methods}
+Statistical or classical methods can be broken into two families: \textbf{moving average} and \textbf{Auto regressives}.
+Moving average methods are based on the assumption that the future values of a time series can be predicted by averaging the past values.
+Auto regressive type methods are based on the assumption that the future values of a time series can be predicted by a linear combination of the past values.
+
+\subsubsection{Simple Exponential Smoothing (SES)}
+It was first introduced by Holt in 1957. It is a naive approach where the observations at
+preceding time periods are weighted with a single smoothing parameter to forecast the
+observations at the next time period.
+
+The weights decrease exponentially as observations come from further in the past,
+the smallest weights are associated with the oldest observations.
+
+The weights are calculated using an exponential function. The exponential function is defined by
+the smoothing parameter, alpha. The smoothing parameter determines the amount of exponential
+smoothing. A larger value of alpha results in more exponential smoothing.
+
+\begin{equation}
+\label{eq:ses}
+\hat{y}_{t+h|t} = \alpha y_t + (1-\alpha)\hat{y}_{t+h-1|t}
+\end{equation}
+where $\hat{y}_{t+h|t}$ is the predicted value of the time series at time $t+h$,
+$\alpha$ is the smoothing factor, and $y_t$ is the actual value of the time series
+at time $t$.
+
+\subsubsection{Autoregressive Integrated Moving Average (ARIMA)}
+ARIMA stands for AutoRegressive Integrated Moving Average. It was created by Box and Jenkins 
+in 1970, building on techniques used by other statisticians to forecast economic data.
+
+The ARIMA model is in fact a combination of three models:
+\begin{itemize}
+\item \textbf{AutoRegressive (AR)}: A model that uses the dependent relationship between an observation and some number of lagged observations.
+\item \textbf{Integrated (I)}: A model that uses differencing of raw observations in order to make the time series stationary.
+\item \textbf{Moving Average (MA)}: A model that uses the dependency between an observation and a residual error from a moving average model applied to lagged observations.
+\end{itemize} 
+
+The ARIMA model is summarised by this model: $ARIMA(p,d,q)$, where $p$ is the number of lag observations included in the model, $d$ is the number of times that the raw observations are differenced, and $q$ is the size of the moving average window, also called the order of moving average.
+
+\subsection{Seasonal ARIMA (SARIMA)}
+SARIMA is an extension of ARIMA that explicitly supports univariate time series data with a seasonal component.
+
+SARIMA stands for Seasonal AutoRegressive Integrated Moving Average.
+The SARIMA model is used to model time series data with a seasonal component. 
+The seasonal component is modeled using an ARIMA model whose order is differenced 
+by the period of the seasonality.
+
+SARIMA models are denoted SARIMA(p, d, q)(P, D, Q)s where the parameters are as 
+follows:
+The first three are the same as the ARIMA model and model the trend component:
+\begin{itemize}
+\item $p$ The number of lag observations included in the model, also 
+called the trend autoregression order.
+\item $d$ The number of times that the raw observations are differenced, also 
+called the degree of differencing, or the trend difference order.
+\item $q$ The size of the moving average window, also called the order of moving average.
+\end{itemize}
+
+The remaining are not part of the ARIMA model and must be configured to
+model the seasonal component:
+\begin{itemize}
+\item $P$ The order of the seasonal autoregressive model.
+\item $D$ The order of the seasonal difference.
+\item $Q$ The order of the seasonal moving average model.
+\item $s$ The number of time steps for a single seasonal period.
+\end{itemize}
+
+Importantly, the 's' parameter influences the P, D, Q parameters. 
+For example, if s = 12 for monthly data, then a P=1 would make use of 
+the first 12 lags of the seasonal difference (t-12), a P=2 would make 
+use of the first 24 lags of the seasonal difference (t-12, t-24), and so on.
+
+Similarly for D and Q, a D=1 would make use of the first 12 lags of 
+the seasonal difference (t-12), a D=2 would make use of the first 24
+lags of the seasonal difference (t-12, t-24), and so on. 
+A Q =1 would make use of the first 12 lags of the seasonal moving 
+average (t-12), a Q=2 would make use of the first 24 lags of the error
+(t-12, t-24), and so on.
+
+The trend elements (p, d, q) can be chosen through careful examination 
+of the ACF and PACF plots, looking at correlations of recent lags.
+
+\subsubsection{Linear Regression}
+Linear regression is a statistical method for modelling the relationship between a scalar dependent variable $y$ and one or more explanatory variables (or independent variables) denoted $X$.
+If there is a single explanatory variable, the method is referred to as simple linear regression. For more than one explanatory variable, the method is referred to as multiple linear regression.
+
+\subsection{Metrics for evaluating time series prediction}
+\label{sec:metrics}
+There are many metrics that can be used to evaluate the performance of a time series prediction model. The most common metrics are:
+\begin{itemize}
+\item \textbf{Mean Absolute Error (MAE)}: It is the mean of the absolute value of the errors. 
+\item \textbf{Root Mean Squared Error (RMSE)}: It is the square root of the mean of the squared errors. 
+\item \textbf{R squared (R2)}: It is the percentage of the response variable variation that is explained by a linear model. 
+\end{itemize}
+
+\subsubsection{Mean Absolute Error (MAE)}
+It is the mean of the absolute value of the errors. It is calculated as:
+\begin{equation}
+\label{eq:mae}
+MAE = \frac{1}{n}\sum_{i=1}^{n} |y_i - \hat{y}_i|
+\end{equation}
+where $y_i$ is the actual value of the time series at time $i$, $\hat{y}_i$ is the predicted value of the time series at time $i$, and $n$ is the number of observations.
+
+\subsubsection{Root Mean Squared Error (RMSE)}
+It is the square root of the mean of the squared errors. It is calculated as:
+\begin{equation}
+\label{eq:rmse}
+RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
+\end{equation}
+where $y_i$ is the actual value of the time series at time $i$, $\hat{y}_i$ is the predicted value of the time series at time $i$, and $n$ is the number of observations.
+
+\subsubsection{R squared (R2)}
+It is the percentage of the response variable variation that is explained by a linear model. It is calculated as:
+\begin{equation}
+\label{eq:r2}
+R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}
+\end{equation}
+where $y_i$ is the actual value of the time series at time $i$, $\hat{y}_i$ is the predicted value of the time series at time $i$, $\bar{y}$ is the mean of the actual values of the time series, and $n$ is the number of observations.
+
+
+\subsection{Probabilistic Methods}
+Probabilistic methods utilise the probability distribution of the time series to make predictions.
+
+\subsubsection{Facebook Prophet}
+A quick summary of the library is as follows: 
+    Prophet is a procedure for forecasting time series data based on an additive model 
+    where non-linear trends are fit with yearly, weekly, and daily seasonality, plus 
+    holiday effects.
+    It has been used for forecasting retail foot traffic with RMSPE of 25% on a 
+    hold-out set, and for macroeconomic forecasting with MAPE of 2.5% on a hold-out set.
+    It works best with daily periodicity data with at least one year of historical data.
+    Prophet is robust to missing data and shifts in the trend, and typically handles outliers
+    well.
+    A great introduction to Prophet can be found on Towards Data Science:
+    \url{https://towardsdatascience.com/an-end-to-end-project-on-time-series-analysis-and-forecasting-with-python-4835e6bf050b}
+
+
+Downsides of Prophet:
+\begin{itemize}
+	\item It is not very flexible. It is not possible to add custom regressors.
+	\item It is not very transparent. It is not possible to see the underlying model.
+	\item Whilst it is very easy to use, it is not very easy to tune.
+\end{itemize}
+
+\subsection{Neural Network Methods}
+Neural network methods use neural networks to make predictions.
+\subsubsection{Fully Connected Neural Network (FCNN)}
+A fully connected neural network is a neural network where each node in one
+    layer is connected to each node in the next layer.
+
+	This approach uses a fully connected neural network with an embedding layer 
+	to handle categorical data.
+	A neural network is a machine learning model that is inspired by the human brain.
+	It consists of multiple layers of neurons that are connected to each other.
+	The neurons in a layer are connected to all neurons in the next layer.
+	
+	The model has 3 inputs: the continuous data, the month and the year.
+	\begin{itemize}
+		\item The month data is categorical, so it is passed through an embedding layer.
+		\item The year data is also categorical, but it is passed through a dense layer.
+		\item The output of the embedding layer and the dense layer are concatenated with the continuous data.
+		\item The output of the concatenation is passed through a dense layer.
+		\item The output of the dense layer is multiplied by the standard deviation of the continuous data. 
+		This is done to scale the output to the same range as the continuous data.
+		\item The output of the dense layer is then added to the continuous data. This is done to shift 
+		the output to the same range as the continuous data.
+		\item The output of the addition is the prediction.
+		Loss is calculated using the root mean squared error and the mean absolute error.
+		\item The model is trained using the Adam optimizer. This is a gradient descent algorithm that
+		is able to adapt the learning rate during training.
+	\end{itemize}
+
+
+
+\section{A broad overview of the main types of time series datasets}
+\label{sec:datasets}
+Timeseries datasets are available from many sources, and they can be broadly
+categorized in various ways:
+\begin{itemize}
+	\item \textbf{Seasonal vs Non-Seasonal variations}: A time series is seasonal if it exhibits a regular pattern of variations at fixed, known intervals, such as daily, weekly, monthly; i.e. for less than a year. A time series is non-seasonal if it does not exhibit such a pattern. 
+	For example, the number of passengers on an airline is seasonal, as it varies according to the day of the week, and the month of the year. A time series is non-seasonal if it does not exhibit such a pattern. For example, the number of people in a room is non-seasonal, as it varies according to the time of day, but not according to the day of the week, or the month of the year.
+	\item \textbf{Secular Trend vs No Secular Trend}: A time series exhibits a secular trend if it has a long term increasing or decreasing trend.
+	\item \textbf{Cycle vs No Cycle}: A time series exhibits a cycle if it has a repeating periodical pattern of variations above or below the trend, that are not of a fixed, known interval, such as the business cycle.
+	\item \textbf{Real or Synthetic}: whether the time series is real or synthetic
+	\item \textbf{Random or Deterministic}: whether the time series has a primarily random component; i.e. does it suffer from irregular variations that are not predictable?
+	\item \textbf{Extremistan or Normalistan}: this comes from the work of Nassim Taleb, and refers to whether the time series tends to have extreme values or not. Extreme values are values that are far from the mean of the time series. In nature, most time series reside within Normalistan, but in the financial markets, most time series are firmly in Extremistan.
+\end{itemize}
+\subsection(An overview of the types of datasets used in this report)
+\label{sec:datasetsthisreport}
+\subsection{The datasets}
+\begin{itemize}
+\item \textbf{Air Passengers}: This dataset contains the number of air passengers per month from 1949 to 1960. How can we categorise it? 
+\begin{itemize}
+	\item \textbf{Seasonal}: Yes, it is seasonal, as it varies according to the month of the year.
+	\item \textbf{Secular Trend}: Yes, it has a secular trend, as it has a long term increasing trend.
+	\item \textbf{Cycle}: No, it does not have a cycle that is not of a fixed, known interval.
+	\item \textbf{Real}: Yes, it is real.
+	\item \textbf{Random}: No, it does not suffer from irregular variations that are not predictable.
+	\item \textbf{Extremistan}: No, it is in Normalistan.
+\end{itemize}
+\item \textbf{Stock price}: This dataset contains the daily stock price of JPM from 2012 to 2017. This can be categorised in the follow way:
+\begin{itemize}
+	\item \textbf{Seasonal}: Yes, it is seasonal, as it varies according to the day of the week.
+	\item \textbf{Secular Trend}: Yes, it has a secular trend, as it has a long term increasing trend that is not linear.
+	\item \textbf{Cycle}: Yes, it has a cycle that is not of a fixed, known interval (the business cycle).
+	\item \textbf{Real}: Yes, it is real.
+	\item \textbf{Random}: Yes, it has a large random component. This is because the stock price is determined by many factors, such as the economy, the company's performance, and the market sentiment.
+	\item \textbf{Extremistan}: Yes, it is in Extremistan.
+\end{itemize}
+\item \textbf{Air Quality}: This dataset contains the weekly air quality measurements for the city of Delhi, India from 2010 to 2015. It is calssed as follows:
+\begin{itemize}
+	\item \textbf{Seasonal}: Yes, it is seasonal as PM2.5 levels vary according to the day of the week, the month of the year.
+	\item \textbf{Secular Trend}: It appears to be stable over time, so it does not have a secular trend.
+	\item \textbf{Cycle}: Yes, it may have a cycle that is not of a fixed, known interval.
+	\item \textbf{Real}: Yes, it is real.
+	\item \textbf{Random}: No, it is deterministic.
+	\item \textbf{Extremistan}: No, it is in Normalistan.
+\end{itemize}
+\item \textbf{Straight Line with Noise}: This dataset contains a straight line with noise added to it. It is:
+\begin {itemize}
+	\item \textbf{Seasonal}: No, it is not seasonal.
+	\item \textbf{Secular Trend}: Yes, it has a secular trend, as it has a long term increasing trend.
+	\item \textbf{Cycle}: No, it does not have a cycle that is not of a fixed, known interval.
+	\item \textbf{Real}: No, it is synthetic.
+	\item \textbf{Random}: Yes, it has both a deterministic and random component.
+	\item \textbf{Extremistan}: No, it is in Normalistan.
+\end{itemize}
+\end{itemize}
+ 
+\section{Methodology}
+\label{sec:methodology}
+\subsection{The Python codebase}
+\label{sec:codebase}
+The codebase is available on GitHub at \url{https://github.com/swhustla/india_air_pollution_study}. 
+The codebase is written in Python 3.6. The codebase is divided into six main parts:
+\begin{itemize}
+	\item \textbf{methods}: This folder contains the code for the methods used in this report, written in generic form.
+	\item \textbf{predictions}: This folder contains the code for the predictions, specific to each method.
+	\item \textbf{data}: This folder contains files to collect the data used in this report. The .py files in this folder are used to load the data into the codebase. The data is stored in the \texttt{data} folder where necessary.
+	\item \textbf{measurements}: This folder contains files to measure the performance of the models. The results are stored in the \texttt{reports} folder where necessary.
+	\item \textbf{reports}: This folder contains the reports generated by the codebase.
+	\item \textbf{plots}: This folder contains the plots generated by the codebase.
+\end{itemize}
+\subsection{Use of a modular codebase}
+\label{sec:modularcodebase}
+The codebase is modular, and can be used to perform the following tasks:
+\begin{itemize}
+	\item \textbf{Collecting the data}: The codebase can be used to collect the data used in this report. The data is stored in the \texttt{data} folder where necessary.
+	\item \textbf{Performing predictions}: The codebase can be used to perform predictions using the methods described in this report. The predictions are stored in the \texttt{predictions} folder where necessary.
+	\item \textbf{Measuring the performance of the models}: The codebase can be used to measure the performance of the models. The results are stored in the \texttt{reports} folder where necessary.
+	\item \textbf{Generating the plots}: The codebase can be used to generate the plots. The plots are stored in the \texttt{plots} folder where necessary.
+	
+\end{itemize}
+
+\subsubsection{Collecting the data}
+\label{sec:collectingdata}
+
+\subsubsection{Preprocessing the data}
+\label{sec:preprocessingdata}
+For time series data, the data is preprocessed by:
+\begin{itemize}
+	% \item \textbf{Removing the outliers}: The outliers are removed using the interquartile range method.
+	% \item \textbf{Removing the missing values}: The missing values are removed using the forward fill method.
+	\item \textbf{Removing the trend}: The trend is removed using the Hodrick-Prescott filter.
+	\item \textbf{Removing the seasonality}: The seasonality is removed using the seasonal decomposition method.
+\end{itemize}
+
+%outlier removal
+% \subsubsection[]{Outlier removal}
+% \label{sec:outlierremoval}
+% For which methods is outlier removal necessary?
+% In general, it depends on the both data domain and the method used. The rule concerning the domain is relatively simple; if the outlier in question has a high probability of repeating, then outlier removal is necessary. 
+% The rule concerning the method is more complex; broadly if the method is sensitive to outliers, then outlier removal is necessary. 
+% Methods that tend to be most sensitive to outliers are ARIMA, SARIMA, and VAR.
+% Meanwhile, methods that tend to be least sensitive to outliers are ETS (Exponential Smoothing), TBATS (Trigonometric Exponential Smoothing).
+
+\subsubsection{Performing predictions}
+\label{sec:performingpredictions}
+
+
+
+\section{Results}
+\label{sec:results}
+\subsection{Performance of the models}
+\label{sec:performance}
+\begin{table}[]
+	\begin{tabular}{|c|c|c|c|c|c|}
+	\hline
+	\textbf{Dataset}      & \textbf{Model}     & \textbf{RMSE} & \textbf{R Squared} & \textbf{MAE} & \textbf{Elapsed (s)} \\ \hline
+	Indian city pollution & linear\_regression & 77.4384       & -0.1605            & 67.1477      & 0.3175               \\ \hline
+	Stock price           & linear\_regression & 42.9849       & -4.277             & 39.615       & 0.1639               \\ \hline
+	Airline passengers    & linear\_regression & 71.6498       & 0.1676             & 53.7296      & 0.2039               \\ \hline
+	Straight line         & linear\_regression & 41.8694       & 0.8977             & 36.2212      & 0.1653               \\ \hline
+	Indian city pollution & ARIMA              & 116.914       & -1.6453            & 106.1345     & 0.3934               \\ \hline
+	Stock price           & ARIMA              & 36.0669       & -2.7151            & 31.9772      & 0.5472               \\ \hline
+	Airline passengers    & ARIMA              & 71.9555       & 0.1605             & 54.0135      & 0.3339               \\ \hline
+	Straight line         & ARIMA              & 42.1426       & 0.9012             & 36.6301      & 0.3745               \\ \hline
+	Indian city pollution & Prophet            & 34.5066       & 0.7696             & 25.1749      & 2.176                \\ \hline
+	Stock price           & Prophet            & 29.7144       & -1.5217            & 26.2528      & 5.6924               \\ \hline
+	Airline passengers    & Prophet            & 40.5704       & 0.7331             & 34.1229      & 0.5898               \\ \hline
+	Straight line         & Prophet            & 43.3315       & 0.9055             & 37.693       & 1.2789               \\ \hline
+	Indian city pollution & FCNN               & 492.7934      &                    & 487.829      & 0.7921               \\ \hline
+	Stock price           & FCNN               & 487.531       &                    & 487.0026     & 1.6032               \\ \hline
+	Airline passengers    & FCNN               & 181.4364      &                    & 166.3804     & 0.5986               \\ \hline
+	Straight line         & FCNN               & 895.2705      &                    & 892.0402     & 0.7397               \\ \hline
+	Indian city pollution & FCNN\_embedding    & 51.7223       &                    & 42.5439      & 3.1747               \\ \hline
+	Stock price           & FCNN\_embedding    & 7.0223        &                    & 5.7167       & 2.0247               \\ \hline
+	Airline passengers    & FCNN\_embedding    & 103.8403      &                    & 74.5756      & 2.3061               \\ \hline
+	Straight line         & FCNN\_embedding    & 58.1626       &                    & 47.9317      & 4.0272               \\ \hline
+	Indian city pollution & SES                & 41.1457       & 0.6724             & 30.3949      & 0.1874               \\ \hline
+	Stock price           & SES                & 40.152        & -3.6044            & 36.511       & 0.4241               \\ \hline
+	Airline passengers    & SES                & 32.713        & 0.8265             & 26.3054      & 0.1903               \\ \hline
+	Straight line         & SES                & 69.4035       & 0.7194             & 58.2135      & 0.1967               \\ \hline
+	Indian city pollution & SARIMA             & 36.4766       & 0.7425             & 25.4158      & 3.0489               \\ \hline
+	Airline passengers    & SARIMA             & 31.2388       & 0.8418             & 27.7134      & 0.2803               \\ \hline
+	\end{tabular}
+	\caption{Performance of the models for a variety of datasets.}
+	\end{table}
+
+\section{Plots}
+\label{sec:plots}
+\subsection{Indian city pollution}
+\label{sec:indiancitypollution}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\linewidth]{../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png}
+	\caption{Indian city pollution}
+\label{fig:indiancitypollution}
+\end{figure}
+
+
+
+\section{Applications and Learnings}
+\label{sec:appln}
+Practical impacts.
+\subsection{Summary and Inferences}
+\subsection{Limitations of the proposed method}
+\subsection{Future Scope of Work}
+\subsection{Discussion on Implementation}
+\subsubsection{Libraries/Frameworks used}
+\subsubsection{Location of the data and code} 
+
+\section{Conclusions}
+\label{sec:concl}
+
+\section*{Acknowledgements}
+
+\section*{References}
+\begin{thebibliography}{10}
+\bibitem{ref1}
+\end{thebibliography}
+\end{document}
+

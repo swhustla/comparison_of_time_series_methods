@@ -10,6 +10,7 @@ from data.stock_prices import stock_prices
 from data.list_of_tuples import list_of_tuples
 from data.airline_passengers import airline_passengers
 from predictions.ARIMA import arima
+from predictions.SARIMA import sarima
 from predictions.linear_regression import linear_regression
 from predictions.prophet import prophet
 from predictions.FCNN import fcnn
@@ -37,6 +38,7 @@ __predictors: dict[str, Predict[Dataset, Result]] = {
     "FCNN": fcnn,
     "FCNN_embedding": fcnn_embedding,
     "SES": ses,
+    "SARIMA": sarima,
 }
 
 __testset_size = 0.2
@@ -76,6 +78,9 @@ def generate_predictions(methods: list[str], datasets: list[str]):
     for method_name in methods:
         for dataset_name in datasets:
             data = load_dataset(dataset_name)
+            if method_name in ["SARIMA"] & data.time_unit == "days":
+                print(f"Skipping {method_name} on {data.name} because it does not support daily data.")
+                continue
             report = predict_measure_plot(data, method_name)
             store_metrics(report)
             yield report
@@ -96,6 +101,7 @@ __methods = [
     "FCNN",
     "FCNN_embedding",
     "SES",
+    "SARIMA",
     # "LSTM"
     # "MSTSD"
     ]
