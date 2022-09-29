@@ -101,13 +101,13 @@ __datasets = [
 
 __methods = [
     # "MA",
-    "AR",
-    # "linear_regression", 
+    # "AR",
+    "linear_regression", 
     # "ARIMA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    # "SES",
+    "SES",
     # "SARIMA",
     # "LSTM"
     # "MSTSD"

@@ -12,3 +12,5 @@ plots/*/*.png
 write_up/*.pdf
 write_up/*.synctex*.gz
 
+plots/*/*/*.png
+plots/*/*/*/*.png
