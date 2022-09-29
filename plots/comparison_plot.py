@@ -75,14 +75,13 @@ def __plot(
     return figure
 
 
-def __save_plot(figure: Figure, title: str, type: str = "comparison") -> None:
+def __save_plot(figure: Figure, folder: str, file_name: str, plot_type: str, title: str) -> None:
     """Save the plot to disk."""
-    print(f"Saving {type} plot for {title}")
-    snake_case_title = title.replace(" ", "_").lower()
-    if not os.path.exists(f"plots/{type}"):
-        os.makedirs(f"plots/{type}")
+    print(f"Saving {plot_type} plot for {title} to {folder}/{file_name}.png")
+    if not os.path.exists(f"plots/{folder}"):
+        os.makedirs(f"plots/{folder}")
         
-    figure.savefig(f"plots/{type}/{snake_case_title}.png")
+    figure.savefig(f"plots/{folder}/{file_name}_{plot_type}.png", bbox_inches="tight")
 
 
 comparison_plot = method(__full_data_plus_prediction_plot, __plot, __save_plot)

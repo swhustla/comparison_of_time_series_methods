@@ -77,6 +77,8 @@ def __forecast(model: Model, data:Dataset) -> PredictionData:
         ground_truth_values=ground_truth_df["y"],
         confidence_columns=["yhat_lower", "yhat_upper"],
         title=title,
+        plot_folder=f"{data.name}/{data.subset_row_name}/Prophet/",
+        plot_file_name=f"{data.subset_column_name}_forecast",
     )
 
 prophet = method(__fit_prophet_model, __forecast)

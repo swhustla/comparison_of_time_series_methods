@@ -10,3 +10,5 @@ class PredictionData:
     ground_truth_values: Optional[Data]
     confidence_columns: Optional[list[str]]
     title: str
+    plot_folder: str
+    plot_file_name: str

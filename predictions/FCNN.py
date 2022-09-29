@@ -153,6 +153,9 @@ def __get_predictions(
         ground_truth_values=y_test[data.subset_column_name],
         confidence_columns=None,
         title=title,
+        plot_folder=f"{data.name}/{data.subset_row_name}/FCNN/",
+        plot_file_name=f"{data.subset_column_name}_forecast",
+
     )
 
 
