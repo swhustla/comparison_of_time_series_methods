@@ -105,6 +105,7 @@ def __get_training_set(data: Dataset) -> Dataset:
         subset_column_name=data.subset_column_name,
         time_unit=data.time_unit,
         subset_row_name=data.subset_row_name,
+        seasonality=data.seasonality,
     )
 
 
@@ -116,6 +117,7 @@ def __get_test_set(data: Dataset) -> Dataset:
         subset_column_name=data.subset_column_name,
         time_unit=data.time_unit,
         subset_row_name=data.subset_row_name,
+        seasonality=data.seasonality,
     )
 
 
@@ -291,6 +293,7 @@ def __seasonal_decompose_data(data: Dataset) -> Dataset:
         values=decomposition,
         subset_column_name=data.subset_column_name,
         subset_row_name=data.subset_row_name,
+        seasonality=data.seasonality,
     )
 
 
@@ -307,6 +310,7 @@ def __tidy_up_decomposition_data(data: Dataset) -> Dataset:
         values=residual_values,
         subset_column_name=data.subset_column_name,
         subset_row_name=data.subset_row_name,
+        seasonality=data.seasonality,
     )
 
 
@@ -384,6 +388,8 @@ def __predict(
         ],
         confidence_columns=None,
         title=title,
+        plot_folder=f"{data.name}/{data.subset_row_name}/SES/",
+        plot_file_name=f"{data.subset_column_name}_forecast",
     )
 
 

@@ -137,6 +137,11 @@ def __fit_model(data: Dataset) -> Model:
     else:
         return model.fit(disp=False)
 
+def __get_model_order_snake_case(model: Model) -> str:
+    """Get the SARIMAXResults model order in snake case"""
+    dict_of_model_orders = model.model_orders
+    print(f"Model orders for {model.model.data.orig_endog.name} are {dict_of_model_orders}")
+    return f"ar_{dict_of_model_orders['ar']}_trend_{dict_of_model_orders['trend']}_ma_{dict_of_model_orders['ma']}_seasonal_ar_{dict_of_model_orders['seasonal_ar']}_seasonal_ma_{dict_of_model_orders['seasonal_ma']}_exog_{dict_of_model_orders['exog']}"
 
 def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
     """Forecast the next 20% of the data"""
@@ -150,6 +155,8 @@ def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
         ground_truth_values=__get_test_set(data),
         confidence_columns=None,
         title=title,
+        plot_folder=f"{data.name}/{data.subset_row_name}/SARIMA/",
+        plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
     )
 
 

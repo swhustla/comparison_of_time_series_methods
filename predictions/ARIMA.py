@@ -98,15 +98,27 @@ def __fit_auto_regressive_model(data: Dataset) -> Model:
     return model_result
 
 
+def __get_model_order_snake_case(model: Model) -> str:
+    """convert model order dict to snake case filename"""
+
+    model_order = model.model.order
+    model_order = f"AR{model_order[0]}_I{model_order[1]}_MA{model_order[2]}"
+    return model_order.replace(" ", "_")
+
+
+
 def __forecast(model: Model, data:Dataset) -> PredictionData:
     """ Forecast the next 20% of the data """
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with ARIMA"
+
     return PredictionData(
         values=model.get_forecast(steps=__number_of_steps(data)).summary_frame(),
         prediction_column_name="mean",
         ground_truth_values=__get_test_set(data),
         confidence_columns=["mean_ci_lower", "mean_ci_upper"],
         title=title,
+        plot_folder=f"{data.name}/{data.subset_row_name}/ARIMA/",
+        plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
     )
 
 

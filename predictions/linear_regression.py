@@ -103,6 +103,8 @@ def __test(data: Dataset, theta) -> Tuple[PredictionData, Dataset]:
         ground_truth_values=__convert_to_pandas_series(y, start_value=start_value),
         confidence_columns=None,
         title=title,
+        plot_folder=f"{data.name}/{data.subset_row_name}/linear_regression/",
+        plot_file_name=f"{data.subset_column_name}_forecast",
     )
 
 

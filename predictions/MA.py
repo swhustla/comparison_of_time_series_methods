@@ -117,6 +117,14 @@ def __fit_simple_ma(data: Dataset, ma_order: int = 1) -> Model:
     return model_result
 
 
+def __get_model_order_snake_case(model: Model) -> str:
+    """convert model order dict to snake case filename"""
+
+    model_order = model.model.order
+    model_order = f"AR{model_order[0]}_I{model_order[1]}_MA{model_order[2]}"
+    return model_order.replace(" ", "_")
+
+
 def __forecast(model: Model, data: Dataset) -> PredictionData:
     """
     Makes a prediction for the next 20% of the data using the fitted model.
@@ -128,6 +136,8 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         ground_truth_values=__get_test_set(data),
         confidence_columns=["mean_ci_lower", "mean_ci_upper"],
         title=title,
+        plot_folder=f"{data.name}/{data.subset_row_name}/MA/",
+        plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
     )
 
 
