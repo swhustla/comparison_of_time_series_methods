@@ -11,6 +11,7 @@ from data.list_of_tuples import list_of_tuples
 from data.airline_passengers import airline_passengers
 from predictions.AR import ar
 from predictions.MA import ma
+from predictions.HoltWinters import holt_winters
 from predictions.ARIMA import arima
 from predictions.SARIMA import sarima
 from predictions.linear_regression import linear_regression
@@ -43,6 +44,7 @@ __predictors: dict[str, Predict[Dataset, Result]] = {
     "SES": ses,
     "SARIMA": sarima,
     "MA": ma,
+    "HoltWinters": holt_winters,
 }
 
 __testset_size = 0.2
@@ -102,12 +104,13 @@ __datasets = [
 __methods = [
     # "MA",
     # "AR",
-    "linear_regression", 
+    # "linear_regression", 
     # "ARIMA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    "SES",
+    # "SES",
+    "HoltWinters",
     # "SARIMA",
     # "LSTM"
     # "MSTSD"
