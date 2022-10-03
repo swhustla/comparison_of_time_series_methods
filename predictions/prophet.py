@@ -50,6 +50,7 @@ def __get_training_set(data: Dataset) -> pd.DataFrame:
 def __get_test_set(data: Dataset) -> pd.DataFrame:
     return __get_dataframe_with_date_column(data.values[-__number_of_steps(data) :])
 
+#TODO: Add settings for the model to include seasonality, holidays, etc.
 def __fit_prophet_model(data: Dataset) -> Model:
     """Fit a Prophet model to the first 80% of the data"""
     train_df = __get_training_set(data)

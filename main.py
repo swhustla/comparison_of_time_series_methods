@@ -9,6 +9,7 @@ from data.india_pollution import india_pollution
 from data.stock_prices import stock_prices
 from data.list_of_tuples import list_of_tuples
 from data.airline_passengers import airline_passengers
+from data.sun_spots import sun_spots
 from predictions.AR import ar
 from predictions.MA import ma
 from predictions.HoltWinters import holt_winters
@@ -30,6 +31,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
     "stock_prices": stock_prices,
     "list_of_tuples": list_of_tuples, 
     "airline_passengers": airline_passengers,
+    "sun_spots": sun_spots,
 }
 
 
@@ -96,24 +98,23 @@ def generate_predictions(methods: list[str], datasets: list[str]):
 
 __datasets = [
     "india_pollution", 
-    "stock_prices", 
-    "airline_passengers",
-    "list_of_tuples"
+    # "stock_prices", 
+    # "airline_passengers",
+    # "list_of_tuples"
+    # "sun_spots",
     ]
 
 __methods = [
-    # "MA",
-    # "AR",
-    # "linear_regression", 
-    # "ARIMA",
-    # "Prophet",
-    # "FCNN",
-    # "FCNN_embedding",
-    # "SES",
+    "MA",
+    "AR",
+    "linear_regression", 
+    "ARIMA",
+    "Prophet",
+    "FCNN",
+    "FCNN_embedding",
+    "SES",
     "HoltWinters",
-    # "SARIMA",
-    # "LSTM"
-    # "MSTSD"
+    "SARIMA",
     ]
 
 

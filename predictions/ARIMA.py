@@ -47,7 +47,7 @@ Model = TypeVar("Model")
 
 
 def __number_of_steps(data: Dataset) -> int:
-    return int(len(data.values) // 5) 
+    return int(len(data.values) // 5)
 
 
 def __get_training_set(data: Dataset) -> pd.DataFrame:
@@ -56,6 +56,20 @@ def __get_training_set(data: Dataset) -> pd.DataFrame:
 
 def __get_test_set(data: Dataset) -> pd.DataFrame:
     return data.values[-__number_of_steps(data) :][data.subset_column_name]
+
+
+def __get_period_of_seasonality(data: Dataset) -> int:
+    """
+    Returns the period of seasonality.
+    """
+    if data.time_unit == "years":
+        return 11
+    elif data.time_unit == "months":
+        return 12
+    elif data.time_unit == "weeks":
+        return 52
+    elif data.time_unit == "days":
+        return 365
 
 
 def __stationarity(data: Dataset) -> bool:
@@ -87,11 +101,15 @@ def __fit_auto_regressive_model(data: Dataset) -> Model:
     model = STLForecast(
         __get_training_set(data),
         sm.tsa.arima.ARIMA,
-        model_kwargs=dict(order=(
-            ar_order,
-            differencing_term,
-            ma_order,
-        ), trend="t"),
+        model_kwargs=dict(
+            order=(
+                ar_order,
+                differencing_term,
+                ma_order,
+            ),
+            trend="t",
+        ),
+        period=__get_period_of_seasonality(data),
     )
 
     model_result = model.fit().model_result
@@ -106,9 +124,8 @@ def __get_model_order_snake_case(model: Model) -> str:
     return model_order.replace(" ", "_")
 
 
-
-def __forecast(model: Model, data:Dataset) -> PredictionData:
-    """ Forecast the next 20% of the data """
+def __forecast(model: Model, data: Dataset) -> PredictionData:
+    """Forecast the next 20% of the data"""
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with ARIMA"
 
     return PredictionData(
@@ -122,6 +139,4 @@ def __forecast(model: Model, data:Dataset) -> PredictionData:
     )
 
 
-arima = method(
-    __fit_auto_regressive_model, __forecast
-)
+arima = method(__fit_auto_regressive_model, __forecast)

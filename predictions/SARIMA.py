@@ -95,6 +95,8 @@ def __get_seasonal_period(data: Dataset) -> int:
         return 52
     elif data.time_unit == "months":
         return 12
+    elif data.time_unit == "years":
+        return 11
     else:
         raise ValueError("Invalid time unit")
 
@@ -105,7 +107,19 @@ def __get_seasonal_differencing_term(data: Dataset) -> int:
     print(f"differencing term D for {data.name} is {ndiffs(data.values[data.subset_column_name], test='adf', max_d=maximum_differencing_term)}")
     return ndiffs(data.values[data.subset_column_name], test="adf", max_d=maximum_differencing_term)
 
+def __get_trend_given_data(data: Dataset) -> str:
+    """Get the trend given the data"""
+    if data.name == "Sun spots":
+        return "c"
+    else:
+        return "t"
 
+def __get_number_of_lags_or_trend_autoregression_order(data: Dataset) -> int:
+    """Get the number of lags or trend autoregression order for the SARIMA model"""
+    if data.name == "Sun spots":
+        return 3
+    else:
+        return 1
 
 def __fit_model(data: Dataset) -> Model:
     """Fit the SARIMA model to the first 80% of the data"""
@@ -119,7 +133,9 @@ def __fit_model(data: Dataset) -> Model:
     D = __get_seasonal_differencing_term(data)
     s = __get_seasonal_period(data)
 
-    my_order = (1, d, 1)
+    p = __get_number_of_lags_or_trend_autoregression_order(data)
+
+    my_order = (p, d, 0)
     my_seasonal_order = (1, D, 1, s)
 
     model = SARIMAX(
@@ -128,6 +144,7 @@ def __fit_model(data: Dataset) -> Model:
         seasonal_order=my_seasonal_order,
         enforce_stationarity=False,
         enforce_invertibility=False,
+        trend=__get_trend_given_data(data),
     )
     print(f"Number of observations for {data.name} is {len(data.values)}")
     print(f"Training SARIMA model on {data.name} with order {my_order} and seasonal order {my_seasonal_order}")

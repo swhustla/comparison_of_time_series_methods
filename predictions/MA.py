@@ -85,6 +85,8 @@ def __get_number_of_lags(data: Dataset) -> int:
         return 51
     elif data.time_unit == "months":
         return 12
+    elif data.time_unit == "years":
+        return 11
     else:
         return 1
 
@@ -111,6 +113,7 @@ def __fit_simple_ma(data: Dataset, ma_order: int = 1) -> Model:
         __get_training_set(data),
         sm.tsa.ARIMA,
         model_kwargs=dict(order=(ar_order, integ_order, ma_order), trend="t"),
+        period=__get_number_of_lags(data),
     )
 
     model_result = model.fit().model_result
