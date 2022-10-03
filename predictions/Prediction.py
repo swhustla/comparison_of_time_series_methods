@@ -12,3 +12,4 @@ class PredictionData:
     title: str
     plot_folder: str
     plot_file_name: str
+    model_config: Optional[dict] = None
