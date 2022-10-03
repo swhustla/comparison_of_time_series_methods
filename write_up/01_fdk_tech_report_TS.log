@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.9.26)  28 SEP 2022 19:18
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.9.26)  2 OCT 2022 15:07
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -817,7 +817,6 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 25.
 LaTeX Info: Redefining \pageref on input line 25.
 LaTeX Info: Redefining \nameref on input line 25.
- (./01_fdk_tech_report_TS.out) (./01_fdk_tech_report_TS.out)
 \@outlinefile=\write5
 \openout5 = `01_fdk_tech_report_TS.out'.
 
@@ -958,21 +957,28 @@ LaTeX Warning: No positions in optional float specifier.
 
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
 (Font)              scaled to size 10.0pt on input line 409.
-<../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png, id=187, 722.7pt x 361.35pt>
-File: ../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png Graphic file (type png)
-<use ../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png>
-Package pdftex.def Info: ../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png  used on input line 418.
-(pdftex.def)             Requested size: 387.00153pt x 193.49954pt.
+
+LaTeX Warning: File `../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png' not found on input line 418.
+
+
+/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:418: Package pdftex.def Error: File `../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png' not found: using draft setting.
+
+See the pdftex.def package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.418 ...hi_for_the_next_57_weeks_with_sarima.png}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
 
 Class acmart Warning: A possible image without description on input line 421.
 
 
 Underfull \vbox (badness 3657) has occurred while \output is active []
 
- [9.9]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [10.10 <../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png>] (/usr/local/texlive/2022/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
+ [9.9] [10.10] (/usr/local/texlive/2022/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 ) (/usr/local/texlive/2022/texmf-dist/tex/generic/stringenc/se-utf8.def
 File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
@@ -980,23 +986,37 @@ File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
 
 Class acmart Warning: Some images may lack descriptions.
 
-[11.11] (./01_fdk_tech_report_TS.aux)
-Package rerunfilecheck Info: File `01_fdk_tech_report_TS.out' has not changed.
-(rerunfilecheck)             Checksum: EE953E6F9F8E27EBCFF0479A851D7D98;5688.
+[11.11] (./01_fdk_tech_report_TS.aux
+
+Package natbib Warning: Citation(s) may have changed.
+(natbib)                Rerun to get citations correct.
+
+)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `01_fdk_tech_report_TS.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `01_fdk_tech_report_TS.out':
+(rerunfilecheck)             Before: <no file>
+(rerunfilecheck)             After:  EE953E6F9F8E27EBCFF0479A851D7D98;5688.
  ) 
 Here is how much of TeX's memory you used:
- 22521 strings out of 478268
- 380327 string characters out of 5846347
- 733698 words of memory out of 5000000
- 39755 multiletter control sequences out of 15000+600000
+ 22525 strings out of 478268
+ 382036 string characters out of 5846347
+ 734383 words of memory out of 5000000
+ 39749 multiletter control sequences out of 15000+600000
  601742 words of font info for 299 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
  84i,11n,131p,1092b,548s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_oexx6f.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_nh77jq.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_76gpa5.enc}</usr/local/texlive/2022/texmf-dist/fonts/type1/public/inconsolata/Inconsolata-zi4r.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/LibertineMathMI.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/LibertineMathMI7.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumT.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumTB.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumTI.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinLibertineT.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinLibertineTB.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txexs.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txmiaX.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txsys.pfb>
-Output written on 01_fdk_tech_report_TS.pdf (11 pages, 443363 bytes).
+Output written on 01_fdk_tech_report_TS.pdf (11 pages, 416832 bytes).
 PDF statistics:
- 284 PDF objects out of 1000 (max. 8388607)
- 240 compressed objects within 3 object streams
+ 192 PDF objects out of 1000 (max. 8388607)
+ 151 compressed objects within 2 object streams
  66 named destinations out of 1000 (max. 500000)
- 60158 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 59921 words of extra memory for PDF output out of 61914 (max. 10000000)
 
