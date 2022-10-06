@@ -22,7 +22,7 @@ __parallel = False
 def holt_winters(
     get_best_model: Callable[[Dataset, bool], Tuple[Model, dict]],
     get_forecast: Callable[[Dataset, Model, dict], Prediction],
-) -> Predict[Dataset, Result]:
+) -> Predict[Dataset, PredictionData]:
     """
     Return a function that takes a dataset and returns a prediction.
     """
