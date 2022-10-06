@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from data.Data import Dataset
+from data.dataset import Dataset
 from predictions.Prediction import PredictionData
 from methods.plot import Figure
 

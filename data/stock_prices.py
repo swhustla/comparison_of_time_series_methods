@@ -8,7 +8,7 @@ from typing import TypeVar
 from pandas_datareader.data import DataReader
 
 Data = TypeVar("Data", contravariant=True)
-from data.Data import Dataset
+from data.dataset import Dataset
 
 
 from .load import Load

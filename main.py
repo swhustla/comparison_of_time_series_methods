@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from methods.predict import Predict
-from data.Data import Dataset, Result
+from data.dataset import Dataset, Result
 from predictions.Prediction import PredictionData
 from data.load import Load
 from data.report import Report

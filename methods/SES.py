@@ -6,7 +6,7 @@ It is a wrapper around the statsmodels library.
 """
 
 from typing import TypeVar, Callable
-from data.Data import Dataset, Result
+from data.dataset import Dataset
 from predictions.Prediction import PredictionData
 import logging
 

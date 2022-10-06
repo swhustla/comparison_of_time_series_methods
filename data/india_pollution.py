@@ -5,7 +5,7 @@ from typing import TypeVar, Callable
 import pandas as pd
 
 Data = TypeVar("Data", contravariant=True)
-from data.Data import Dataset
+from data.dataset import Dataset
 
 
 from .load import Load

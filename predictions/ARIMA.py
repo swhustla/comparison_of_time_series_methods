@@ -40,7 +40,7 @@ from pmdarima.arima.utils import ndiffs
 from statsmodels.tsa.forecasting.stl import STLForecast
 import statsmodels.api as sm
 
-from data.Data import Dataset, Result
+from data.dataset import Dataset, Result
 from predictions.Prediction import PredictionData
 
 Model = TypeVar("Model")

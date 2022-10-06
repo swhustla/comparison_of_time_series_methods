@@ -57,7 +57,7 @@ from arch.unitroot import ADF
 from pmdarima.arima.utils import ndiffs
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
-from data.Data import Dataset, Result
+from data.dataset import Dataset, Result
 from predictions.Prediction import PredictionData
 
 Model = TypeVar("Model")

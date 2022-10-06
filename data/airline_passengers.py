@@ -3,7 +3,7 @@
 import pandas as pd
 
 from pathlib import Path
-from data.Data import Dataset
+from data.dataset import Dataset
 
 __airline_passenger_path = Path("data/airline-passengers.csv")
 __url_airline_passengers = "https://raw.githubusercontent.com/benman1/Machine-Learning-for-Time-Series-with-Python/main/chapter10/passengers.csv"

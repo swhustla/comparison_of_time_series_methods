@@ -83,7 +83,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-from data.Data import Dataset, Result
+from data.dataset import Dataset, Result
 from predictions.Prediction import PredictionData
 
 from methods.SES import ses as method
