@@ -115,6 +115,8 @@ def __split_data(
         shift_amount = 4
     elif data.time_unit == "months":
         shift_amount = 1
+    elif data.time_unit == "years":
+        shift_amount = 11
     else:
         raise ValueError(f"Unknown time unit {data.time_unit}")
 

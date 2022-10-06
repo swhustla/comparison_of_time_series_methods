@@ -190,6 +190,8 @@ def __get_seasonal_period(data: Dataset) -> int:
         return 52
     elif data.time_unit == "days":
         return 365
+    elif data.time_unit == "years":
+        return 11
     else:
         return 1
 
@@ -220,8 +222,16 @@ def __calculate_next_seasonal_values(
 
 
 def __detect_an_increase_in_a_series(series: pd.Series) -> bool:
-    """Detects if there is a gradual increase or decrease in a series"""
-    return np.abs(series.diff().mean()) > 0.05
+    """Detects if there is a gradual increase or decrease in a series
+    by calculating the average of the first and last 20% of the series
+    and comparing them.
+    If the difference is significant, then there is a trend."""
+    series = series.dropna()
+    first_20_percent = series[: int(len(series) * 0.2)].mean()
+    last_20_percent = series[-int(len(series) * 0.2) :].mean()
+    print(f"{first_20_percent} {last_20_percent}")
+    print(f"absolutediff: {abs(first_20_percent - last_20_percent)}")
+    return abs(first_20_percent - last_20_percent) > (0.1 * series.mean())
 
 
 def __determine_if_seasonality_is_multiplicative(
@@ -246,6 +256,7 @@ def __determine_if_seasonality_is_multiplicative(
     rolling_max = data_minus_moving_av_index.rolling(
         window=seasonal_period
     ).max()
+    print(f"rolling max for {training_dataset.name} every 20: {rolling_max[::20]}")
     return __detect_an_increase_in_a_series(rolling_max)
 
 

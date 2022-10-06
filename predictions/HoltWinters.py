@@ -76,7 +76,7 @@ return the best set of parameters.
 """
 
 
-from typing import Tuple, TypeVar, Callable
+from typing import Tuple, TypeVar, Callable, List, Dict, Any
 
 from typing import TypeVar, Callable
 import warnings
@@ -212,7 +212,7 @@ def __grid_search_configs(data: Dataset, cfg_list: list, parallel:bool = True):
     scores.sort(key=lambda tup: tup[0])
     return scores
 
-def __exp_smoothing_configs(seasonal: int) -> list:
+def __exp_smoothing_configs(seasonal: List[int]) -> list:
     """Create a set of exponential smoothing configs to try."""
     model_configs = list()
     # define config lists
@@ -223,37 +223,43 @@ def __exp_smoothing_configs(seasonal: int) -> list:
     b_params = [True, False]
     r_params = [True, False]
     # create config instances
+    null_trend_done = False
+    null_seasonal_done = False
     for t in t_params:
         for d in d_params:
             if t is None and d:
+                d = False
+                null_trend_done = True
+            if t is None and null_trend_done:
                 continue
             for s in s_params:
-                # p is None if s is None
-                if s is None:
-                    p = None
-                else:
-                    p = p_params
-                for b in b_params:
-                    for r in r_params:
-                        cfg = [t, d, s, p, b, r]
-                        model_configs.append(cfg)
+                for  p in p_params:
+                    if s is None and p:
+                        p= None
+                        null_seasonal_done = True
+                    if s is None and null_seasonal_done:
+                        continue
+                    for b in b_params:
+                        for r in r_params:
+                            cfg = [t, d, s, p, b, r]
+                            model_configs.append(cfg)
     return model_configs
         
-def __get_seasonal_period_list(data: Dataset) -> int:
+def __get_seasonal_period_list(data: Dataset) -> List[int]:
     """Get a list of seasonal periods to try."""
     if data.seasonality is None:
         return None
     else:
         if data.time_unit == "days":
-            return 365
+            return [365]
         elif data.time_unit == "weeks":
-            return 52
+            return [4, 13, 26, 52]
         elif data.time_unit == "months":
-            return 12
+            return [3, 12, 24]
         elif data.time_unit == "quarters":
-            return 4
+            return [4, 5]
         elif data.time_unit == "years":
-            return 1
+            return [11, 12, 13]
         else:
             return None
 
