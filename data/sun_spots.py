@@ -1,4 +1,7 @@
-"""Load in sun spots data."""
+"""Load in sun spots data.
+
+This is a dataset of the number of sun spots observed from 1700 to 2008.
+"""
 
 from typing import TypeVar
 import statsmodels.api as sm

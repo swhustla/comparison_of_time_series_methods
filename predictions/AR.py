@@ -1,7 +1,9 @@
 """
 The Auto Regressive Prediction method
 
-Auto-regressive models are a class of statistical models for analyzing and forecasting time series data. They explicitly model the relationship between the observations and their lagged values. This is in contrast to other methods that model the relationship between the observations and a deterministic trend, such as linear or exponential trend.
+Auto-regressive models are a class of statistical models for analyzing and forecasting time series data. 
+They explicitly model the relationship between the observations and their lagged values. 
+This is in contrast to other methods that model the relationship between the observations and a deterministic trend, such as linear or exponential trend.
 They were first developed for analyzing and forecasting economic time series data, and are now widely used in other fields, such as signal processing and econometrics.
 
 The AR model is defined by the following equation:

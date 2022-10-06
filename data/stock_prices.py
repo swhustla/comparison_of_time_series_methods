@@ -1,4 +1,7 @@
-"""Load in stock prices data."""
+"""Load in stock prices data.
+
+This is a dataset of stock prices for the company JPMorgan Chase & Co. (JPM).
+"""
 
 from datetime import datetime
 from typing import TypeVar
