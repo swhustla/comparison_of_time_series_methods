@@ -1,8 +1,13 @@
 """Simple Moving Average Prediction
 
 
-The simple moving average prediction method is a simple method that
-calculates the average of the last n values and uses that as the prediction.
+Moving average time series models are a type of linear regression model that
+uses the average of the previous observations as the prediction for the next
+time period. The moving average model is a type of ARIMA model, where the
+autoregressive part of the model is set to zero. The moving average model is
+useful for removing the trend and seasonality from the data, and is often used
+as a preprocessing step for other models.
+
 
 The simple MA method is a special case of the general linear regression model, where the regressors are lagged values of the dependent variable. The simple MA model is also a special case of the autoregressive moving average model, where the autoregressive coefficients are all zero.
 It is defined by the following equation:
