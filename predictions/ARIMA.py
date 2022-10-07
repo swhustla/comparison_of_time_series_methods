@@ -40,8 +40,14 @@ from pmdarima.arima.utils import ndiffs
 from statsmodels.tsa.forecasting.stl import STLForecast
 import statsmodels.api as sm
 
+from sklearn.metrics import mean_squared_error
+
+
 from data.dataset import Dataset, Result
 from predictions.Prediction import PredictionData
+
+
+import measurements.get_metrics as get_metrics
 
 Model = TypeVar("Model")
 
@@ -71,6 +77,17 @@ def __get_period_of_seasonality(data: Dataset) -> int:
     elif data.time_unit == "days":
         return 365
 
+def __get_seasonal_parameter(data: Dataset) -> int:
+    """Get the seasonal parameter for the ARIMA model"""
+    if data.time_unit == "days":
+        return 7
+    elif data.time_unit == "weeks":
+        return 4
+    elif data.time_unit == "months":
+        return 12
+    elif data.time_unit == "years":
+        return 1
+
 
 def __stationarity(data: Dataset) -> bool:
     """
@@ -85,31 +102,63 @@ def __get_differencing_term(data: Dataset) -> int:
     """Get the differencing term for the ARIMA model"""
     return ndiffs(data.values[data.subset_column_name], test="adf")
 
+def __evaluate_arima_model(data: Dataset, arima_order: tuple) -> Result:
+    """Evaluate an ARIMA model for a given order (p,d,q) and return RMSE"""
+    # prepare training dataset
+    training_set = __get_training_set(data)
+    # prepare test dataset
+    test_set = __get_test_set(data)
+    # make predictions
+    model = STLForecast(
+        training_set,
+        period=__get_period_of_seasonality(data),
+        model=sm.tsa.ARIMA,
+        model_kwargs={"order": arima_order},
+    )
+    model_fit = model.fit()
+    yhat = model_fit.forecast(len(test_set))
+    # calculate out of sample error 
+    mse = mean_squared_error(test_set, yhat)
+    return mse
+
+
+def __evaluate_models(data: Dataset, p_values: list, d_values: list, q_values: list) -> Result:
+    """Evaluate combinations of p, d and q values for an ARIMA model"""
+    best_score, best_cfg = float("inf"), None
+    for p in p_values:
+        for d in d_values:
+            for q in q_values:
+                order = (p, d, q)
+                try:
+                    mse = __evaluate_arima_model(data, order)
+                    if mse < best_score:
+                        best_score, best_cfg = mse, order
+                    logging.info(f"ARIMA{order} MSE={mse}")
+                except Exception as e:
+                    logging.error(f"ARIMA{order} failed with error: {e}")
+                    continue
+    logging.info(f"Best ARIMA{best_cfg} MSE={best_score}")
+    return best_cfg
+
+    
+__p_values = [0, 1, 2, 4, 6, 8, 10]
+__d_values = [0, 1, 2]
+__q_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+def __get_best_model_order(data: Dataset) -> Model:
+    """Get the best model order for the ARIMA model"""
+    return __evaluate_models(data, __p_values, __d_values, __q_values)
 
 def __fit_auto_regressive_model(data: Dataset) -> Model:
-    """Fit an ARIMA model to the first 80% of the data"""
-    if __stationarity(data):
-        logging.info(f"Data {data.name} is stationary")
-        differencing_term = 0
-    else:
-        logging.info(f"Data {data.name} is not stationary")
-        differencing_term = __get_differencing_term(data)
+    """Fit the best ARIMA model to the first 80% of the data"""
 
-    ar_order = 1
-    ma_order = 1
+    ar_order, differencing_term, ma_order = __get_best_model_order(data)
 
     model = STLForecast(
         __get_training_set(data),
-        sm.tsa.arima.ARIMA,
-        model_kwargs=dict(
-            order=(
-                ar_order,
-                differencing_term,
-                ma_order,
-            ),
-            trend="t",
-        ),
         period=__get_period_of_seasonality(data),
+        model=sm.tsa.ARIMA,
+        model_kwargs={"order": (ar_order, differencing_term, ma_order)},
     )
 
     model_result = model.fit().model_result
@@ -127,7 +176,7 @@ def __get_model_order_snake_case(model: Model) -> str:
 def __forecast(model: Model, data: Dataset) -> PredictionData:
     """Forecast the next 20% of the data"""
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with ARIMA"
-
+    # print(f"Sample of the forecast for {data.name}: \n{model.get_forecast(__number_of_steps(data)).summary_frame()}")
     return PredictionData(
         values=model.get_forecast(steps=__number_of_steps(data)).summary_frame(),
         prediction_column_name="mean",
