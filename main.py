@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from methods.predict import Predict
-from data.Data import Dataset, Result
+from data.dataset import Dataset, Result
 from predictions.Prediction import PredictionData
 from data.load import Load
 from data.report import Report
@@ -99,22 +99,22 @@ def generate_predictions(methods: list[str], datasets: list[str]):
 __datasets = [
     # "india_pollution", 
     # "stock_prices", 
-    # "airline_passengers",
-    # "list_of_tuples"
-    "sun_spots",
+    "airline_passengers",
+    # "list_of_tuples",
+    # "sun_spots",
     ]
 
 __methods = [
-    "MA",
-    "AR",
-    "linear_regression", 
+    # "MA",
+    # "AR",
+    # "linear_regression", 
     "ARIMA",
     # "Prophet",
-    "FCNN",
-    "FCNN_embedding",
-    "SES",
-    "HoltWinters",
-    "SARIMA",
+    # "FCNN",
+    # "FCNN_embedding",
+    # "SES",
+    # "HoltWinters",
+    # "SARIMA",
     ]
 
 

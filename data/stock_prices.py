@@ -7,8 +7,10 @@ from datetime import datetime
 from typing import TypeVar
 from pandas_datareader.data import DataReader
 
+import pandas as pd
+
 Data = TypeVar("Data", contravariant=True)
-from data.Data import Dataset
+from data.dataset import Dataset
 
 
 from .load import Load
@@ -37,9 +39,15 @@ def __resample(dataframe: Data) -> Data:
     yahoo_all_dates_df.ffill(inplace=True)
     return yahoo_all_dates_df
 
+def __add_inferred_freq_to_index(dataframe: pd.DataFrame) -> pd.DataFrame:
+    """Add an inferred frequency to the index."""
+    dataframe.index.freq = dataframe.index.inferred_freq
+    return dataframe
+
 
 def stock_prices(stock_choice=__stock_choice) -> Dataset:
     """Load in stock market data."""
     data = __load_data(stock_choice)
     data = __resample(data)
+    data = __add_inferred_freq_to_index(data)
     return Dataset("Stock price", data, "days", ["Adj Close"], "JPM", "Adj Close", False)

@@ -41,7 +41,7 @@ from tensorflow.keras.layers import Dense, Input, Dropout
 
 from sklearn.model_selection import train_test_split
 
-from data.Data import Dataset
+from data.dataset import Dataset
 from predictions.Prediction import PredictionData
 
 Model = TypeVar("Model")

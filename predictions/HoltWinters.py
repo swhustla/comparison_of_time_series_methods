@@ -89,7 +89,7 @@ import numpy as np
 
 import logging
 
-from data.Data import Dataset, Result
+from data.dataset import Dataset, Result
 from predictions.Prediction import PredictionData
 
 from methods.HoltWinters import holt_winters as method

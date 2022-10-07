@@ -41,6 +41,8 @@ def __full_data_plus_prediction_plot(training_data: pd.DataFrame, prediction: Pr
             label="Confidence interval",
         )
     axes.set_title(title)
+
+    axes.set_ylim(bottom=0, top=1.1 * max(training_data_series.max(), prediction_series.max()))
     axes.legend()
     return figure
 
@@ -69,6 +71,8 @@ def __plot(
             label="Confidence interval",
         )
     ax.set_title(title)
+
+    ax.set_ylim(bottom=0, top=1.1 * max(ground_truth_series.max(), prediction_series.max()))
 
     ax.legend()
 

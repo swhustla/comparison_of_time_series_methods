@@ -7,7 +7,7 @@ It is a wrapper around the statsmodels library.
  """
 
 from typing import TypeVar, Callable
-from data.Data import Dataset, Result
+from data.dataset import Dataset
 
 from predictions.Prediction import PredictionData
 import logging
@@ -30,7 +30,7 @@ def ar(
     function that predicts the next 20% of the data using the Auto Regressive method.
     """
 
-    def predict(data: Dataset) -> Result:
+    def predict(data: Dataset) -> Prediction:
         """
         Predicts the next 20% of the data using the Auto Regressive method.
 

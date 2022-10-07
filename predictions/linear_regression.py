@@ -35,7 +35,7 @@ import numpy as np
 import pandas as pd
 from typing import Tuple
 
-from data.Data import Dataset
+from data.dataset import Dataset
 from predictions.Prediction import PredictionData
 
 from methods.linear_regression import linear_regression as method

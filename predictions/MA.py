@@ -36,7 +36,7 @@ import statsmodels.api as sm
 
 from matplotlib import pyplot as plt
 
-from data.Data import Dataset, Result
+from data.dataset import Dataset, Result
 from predictions.Prediction import PredictionData
 
 Model = TypeVar("Model")

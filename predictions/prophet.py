@@ -31,7 +31,7 @@ import pandas as pd
 
 from methods.prophet import prophet as method
 
-from data.Data import Dataset
+from data.dataset import Dataset
 from predictions.Prediction import PredictionData
 
 Model = TypeVar("Model")
