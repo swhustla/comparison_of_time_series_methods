@@ -15,12 +15,18 @@ from data.dataset import Dataset
 from .load import Load
 
 
+def __add_inferred_freq_to_index(dataframe: pd.DataFrame) -> pd.DataFrame:
+    """Add an inferred frequency to the index."""
+    dataframe.index.freq = dataframe.index.inferred_freq
+    return dataframe
+
 def sun_spots() -> Data:
     """Load in and prepare the data."""
     data = sm.datasets.sunspots.load_pandas().data
     data.index = pd.Index(pd.date_range("1700", end="2009", freq="A-DEC"))
     data.index.name = "Date"
     del data["YEAR"]
+    data = __add_inferred_freq_to_index(data)
 
     return Dataset(
         name="Sun spots",
