@@ -14,3 +14,4 @@ write_up/*.synctex*.gz
 
 plots/*/*/*.png
 plots/*/*/*/*.png
+.DS_Store

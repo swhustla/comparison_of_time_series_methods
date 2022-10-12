@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 from typing import Tuple, Optional
 
 from matplotlib import pyplot as plt
@@ -28,6 +29,8 @@ def __full_data_plus_prediction_plot(training_data: pd.DataFrame, prediction: Pr
     training_data_series.plot(ax=axes, label="Training data", style=".")
 
     prediction_series = __get_prediction_series(prediction)
+    if type(prediction_series) is np.ndarray:
+        prediction_series = pd.Series(prediction_series, index=prediction.ground_truth_values.index)
     prediction_series.plot(ax=axes, label="Forecast", style="-")
 
     if prediction.confidence_columns is not None:
@@ -54,6 +57,10 @@ def __plot(
     ground_truth_series = prediction.ground_truth_values
     prediction_series = __get_prediction_series(prediction)
 
+    if type(prediction_series) is np.ndarray:
+        prediction_series = pd.Series(prediction_series, index=prediction.ground_truth_values.index)
+
+
     title = prediction.title
 
     figure, ax = plt.subplots(figsize=(12, 6))
@@ -71,7 +78,10 @@ def __plot(
             label="Confidence interval",
         )
     ax.set_title(title)
-
+    if type(ground_truth_series) is pd.DataFrame:
+        ground_truth_series = ground_truth_series.iloc[:, 0]
+    print(f"ground_truth_series.max() = {ground_truth_series.max()}")
+    print(f"prediction_series.max() = {prediction_series.max()}")
     ax.set_ylim(bottom=0, top=1.1 * max(ground_truth_series.max(), prediction_series.max()))
 
     ax.legend()

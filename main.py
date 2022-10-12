@@ -20,6 +20,7 @@ from predictions.prophet import prophet
 from predictions.FCNN import fcnn
 from predictions.FCNN_embedding import fcnn_embedding
 from predictions.SES import ses
+from predictions.tsetlin_machine import tsetlin_machine
 from measurements.get_metrics import get_metrics
 from measurements.store_metrics import store_metrics
 from plots.comparison_plot import comparison_plot
@@ -47,6 +48,7 @@ __predictors: dict[str, Predict[Dataset, Result]] = {
     "SARIMA": sarima,
     "MA": ma,
     "HoltWinters": holt_winters,
+    "TsetlinMachine": tsetlin_machine,
 }
 
 __testset_size = 0.2
@@ -97,24 +99,25 @@ def generate_predictions(methods: list[str], datasets: list[str]):
 
 
 __datasets = [
-    # "india_pollution", 
-    # "stock_prices", 
+    "india_pollution", 
+    "stock_prices", 
     "airline_passengers",
-    # "list_of_tuples",
-    # "sun_spots",
+    "list_of_tuples",
+    "sun_spots",
     ]
 
 __methods = [
     # "MA",
     # "AR",
     # "linear_regression", 
-    "ARIMA",
+    # "ARIMA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
     # "SES",
     # "HoltWinters",
     # "SARIMA",
+    "TsetlinMachine",
     ]
 
 
