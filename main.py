@@ -99,11 +99,11 @@ def generate_predictions(methods: list[str], datasets: list[str]):
 
 
 __datasets = [
-    # "india_pollution", 
-    # "stock_prices", 
+    "india_pollution", 
+    "stock_prices", 
     "airline_passengers",
-    # "list_of_tuples",
-    # "sun_spots",
+    "list_of_tuples",
+    "sun_spots",
     ]
 
 __methods = [

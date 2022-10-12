@@ -115,13 +115,21 @@ included in the Tsetlin Machine Python library. The Tsetlin Machine Python
 library is available at: 
 https://github.com/cair/pyTsetlinMachine
 
+The T parameter is the number of states that the Tsetlin Machine has. In a regression
+Tsetlin Machine, with a continuous output, the T parameter is calculated as follows:
+T = 1 + (max - min) / 2 * s
 
+where max is the maximum value of the output and min is the minimum value of the output.
+s is the number of states per unit of the output. The default value of s is 25,
+though a rule of thumb is to use a value of s that is equal to the number of
+states that the Tsetlin Machine has.
 
 """
 
 from typing import Tuple, TypeVar
 
 import pandas as pd
+import numpy as np
 
 import tsfresh
 from tsfresh.feature_extraction import EfficientFCParameters
@@ -144,8 +152,18 @@ __test_size: float = 0.2
 __number_of_epochs: int = 100
 
 __number_of_clauses: int = 100
-__s: float = 1.9
+__s: float = 1.9 # s represents the number of states per unit of the output
 __number_of_state_bits: int = 2
+
+
+def _add_month_and_year_columns(data: Dataset) -> pd.DataFrame:
+    """
+    Add month and year columns to a dataframe.
+    """
+    df = data.values
+    df["month"] = df.index.month
+    df["year"] = df.index.year
+    return df
 
 
 def __add_ts_fresh_features_to_data(data: Dataset) -> pd.DataFrame:
@@ -155,14 +173,13 @@ def __add_ts_fresh_features_to_data(data: Dataset) -> pd.DataFrame:
     Output is a pandas DataFrame.
     """
     logging.info("Adding tsfresh features to data")
-    print(f"column id: {data.subset_column_name}")
-    print(f"sort by: {data.values.index.name}")
-    print(f"sample of raw data: {data.values.head()}")
     tsf_settings = EfficientFCParameters()
     tsf_settings.disable_progressbar = False
     data_with_features = tsfresh.extract_features(
-        data.values,
+        data.values.reset_index(drop=False),
         column_value=data.subset_column_name,
+        column_sort=data.values.index.name,
+        column_id=data.subset_column_name,
         default_fc_parameters=tsf_settings,
     )
 
@@ -179,59 +196,75 @@ def __binarize_data(data: pd.DataFrame) -> pd.DataFrame:
     """
     logging.info("Binarizing the data...")
     binarizer = Binarizer(max_bits_per_feature=10)
-    print(f"Data before binarization: {data.head()}")
-    binarizer.fit(data)
-    return binarizer.transform(data)
+    np_array_version_of_data = np.array(data)
+    binarizer.fit(np_array_version_of_data)
+    binarized_data_array = binarizer.transform(np_array_version_of_data)
+    new_binarized_columns = [
+        f"binarized_{i}" for i in range(binarized_data_array.shape[1])
+    ]
+    return pd.DataFrame(binarized_data_array, columns=new_binarized_columns, index=data.index)
 
 
 def __split_data(
     data: Dataset,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Split data into training and test sets."""
-    data_with_ts_fresh_features = __add_ts_fresh_features_to_data(data)
-    binarized_data = __binarize_data(data_with_ts_fresh_features)
+    data_with_extra_features = _add_month_and_year_columns(data)
+    x_data = data_with_extra_features.drop(columns=[data.subset_column_name])
+    y_data = data_with_extra_features[[data.subset_column_name]]
+    
+    binarized_x_data = __binarize_data(x_data)
 
     logging.info("Splitting data into training and test sets...")
-    print(f"binarized_data.shape = {binarized_data.shape}")
-    print(f" binarized_data.head() = {binarized_data.head()}")
+    
     return train_test_split(
-        binarized_data, test_size=__test_size, shuffle=False
+        binarized_x_data, y_data, test_size=__test_size, shuffle=False
     )
 
 
-def __create_tsetlin_machine_regression_model() -> RegressionTsetlinMachine:
+def __create_tsetlin_machine_regression_model(data:Dataset) -> RegressionTsetlinMachine:
     """
     Create a Tsetlin Machine regression model for time series prediction.
     """
+    logging.info("Creating Tsetlin Machine regression model...")
+    data_targets = data.values[data.subset_column_name]
+    number_of_states = int(1 + (data_targets.max() - data_targets.min()) / (2 * __s))
+    logging.info(f"Number of states T = {number_of_states}")
     tm = RegressionTsetlinMachine(
-        __number_of_clauses,
-        __s,
-        __number_of_state_bits,
-        number_of_targets=1,
+        number_of_clauses= __number_of_clauses,
+        T=number_of_states,
+        s=__s,
+        number_of_state_bits=__number_of_state_bits,
         weighted_clauses=True,
     )
     return tm
 
 
-def __train_tsetlin_machine_regression_model(t_model, X_train, y_train):
+def __train_tsetlin_machine_regression_model(t_model: Model, x_train: pd.DataFrame, y_train: pd.DataFrame) -> Model:
     """
     Train a Tsetlin Machine regression model.
     """
-    t_model.fit(X_train, y_train, epochs=__number_of_epochs)
+    #convert to numpy array
+    x_train = np.array(x_train)
+    #convert to numpy array with 1 dimension
+    y_train = np.array(y_train).reshape(-1)
+    t_model.fit(x_train, y_train, epochs=__number_of_epochs)
     return t_model
 
 
 def __predict_with_tsetlin_machine_regression_model(
-    model: Model, data: Dataset, X_test: pd.DataFrame
+    model: Model, data: Dataset, x_test: pd.DataFrame, y_test: pd.DataFrame
 ) -> PredictionData:
     """
     Predict with a Tsetlin Machine regression model.
     """
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with a Tsetlin Machine Regression Model"
+    #convert to numpy array
+    x_test_array = np.array(x_test)
     return PredictionData(
-        values=model.predict(X_test),
+        values=model.predict(x_test_array),
         prediction_column_name=None,
-        ground_truth_values=X_test,
+        ground_truth_values=y_test,
         confidence_columns=None,
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/tsetlin_machine_regression_model/",
