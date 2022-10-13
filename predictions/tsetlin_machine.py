@@ -124,6 +124,8 @@ s is the number of states per unit of the output. The default value of s is 25,
 though a rule of thumb is to use a value of s that is equal to the number of
 states that the Tsetlin Machine has.
 
+The grid search is used to find the best parameters for the Tsetlin Machine.
+
 """
 
 from typing import Tuple, TypeVar
@@ -158,11 +160,14 @@ __number_of_state_bits: int = 2
 
 def _add_month_and_year_columns(data: Dataset) -> pd.DataFrame:
     """
-    Add month and year columns to a dataframe.
+    Add normalised month and year (and potentially week) columns to a dataframe.
     """
     df = data.values
-    df["month"] = df.index.month
-    df["year"] = df.index.year
+    # Add month and year columns, normalising to start from 0
+    df["month"] = df.index.month - 1
+    df["year"] = df.index.year - df.index.year.min()
+    if data.time_unit == "days" | data.time_unit == "weeks":
+        df["week"] = df.index.week - 1
     return df
 
 
