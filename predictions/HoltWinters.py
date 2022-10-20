@@ -134,8 +134,12 @@ def __exp_smoothing_forecast(data: Dataset, config: dict) -> np.array:
     # define model
     training_data = np.array(__get_training_set(data).values)
     model = ExponentialSmoothing(
-        training_data, trend=t, damped_trend=d, seasonal=s, 
-        seasonal_periods=p, use_boxcox=b
+        training_data,
+        trend=t,
+        damped_trend=d,
+        seasonal=s,
+        seasonal_periods=p,
+        use_boxcox=b,
     )
 
     # fit model
@@ -146,15 +150,18 @@ def __exp_smoothing_forecast(data: Dataset, config: dict) -> np.array:
     )
     return yhat
 
+
 def __measure_rmse(actual: Dataset, predicted: np.array) -> float:
     return np.sqrt(np.mean((actual.values - predicted) ** 2))
+
 
 def __measure_mape(actual: Dataset, predicted: np.array) -> float:
     return np.mean(np.abs((actual.values - predicted) / actual.values)) * 100
 
+
 def __validation(data: Dataset, config: dict) -> float:
     """Validation for uni-variate data."""
-    test =  __get_test_set(data)
+    test = __get_test_set(data)
     yhat = __exp_smoothing_forecast(data, config)
     # estimate prediction error
     error = __measure_mape(test, yhat)
@@ -163,7 +170,10 @@ def __validation(data: Dataset, config: dict) -> float:
 
 
 def __score_model(
-    data: Dataset, config: dict, func: Callable[[Dataset, dict], float], debug: bool = False
+    data: Dataset,
+    config: dict,
+    func: Callable[[Dataset, dict], float],
+    debug: bool = False,
 ) -> Tuple[float, dict]:
     """Score a model, return None on failure."""
     result = None
@@ -188,10 +198,11 @@ def __score_model(
     return (result, config)
 
 
-
-def __grid_search_configs(data: Dataset, cfg_list: list, parallel:bool = True):
+def __grid_search_configs(
+    data: Dataset, cfg_list: list, parallel: bool = True
+) -> List[Tuple[float, dict]]:
     """Grid search the configs."""
-    scores = None
+    scores = list()
     # use fork to avoid memory issues with multiprocessing
     if parallel:
         scores = Parallel(n_jobs=-1, backend="multiprocessing")(
@@ -200,17 +211,18 @@ def __grid_search_configs(data: Dataset, cfg_list: list, parallel:bool = True):
     else:
         scores = [__score_model(data, cfg, __validation) for cfg in cfg_list]
 
+    # sort configs by error, asc
+    scores.sort(key=lambda tup: tup[0])
+
     print(f"Printing top 3 config scores")
     for cfg, error in scores[:3]:
         print(f" > {cfg}, error = {error}")
 
-
-
     # remove empty results
     scores = [r for r in scores if r[0] is not None]
-    # sort configs by error, asc
-    scores.sort(key=lambda tup: tup[0])
+
     return scores
+
 
 def __exp_smoothing_configs(seasonal: List[int]) -> list:
     """Create a set of exponential smoothing configs to try."""
@@ -233,9 +245,9 @@ def __exp_smoothing_configs(seasonal: List[int]) -> list:
             if t is None and null_trend_done:
                 continue
             for s in s_params:
-                for  p in p_params:
+                for p in p_params:
                     if s is None and p:
-                        p= None
+                        p = None
                         null_seasonal_done = True
                     if s is None and null_seasonal_done:
                         continue
@@ -244,7 +256,8 @@ def __exp_smoothing_configs(seasonal: List[int]) -> list:
                             cfg = [t, d, s, p, b, r]
                             model_configs.append(cfg)
     return model_configs
-        
+
+
 def __get_seasonal_period_list(data: Dataset) -> List[int]:
     """Get a list of seasonal periods to try."""
     if data.seasonality is None:
@@ -263,7 +276,10 @@ def __get_seasonal_period_list(data: Dataset) -> List[int]:
         else:
             return None
 
-def __get_best_model(data: Dataset, parallel: bool = True) -> Tuple[ExponentialSmoothing, dict]:
+
+def __get_best_model(
+    data: Dataset, parallel: bool = True
+) -> Tuple[ExponentialSmoothing, dict]:
     """Get the best model for the data."""
     # define config lists
     cfg_list = __exp_smoothing_configs(seasonal=__get_seasonal_period_list(data))
@@ -280,23 +296,29 @@ def __get_best_model(data: Dataset, parallel: bool = True) -> Tuple[ExponentialS
 
     # fit model to training data
     model = ExponentialSmoothing(
-        __get_training_set(data).values, 
-        trend=best_cfg[0], damped_trend=best_cfg[1], seasonal=best_cfg[2],
-        seasonal_periods=best_cfg[3], use_boxcox=best_cfg[4]
+        __get_training_set(data).values,
+        trend=best_cfg[0],
+        damped_trend=best_cfg[1],
+        seasonal=best_cfg[2],
+        seasonal_periods=best_cfg[3],
+        use_boxcox=best_cfg[4],
     )
     model_fit = model.fit(optimized=True, remove_bias=best_cfg[5])
     return model_fit, best_cfg
 
 
-def __get_forecast(data: Dataset, model: ExponentialSmoothing, best_config: dict) -> np.array:
+def __get_forecast(
+    data: Dataset, model: ExponentialSmoothing, best_config: dict
+) -> PredictionData:
     """Get the forecast for the data."""
     title = f"Forecast for {data.name} {data.subset_column_name} using Holt-Winters Exponential Smoothing"
-    
+
     print(f"best config found for {data.name} {data.subset_column_name}: {best_config}")
-    
+
     # make multi-step forecast
     yhat = model.predict(
-        len(__get_training_set(data).values), len(__get_training_set(data).values) + __number_of_steps(data) - 1
+        len(__get_training_set(data).values),
+        len(__get_training_set(data).values) + __number_of_steps(data) - 1,
     )
     return PredictionData(
         values=yhat,
@@ -308,8 +330,6 @@ def __get_forecast(data: Dataset, model: ExponentialSmoothing, best_config: dict
         plot_file_name=f"{data.subset_column_name}_forecast",
         model_config=best_config,
     )
-
-
 
 
 holt_winters = method(__get_best_model, __get_forecast)

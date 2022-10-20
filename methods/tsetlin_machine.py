@@ -18,23 +18,19 @@ Model = TypeVar("Model")
 Prediction = TypeVar("Prediction")
 
 def tsetlin_machine(
-    split_data: Callable[[Dataset], Tuple[Data, Data, Data, Data]],
-    create_tsetlin_machine_regression_model: Callable[[Dataset], Model],
-    train_tsetlin_machine_regression_model: Callable[[Model, Data, Data], Model],
-    predict_tsetlin_machine_regression_model: Callable[[Model, Dataset, Data, Data], Prediction],
+    get_best_model: Callable[[Dataset, bool], Tuple[Model, dict]],
+    get_forecast: Callable[[Dataset, Model, dict], Prediction],
 ) -> Predict[Dataset, PredictionData]:
     """
     Return a function that takes a dataset and returns a prediction.
     """
-    def predict(dataset: Dataset) -> PredictionData:
+    def predict(dataset: Dataset, parallel: bool = False) -> PredictionData:
         """
         Return a prediction for the given dataset.
         """
-        train_data, test_data, train_labels, test_labels = split_data(dataset)
-        model = create_tsetlin_machine_regression_model(dataset)
-        model = train_tsetlin_machine_regression_model(model, train_data, train_labels)
-        prediction = predict_tsetlin_machine_regression_model(model, dataset, test_data, test_labels)
-        return prediction
+        logging.info("Tsetlin Machine Regression")
+        model, params = get_best_model(dataset, parallel)
+        return get_forecast(dataset, model, params)
     return predict
 
 

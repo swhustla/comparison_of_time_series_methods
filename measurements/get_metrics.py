@@ -26,7 +26,10 @@ def __round_to_4dp(value: float) -> float:
     return round(value, 4)
 
 def __metrics(prediction: PredictionData) -> Dict[str, float]:
-    ground_truth = prediction.ground_truth_values.values
+    if type(prediction.ground_truth_values) == np.ndarray:
+        ground_truth = prediction.ground_truth_values
+    else:
+        ground_truth = prediction.ground_truth_values.values
     if prediction.prediction_column_name is not None:
         prediction = prediction.values[prediction.prediction_column_name].values
     else:
