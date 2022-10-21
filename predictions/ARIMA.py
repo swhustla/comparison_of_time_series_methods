@@ -29,7 +29,7 @@ next 20% of the data.
 
 """
 
-from typing import TypeVar
+from typing import TypeVar, Generic, List, Tuple, Dict, Any, Optional, Union
 from methods.ARIMA import arima as method
 import pandas as pd
 
@@ -51,6 +51,8 @@ import measurements.get_metrics as get_metrics
 
 Model = TypeVar("Model")
 
+__test_size: float = 0.2
+
 
 def __number_of_steps(data: Dataset) -> int:
     return int(len(data.values) // 5)
@@ -62,6 +64,23 @@ def __get_training_set(data: Dataset) -> pd.DataFrame:
 
 def __get_test_set(data: Dataset) -> pd.DataFrame:
     return data.values[-__number_of_steps(data) :][data.subset_column_name]
+
+
+def __get_train_and_test_sets(data: Dataset) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Prepare the data for the ARIMA model"""
+    training_set = __get_training_set(data)
+    test_set = __get_test_set(data)
+    return training_set, test_set
+
+
+def __get_train_validation_and_test_sets(
+    data: Dataset,
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Prepare the data for the ARIMA model"""
+    training_set, test_set = __get_train_and_test_sets(data)
+    validation_set = training_set[-__number_of_steps(data) :]
+    training_set = training_set[: -__number_of_steps(data)]
+    return training_set, validation_set, test_set
 
 
 def __get_period_of_seasonality(data: Dataset) -> int:
@@ -76,6 +95,7 @@ def __get_period_of_seasonality(data: Dataset) -> int:
         return 52
     elif data.time_unit == "days":
         return 365
+
 
 def __get_seasonal_parameter(data: Dataset) -> int:
     """Get the seasonal parameter for the ARIMA model"""
@@ -102,12 +122,18 @@ def __get_differencing_term(data: Dataset) -> int:
     """Get the differencing term for the ARIMA model"""
     return ndiffs(data.values[data.subset_column_name], test="adf")
 
-def __evaluate_arima_model(data: Dataset, arima_order: tuple) -> Result:
+
+def __evaluate_arima_model(
+    data: Dataset, arima_order: tuple, use_validation: bool
+) -> Result:
     """Evaluate an ARIMA model for a given order (p,d,q) and return RMSE"""
-    # prepare training dataset
-    training_set = __get_training_set(data)
-    # prepare test dataset
-    test_set = __get_test_set(data)
+    # prepare training and test datasets
+    if use_validation:
+        training_set, validation_set, test_set = __get_train_validation_and_test_sets(
+            data
+        )
+    else:
+        training_set, test_set = __get_train_and_test_sets(data)
     # make predictions
     model = STLForecast(
         training_set,
@@ -116,13 +142,20 @@ def __evaluate_arima_model(data: Dataset, arima_order: tuple) -> Result:
         model_kwargs={"order": arima_order},
     )
     model_fit = model.fit()
-    yhat = model_fit.forecast(len(test_set))
-    # calculate out of sample error 
-    mse = mean_squared_error(test_set, yhat)
-    return mse
+    if use_validation:
+        predictions = model_fit.forecast(len(validation_set))
+        error = mean_squared_error(validation_set, predictions)
+    else:
+        predictions = model_fit.forecast(len(test_set))
+        error = mean_squared_error(test_set, predictions)
+
+    # return out of sample error
+    return error
 
 
-def __evaluate_models(data: Dataset, p_values: list, d_values: list, q_values: list) -> Result:
+def __evaluate_models(
+    data: Dataset, p_values: list, d_values: list, q_values: list
+) -> Result:
     """Evaluate combinations of p, d and q values for an ARIMA model"""
     best_score, best_cfg = float("inf"), None
     for p in p_values:
@@ -130,7 +163,9 @@ def __evaluate_models(data: Dataset, p_values: list, d_values: list, q_values: l
             for q in q_values:
                 order = (p, d, q)
                 try:
-                    mse = __evaluate_arima_model(data, order)
+                    mse = __evaluate_arima_model(
+                        data, arima_order=order, use_validation=True
+                    )
                     if mse < best_score:
                         best_score, best_cfg = mse, order
                     logging.info(f"ARIMA{order} MSE={mse}")
@@ -140,14 +175,16 @@ def __evaluate_models(data: Dataset, p_values: list, d_values: list, q_values: l
     logging.info(f"Best ARIMA{best_cfg} MSE={best_score}")
     return best_cfg
 
-    
+
 __p_values = [0, 1, 2, 4, 6, 8, 10]
 __d_values = [0, 1, 2]
 __q_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
+
 def __get_best_model_order(data: Dataset) -> Model:
     """Get the best model order for the ARIMA model"""
     return __evaluate_models(data, __p_values, __d_values, __q_values)
+
 
 def __fit_auto_regressive_model(data: Dataset) -> Model:
     """Fit the best ARIMA model to the first 80% of the data"""
