@@ -99,7 +99,7 @@ def generate_predictions(methods: list[str], datasets: list[str]):
 
 
 __datasets = [
-    # "india_pollution", 
+    "india_pollution", 
     "stock_prices", 
     # "airline_passengers",
     "list_of_tuples",
@@ -110,14 +110,14 @@ __methods = [
     # "MA",
     # "AR",
     # "linear_regression", 
-    # "ARIMA",
+    "ARIMA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
     # "SES",
     # "HoltWinters",
     # "SARIMA",
-    "TsetlinMachine",
+    # "TsetlinMachine",
     ]
 
 

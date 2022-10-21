@@ -217,7 +217,10 @@ def __binarize_data(data: pd.DataFrame) -> pd.DataFrame:
         binarized_data_array, columns=new_binarized_columns, index=data.index
     )
 
-def __prepare_training_data(x_train: pd.DataFrame, y_train: pd.DataFrame) -> Tuple[np.array, np.array]:
+
+def __prepare_training_data(
+    x_train: pd.DataFrame, y_train: pd.DataFrame
+) -> Tuple[np.array, np.array]:
     """
     Prepare the training data for the Tsetlin Machine.
     """
@@ -227,6 +230,32 @@ def __prepare_training_data(x_train: pd.DataFrame, y_train: pd.DataFrame) -> Tup
     # convert to numpy array with 1 dimension
     y_train = np.array(y_train).reshape(-1)
     return x_train, y_train
+
+
+def __get_train_and_test_sets(
+    x_data: pd.DataFrame, y_data: pd.DataFrame
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Get the training and test sets."""
+    x_train, x_test, y_train, y_test = train_test_split(
+        x_data, y_data, test_size=__test_size, shuffle=False
+    )
+    x_train, y_train = __prepare_training_data(x_train, y_train)
+    return x_train, x_test, y_train, y_test
+
+
+def __get_train_validation_and_test_sets(
+    x_data: pd.DataFrame, y_data: pd.DataFrame
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Get the training, validation and test sets."""
+    x_train, x_test, y_train, y_test = train_test_split(
+        x_data, y_data, test_size=__test_size, shuffle=False
+    )
+    x_train, x_validation, y_train, y_validation = train_test_split(
+        x_train, y_train, test_size=__test_size, shuffle=False
+    )
+    x_train, y_train = __prepare_training_data(x_train, y_train)
+    
+    return x_train, x_validation, x_test, y_train, y_validation, y_test
 
 
 def __prepare_and_split_data(
@@ -242,20 +271,11 @@ def __prepare_and_split_data(
 
     logging.info("Splitting data into training, validation and test sets...")
 
-    x_train, x_test, y_train, y_test = train_test_split(
-        binarized_x_data, y_data, test_size=__test_size, shuffle=False
-    )
-
     if with_validation:
-        x_train, x_val, y_train, y_val = train_test_split(
-            x_train, y_train, test_size=__test_size, shuffle=False
-        )
-        x_train, y_train = __prepare_training_data(x_train, y_train)
-        return x_train, x_val, x_test, y_train, y_val, y_test
+        return __get_train_validation_and_test_sets(binarized_x_data, y_data)
 
     else:
-        x_train, y_train = __prepare_training_data(x_train, y_train)
-        return x_train, x_test, y_train, y_test
+        return __get_train_and_test_sets(binarized_x_data, y_data)
 
 
 def __create_tsetlin_machine_regression_model(
@@ -462,7 +482,6 @@ def __get_best_model(
     return (best_model, best_config)
 
 
-
 def __train_tsetlin_machine_regression_model(
     t_model: Model, x_train: pd.DataFrame, y_train: pd.DataFrame
 ) -> Model:
@@ -495,8 +514,7 @@ def __get_forecast(
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/tsetlin_machine_regression_model/",
         plot_file_name=f"{data.subset_column_name}_forecast",
-     )
-
+    )
 
 
 def __predict_with_tsetlin_machine_regression_model(
