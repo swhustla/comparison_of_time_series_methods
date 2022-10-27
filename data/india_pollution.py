@@ -1,7 +1,7 @@
 """Load in India Pollution data."""
 
 from pathlib import Path
-from typing import TypeVar, Callable, Dict, Tuple
+from typing import TypeVar, Callable, Dict, Tuple, List, Generator, Optional, Union
 import pandas as pd
 
 from geopy import geocoders
@@ -46,7 +46,7 @@ __column_choice = ["PM2.5", "PM10", "O3", "CO", "SO2", "NO2"]
 __city_choice = ["Delhi"]
 
 
-def __preprocess(dataframe: Data) -> Data:
+def __preprocess(dataframe: Data) -> pd.DataFrame:
     """Preprocess the data."""
     for column in __column_choice:
         dataframe[column] = dataframe[column].interpolate(method="spline", order=1)
@@ -55,9 +55,10 @@ def __preprocess(dataframe: Data) -> Data:
     return dataframe
 
 
-def __resample(dataframe: Data) -> Data:
+def __resample(dataframe: Data) -> pd.DataFrame:
     """Resample the data to weekly."""
     return dataframe.resample("w").mean()
+
 
 def __add_inferred_freq_to_index(dataframe: pd.DataFrame) -> pd.DataFrame:
     """Add an inferred frequency to the index."""
@@ -74,20 +75,51 @@ def get_lat_long_for_city(city: list) -> Dict[str, Tuple[float, float]]:
         dict_of_lat_long[city_this] = (location.latitude, location.longitude)
     return dict_of_lat_long
 
-def india_pollution(city: list = __city_choice, pollution_columns : list = __column_choice, get_lat_long: bool = False) -> Dataset:
+
+def get_list_of_city_names(dataframe: pd.DataFrame) -> list:
+    """Get a list of city names."""
+    return dataframe.City.unique().tolist()
+
+
+def india_pollution(
+    city_list: list = __city_choice,
+    pollution_columns: list = __column_choice,
+    get_lat_long: bool = False,
+) -> Generator[Dataset, None, None]:
     """Load in India Pollution data."""
     path = __download_if_needed()
     data = __load_data(path)
+
     if get_lat_long:
-        lat_long_dict = get_lat_long_for_city(city)
-        for city_this in city:
-            data.loc[data.City == city_this, "Latitude"] = lat_long_dict[city_this][0]
-            data.loc[data.City == city_this, "Longitude"] = lat_long_dict[city_this][1]
+        dataframe_all_cities = pd.DataFrame()
+
+        lat_long_dict = get_lat_long_for_city(city_list)
+        for city_this in city_list:
+            lat_long_dataframe = data[data.City == city_this][pollution_columns]
+            lat_long_dataframe = __preprocess(lat_long_dataframe)
+            lat_long_dataframe = __resample(lat_long_dataframe)
+            lat_long_dataframe = __add_inferred_freq_to_index(lat_long_dataframe)
+            lat_long_dataframe.loc[:, "Latitude"] = lat_long_dict[city_this][0]
+            lat_long_dataframe.loc[:, "Longitude"] = lat_long_dict[city_this][1]
+            lat_long_dataframe.loc[:, "City"] = city_this
+
+            dataframe_all_cities = pd.concat(
+                [dataframe_all_cities, lat_long_dataframe], axis=0
+            )
         # store the data to data folder
-        data.to_csv("data/india_pollution_with_lat_long.csv")
-    
-    data = data[data["City"].isin(city)][pollution_columns]
-    data = __preprocess(data)
-    data = __resample(data)
-    data = __add_inferred_freq_to_index(data)
-    return Dataset("Indian city pollution", data, "weeks", pollution_columns, city[0], pollution_columns[0], True)
+        dataframe_all_cities.to_csv("data/india_pollution_multi_city.csv")
+
+    for city in city_list:
+        data_this_city = data[data["City"].isin([city])][pollution_columns]
+        data_this_city = __preprocess(data_this_city)
+        data_this_city = __resample(data_this_city)
+        data_this_city = __add_inferred_freq_to_index(data_this_city)
+        yield Dataset(
+            "Indian city pollution",
+            data_this_city,
+            "weeks",
+            pollution_columns,
+            city,
+            pollution_columns[0],
+            True,
+        )
