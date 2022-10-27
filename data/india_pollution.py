@@ -1,8 +1,10 @@
 """Load in India Pollution data."""
 
 from pathlib import Path
-from typing import TypeVar, Callable
+from typing import TypeVar, Callable, Dict, Tuple
 import pandas as pd
+
+from geopy import geocoders
 
 Data = TypeVar("Data", contravariant=True)
 from data.dataset import Dataset
@@ -62,10 +64,28 @@ def __add_inferred_freq_to_index(dataframe: pd.DataFrame) -> pd.DataFrame:
     dataframe.index.freq = dataframe.index.inferred_freq
     return dataframe
 
-def india_pollution(city: list = __city_choice, pollution_columns : list = __column_choice) -> Dataset:
+
+def get_lat_long_for_city(city: list) -> Dict[str, Tuple[float, float]]:
+    """Get the latitude and longitude for the given cities."""
+    geolocator = geocoders.Nominatim(user_agent="india-pollution")
+    dict_of_lat_long = {}
+    for city_this in city:
+        location = geolocator.geocode(city_this)
+        dict_of_lat_long[city_this] = (location.latitude, location.longitude)
+    return dict_of_lat_long
+
+def india_pollution(city: list = __city_choice, pollution_columns : list = __column_choice, get_lat_long: bool = False) -> Dataset:
     """Load in India Pollution data."""
     path = __download_if_needed()
     data = __load_data(path)
+    if get_lat_long:
+        lat_long_dict = get_lat_long_for_city(city)
+        for city_this in city:
+            data.loc[data.City == city_this, "Latitude"] = lat_long_dict[city_this][0]
+            data.loc[data.City == city_this, "Longitude"] = lat_long_dict[city_this][1]
+        # store the data to data folder
+        data.to_csv("data/india_pollution_with_lat_long.csv")
+    
     data = data[data["City"].isin(city)][pollution_columns]
     data = __preprocess(data)
     data = __resample(data)

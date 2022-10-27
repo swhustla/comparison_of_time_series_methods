@@ -17,15 +17,24 @@ Prediction = TypeVar("Prediction")
 
 from .predict import Predict
 
-def sarima(
-    fit_model: Callable[[Dataset], Model],
-    forecast: Callable[[Model, Dataset], PredictionData],
-) -> Predict[Dataset, PredictionData]:
-    def predict(
-        data: Dataset,
-    ) -> Prediction:
 
-        trained_model = fit_model(data)
-        return forecast(trained_model, data)
+
+def sarima(
+    get_best_sarima_model: Callable[[Dataset], Model],
+    forecast: Callable[[Model, int], Prediction]
+) -> Predict[Dataset, PredictionData]:
+    """
+    Returns a SARIMA prediction method.
+    """
+    def predict(dataset: Dataset) -> PredictionData:
+        """
+        Predict the given dataset using the SARIMA method.
+        """
+        logging.info("Starting SARIMA prediction")
+        model = get_best_sarima_model(dataset)
+        prediction = forecast(model, dataset)
+        logging.info("Finished SARIMA prediction")
+        return prediction
 
     return predict
+

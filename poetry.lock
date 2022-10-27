@@ -538,6 +538,34 @@ python-versions = ">=3.6.0"
 numpy = ["numpy (>1.0.0)"]
 
 [[package]]
+name = "geographiclib"
+version = "1.52"
+description = "The geodesic routines from GeographicLib"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "geopy"
+version = "2.2.0"
+description = "Python Geocoding Toolbox"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+geographiclib = ">=1.49,<2"
+
+[package.extras]
+timezone = ["pytz"]
+requests = ["requests (>=2.16.2)", "urllib3 (>=1.24.2)"]
+dev-test = ["sphinx", "pytest (>=3.10)", "pytest-aiohttp", "coverage", "async-generator"]
+dev-lint = ["isort (>=5.6.0,<5.7.0)", "flake8 (>=3.8.0,<3.9.0)", "async-generator"]
+dev-docs = ["sphinx-rtd-theme (>=0.5.0)", "sphinx-issues", "sphinx", "readme-renderer"]
+dev = ["sphinx-rtd-theme (>=0.5.0)", "sphinx-issues", "sphinx", "readme-renderer", "pytest (>=3.10)", "pytest-aiohttp", "isort (>=5.6.0,<5.7.0)", "flake8 (>=3.8.0,<3.9.0)", "coverage", "async-generator"]
+aiohttp = ["aiohttp"]
+
+[[package]]
 name = "google-auth"
 version = "2.12.0"
 description = "Google Authentication Library"
@@ -2372,7 +2400,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "flake8 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.10"
-content-hash = "f485cf39a8c31fa433688a17c3ec961df9ec7e6b6f46c40893bf5202497a1dfd"
+content-hash = "514ba2376f7b483c201c4e3c668442a73b7d83bc6915a8bbcebb3e5c3c66036f"
 
 [metadata.files]
 absl-py = []
@@ -2550,6 +2578,8 @@ gast = [
     {file = "gast-0.4.0.tar.gz", hash = "sha256:40feb7b8b8434785585ab224d1568b857edb18297e5a3047f1ba012bc83b42c1"},
 ]
 gdal = []
+geographiclib = []
+geopy = []
 google-auth = []
 google-auth-oauthlib = [
     {file = "google-auth-oauthlib-0.4.6.tar.gz", hash = "sha256:a90a072f6993f2c327067bf65270046384cda5a8ecb20b94ea9a687f1f233a7a"},
