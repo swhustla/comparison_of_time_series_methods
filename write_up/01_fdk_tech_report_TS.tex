@@ -1,5 +1,5 @@
 % ----- DO NOT CHANGE WITHIN THIS BLOCK ---------------------------------------------
-\documentclass[manuscript,screen,nonacm,11pt]{acmart}                                                       																
+\documentclass[manuscript,screen,nonacm]{acmart}                                              																
 %% \BibTeX command to typeset BibTeX logo in the docs														
 \AtBeginDocument{%																											
   \providecommand\BibTeX{{%																							
@@ -95,8 +95,29 @@ There are many time series prediction methods, and they can be broadly
 categorized into three groups: \textbf{statistical or classic}, \textbf{probabilistic} and \textbf{machine learning}.
 \subsection{Statistical or Classic Methods}
 Statistical or classical methods can be broken into two families: \textbf{moving average} and \textbf{Auto regressives}.
+
+
+
+
+\subsection*{Moving Average Methods}
 Moving average methods are based on the assumption that the future values of a time series can be predicted by averaging the past values.
-Auto regressive type methods are based on the assumption that the future values of a time series can be predicted by a linear combination of the past values.
+
+\begin{itemize}
+\item Simple Moving Average (SMA): The SMA is the average of the last $n$ values of the time series.
+\item Simple Exponential Smoothing (SES): The SES is a weighted average of  the last $n$ values of the time series, where the weights decrease exponentially.
+\item Holt-Winters: The Holt-Winters method is an extension of the SES method, where the weights decrease exponentially, and the weights are also adjusted for the trend and seasonality of the time series.
+\end{itemize}
+
+The advantage of moving average methods is that they are easy to implement, and they are fast. 
+They are often used as a baseline for more complex methods, or as an input feature for machine learning methods.
+
+\subsubsection{Simple Moving Average (SMA)}
+The SMA is the average of the last $n$ values of the time series.
+\begin{equation}
+\label{eq:sma}
+\hat{y}_{t} = \frac{1}{n} \sum_{i=1}^{n} y_{t-i}
+\end{equation}
+where $\hat{y}_{t}$ is the predicted value at time $t$, $y_{t}$ is the actual value at time $t$, and $n$ is the number of previous values to use in the average.
 
 
 \subsubsection{Simple Exponential Smoothing (SES)}
@@ -119,6 +140,42 @@ where $\hat{y}_{t+h|t}$ is the predicted value of the time series at time $t+h$,
 $\alpha$ is the smoothing factor, and $y_t$ is the actual value of the time series
 at time $t$.
 
+\subsubsection{Holt-Winters Method}
+The Holt-Winters method is an extension of the SES method, and it is used to forecast
+data with a seasonal component. It is a triple exponential smoothing method, and it
+consists of three exponential smoothing equations: one for the level, one for the trend,
+and one for the seasonality.
+
+\begin{equation}
+\label{eq:hw}
+\hat{y}_{t+h|t} = l_t + hb_t + s_{t+h-m(k+1)}
+\end{equation}
+where $l_t$ is the level at time $t$, $b_t$ is the trend at time $t$, $s_{t+h-m(k+1)}$ is the seasonal component at time $t+h-m(k+1)$, $h$ is the forecast horizon, $m$ is the number of periods in a season, and $k$ is the seasonality period.
+
+
+
+
+\subsection{Auto Regressive Methods}
+Auto regressive type methods are based on the assumption that the future values of a time series can be predicted by a linear combination of the past values.
+
+\begin{itemize}
+	\item Auto Regressive model (AR): The AR model is a linear combination of the last $n$ values of the time series.
+	\item Auto Regressive Integrated Moving Average model (ARIMA): The ARIMA model is an extension of the AR model, where the values of the time series are differenced to remove the trend and seasonality.
+	\item Seasonal Auto Regressive Integrated Moving Average model (SARIMA): The SARIMA model is an extension of the ARIMA model, where the values of the time series are differenced to remove the trend and seasonality.
+\end{itemize}
+
+Auto-regressive methods are more complex than moving average methods, and they are slower to compute. Yet they bring better results, particularly when the time series has a trend or seasonality.
+
+
+\subsubsection{Auto Regressive (AR)}
+The AR model is a linear combination of the last $n$ values of the time series.
+\begin{equation}
+\label{eq:ar}
+\hat{y}_{t+h|t} = \sum_{i=1}^n \phi_i y_{t-i}
+\end{equation}
+where $\hat{y}_{t+h|t}$ is the predicted value of the time series at time $t+h$,
+
+
 \subsubsection{Autoregressive Integrated Moving Average (ARIMA)}
 ARIMA stands for AutoRegressive Integrated Moving Average. It was created by Box and Jenkins 
 in 1970, building on techniques used by other statisticians to forecast economic data.
@@ -132,7 +189,7 @@ The ARIMA model is in fact a combination of three models:
 
 The ARIMA model is summarised by this model: $ARIMA(p,d,q)$, where $p$ is the number of lag observations included in the model, $d$ is the number of times that the raw observations are differenced, and $q$ is the size of the moving average window, also called the order of moving average.
 
-\subsection{Seasonal ARIMA (SARIMA)}
+\subsubsection{Seasonal ARIMA (SARIMA)}
 SARIMA is an extension of ARIMA that explicitly supports univariate time series data with a seasonal component.
 
 SARIMA stands for Seasonal AutoRegressive Integrated Moving Average.
@@ -175,9 +232,90 @@ average (t-12), a Q=2 would make use of the first 24 lags of the error
 The trend elements (p, d, q) can be chosen through careful examination 
 of the ACF and PACF plots, looking at correlations of recent lags.
 
+
+\subsection{Regression Models}
+Regression models are used to predict a continuous variable based on one or more predictor variables. The predictor variables can be continuous or categorical. The regression model is a linear combination of the predictor variables.
+
+\begin {itemize}
+\item \textbf{Linear Regression}: The linear regression model is a linear combination of the predictor variables.
+\item \textbf{Decision Tree}: The decision tree model is a tree structure where each node represents a predictor variable, and each leaf node represents a class label.
+\item \textbf{Random Forest}: The random forest model is an ensemble of decision trees.
+\item \textbf{Gradient Boosting}: The gradient boosting model is an ensemble of decision trees, where each tree is trained to correct the errors of the previous tree.
+\item \textbf{Support Vector Machine}: The support vector machine model is a non-linear model that finds a hyperplane that separates the data into classes.
+
+\end{itemize}
+
 \subsubsection{Linear Regression}
 Linear regression is a statistical method for modelling the relationship between a scalar dependent variable $y$ and one or more explanatory variables (or independent variables) denoted $X$.
 If there is a single explanatory variable, the method is referred to as simple linear regression. For more than one explanatory variable, the method is referred to as multiple linear regression.
+
+Linear regression fits a linear model to the data.
+\begin{equation}
+\label{eq:linear_regression}
+y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \dots + \beta_n x_n
+\end{equation}
+where $y$ is the dependent variable, $x_1, x_2, \dots, x_n$ are the independent variables, and $\beta_0, \beta_1, \beta_2, \dots, \beta_n$ are the coefficients.
+
+
+\subsection{Probabilistic Methods}
+Probabilistic methods utilise the probability distribution of the time series to make predictions.
+
+\subsubsection{Facebook Prophet}
+A quick summary of the library is as follows: 
+    Prophet is a procedure for forecasting time series data based on an additive model 
+    where non-linear trends are fit with yearly, weekly, and daily seasonality, plus 
+    holiday effects.
+    It has been used for forecasting retail foot traffic with RMSPE of 25% on a 
+    hold-out set, and for macroeconomic forecasting with MAPE of 2.5% on a hold-out set.
+    It works best with daily periodicity data with at least one year of historical data.
+    Prophet is robust to missing data and shifts in the trend, and typically handles outliers
+    well.
+    A great introduction to Prophet can be found on Towards Data Science:
+    \url{https://towardsdatascience.com/an-end-to-end-project-on-time-series-analysis-and-forecasting-with-python-4835e6bf050b}
+
+
+Downsides of Prophet:
+\begin{itemize}
+	\item It is not very flexible. It is not possible to add custom regressors.
+	\item It is not very transparent. It is not possible to see the underlying model.
+	\item Whilst it is very easy to use, it is not very easy to tune.
+\end{itemize}
+
+
+
+\subsection{Neural Network Methods}
+Neural network methods use neural networks ( NNs) to make predictions. 
+NNs are a class of machine learning algorithms that are loosely inspired by the structure and function of the brain; composed of artificial neurons that are connected together. Each neuron receives input from other neurons, and passes its output to other neurons. The output of each neuron is a function of the sum of its inputs. The output of a neuron is calculated using an activation function. The activation function is a non-linear function that transforms the output of the neuron. The output of a neuron is calculated as:
+
+
+\subsubsection{Fully Connected Neural Network (FCNN)}
+A fully connected neural network is a neural network where each node in one
+    layer is connected to each node in the next layer.
+
+	This approach uses a fully connected neural network with an embedding layer 
+	to handle categorical data.
+	A neural network is a machine learning model that is inspired by the human brain.
+	It consists of multiple layers of neurons that are connected to each other.
+	The neurons in a layer are connected to all neurons in the next layer.
+	
+	The model has 3 inputs: the continuous data, the month and the year.
+	\begin{itemize}
+		\item The month data is categorical, so it is passed through an embedding layer.
+		\item The year data is also categorical, but it is passed through a dense layer.
+		\item The output of the embedding layer and the dense layer are concatenated with the continuous data.
+		\item The output of the concatenation is passed through a dense layer.
+		\item The output of the dense layer is multiplied by the standard deviation of the continuous data. 
+		This is done to scale the output to the same range as the continuous data.
+		\item The output of the dense layer is then added to the continuous data. This is done to shift 
+		the output to the same range as the continuous data.
+		\item The output of the addition is the prediction.
+		Loss is calculated using the root mean squared error and the mean absolute error.
+		\item The model is trained using the Adam optimizer. This is a gradient descent algorithm that
+		is able to adapt the learning rate during training.
+	\end{itemize}
+
+
+
 
 \subsection{Metrics for evaluating time series prediction}
 \label{sec:metrics}
@@ -211,60 +349,6 @@ It is the percentage of the response variable variation that is explained by a l
 R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}
 \end{equation}
 where $y_i$ is the actual value of the time series at time $i$, $\hat{y}_i$ is the predicted value of the time series at time $i$, $\bar{y}$ is the mean of the actual values of the time series, and $n$ is the number of observations.
-
-
-\subsection{Probabilistic Methods}
-Probabilistic methods utilise the probability distribution of the time series to make predictions.
-
-\subsubsection{Facebook Prophet}
-A quick summary of the library is as follows: 
-    Prophet is a procedure for forecasting time series data based on an additive model 
-    where non-linear trends are fit with yearly, weekly, and daily seasonality, plus 
-    holiday effects.
-    It has been used for forecasting retail foot traffic with RMSPE of 25% on a 
-    hold-out set, and for macroeconomic forecasting with MAPE of 2.5% on a hold-out set.
-    It works best with daily periodicity data with at least one year of historical data.
-    Prophet is robust to missing data and shifts in the trend, and typically handles outliers
-    well.
-    A great introduction to Prophet can be found on Towards Data Science:
-    \url{https://towardsdatascience.com/an-end-to-end-project-on-time-series-analysis-and-forecasting-with-python-4835e6bf050b}
-
-
-Downsides of Prophet:
-\begin{itemize}
-	\item It is not very flexible. It is not possible to add custom regressors.
-	\item It is not very transparent. It is not possible to see the underlying model.
-	\item Whilst it is very easy to use, it is not very easy to tune.
-\end{itemize}
-
-\subsection{Neural Network Methods}
-Neural network methods use neural networks to make predictions.
-\subsubsection{Fully Connected Neural Network (FCNN)}
-A fully connected neural network is a neural network where each node in one
-    layer is connected to each node in the next layer.
-
-	This approach uses a fully connected neural network with an embedding layer 
-	to handle categorical data.
-	A neural network is a machine learning model that is inspired by the human brain.
-	It consists of multiple layers of neurons that are connected to each other.
-	The neurons in a layer are connected to all neurons in the next layer.
-	
-	The model has 3 inputs: the continuous data, the month and the year.
-	\begin{itemize}
-		\item The month data is categorical, so it is passed through an embedding layer.
-		\item The year data is also categorical, but it is passed through a dense layer.
-		\item The output of the embedding layer and the dense layer are concatenated with the continuous data.
-		\item The output of the concatenation is passed through a dense layer.
-		\item The output of the dense layer is multiplied by the standard deviation of the continuous data. 
-		This is done to scale the output to the same range as the continuous data.
-		\item The output of the dense layer is then added to the continuous data. This is done to shift 
-		the output to the same range as the continuous data.
-		\item The output of the addition is the prediction.
-		Loss is calculated using the root mean squared error and the mean absolute error.
-		\item The model is trained using the Adam optimizer. This is a gradient descent algorithm that
-		is able to adapt the learning rate during training.
-	\end{itemize}
-
 
 
 \section{A broad overview of the main types of time series datasets}
@@ -378,7 +462,7 @@ For time series data, the data is preprocessed by:
 \label{sec:results}
 \subsection{Performance of the models}
 \label{sec:performance}
-\begin{table}[]
+\begin{table}[ht]
 	\begin{tabular}{|c|c|c|c|c|c|}
 	\hline
 	\textbf{Dataset}      & \textbf{Model}     & \textbf{RMSE} & \textbf{R Squared} & \textbf{MAE} & \textbf{Elapsed (s)} \\ \hline
@@ -418,9 +502,11 @@ For time series data, the data is preprocessed by:
 \label{sec:indiancitypollution}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\linewidth]{../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png}
-	\caption{Indian city pollution}
-\label{fig:indiancitypollution}
+	\begin{description}
+		\item[Prophet] \includegraphics[width=0.9\linewidth]{/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/plots/Indian city pollution/Bengaluru/Prophet/PM2.5_forecast_full.png}
+	\end{description}
+	\caption{Indian city PM2.5 pollution}	
+	\label{fig:indiancitypollution}
 \end{figure}
 
 
