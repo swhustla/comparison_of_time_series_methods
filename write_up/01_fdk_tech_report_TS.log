@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.9.26)  2 OCT 2022 15:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.9.26)  28 OCT 2022 14:17
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -37,7 +37,7 @@ Package acmart Info: Not using authordraft mode on input line 160.
 Package acmart Info: Using screen mode on input line 174.
 Package acmart Info: Using nonacm mode on input line 174.
 Class acmart Info: Using format manuscript, number 0 on input line 174.
-Class acmart Info: Using fontsize 11pt on input line 258.
+Class acmart Info: Using fontsize 9pt on input line 258.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/amscls/amsart.cls
 Document Class: amsart 2020/05/29 v2.20.6
 \linespacing=\dimen138
@@ -581,7 +581,7 @@ LaTeX Font Info:    Trying to load font information for T1+LinuxLibertineT-TLF o
 File: T1LinuxLibertineT-TLF.fd 2017/03/20 (autoinst) Font definitions for T1/LinuxLibertineT-TLF.
 )
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 10.95pt on input line 3205.
+(Font)              scaled to size 9.0pt on input line 3205.
 ) (/usr/local/texlive/2022/texmf-dist/tex/latex/framed/framed.sty
 Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
 \OuterFrameSep=\skip75
@@ -754,16 +754,14 @@ Package fancyhdr Warning: \fancyhead's `E' option without twoside option is usel
 Package fancyhdr Warning: \fancyhead's `E' option without twoside option is useless on input line 25.
 
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 9.0pt on input line 25.
+(Font)              scaled to size 7.0pt on input line 25.
 LaTeX Font Info:    Trying to load font information for OT1+LinuxLibertineT-TLF on input line 25.
 (/usr/local/texlive/2022/texmf-dist/tex/latex/libertine/OT1LinuxLibertineT-TLF.fd
 File: OT1LinuxLibertineT-TLF.fd 2017/03/20 (autoinst) Font definitions for OT1/LinuxLibertineT-TLF.
 )
 LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 9.0pt on input line 25.
-<<ot1.cmap>>
-LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/n' will be
 (Font)              scaled to size 7.3pt on input line 25.
+<<ot1.cmap>>
 LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/n' will be
 (Font)              scaled to size 5.5pt on input line 25.
 <<oml.cmap>>
@@ -817,6 +815,7 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 25.
 LaTeX Info: Redefining \pageref on input line 25.
 LaTeX Info: Redefining \nameref on input line 25.
+ (./01_fdk_tech_report_TS.out) (./01_fdk_tech_report_TS.out)
 \@outlinefile=\write5
 \openout5 = `01_fdk_tech_report_TS.out'.
 
@@ -852,7 +851,7 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 * \paperwidth=614.295pt
 * \paperheight=794.96999pt
 * \textwidth=430.00462pt
-* \textheight=561.91383pt
+* \textheight=560.0pt
 * \oddsidemargin=19.8752pt
 * \evensidemargin=19.8752pt
 * \topmargin=-3.87262pt
@@ -882,103 +881,80 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: End \AtBeginDocument code.
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 17.28pt on input line 50.
+(Font)              scaled to size 12.0pt on input line 50.
 LaTeX Font Info:    Trying to load font information for T1+LinuxBiolinumT-TLF on input line 50.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/libertine/T1LinuxBiolinumT-TLF.fd
 File: T1LinuxBiolinumT-TLF.fd 2017/03/20 (autoinst) Font definitions for T1/LinuxBiolinumT-TLF.
 )
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
-(Font)              scaled to size 17.28pt on input line 50.
+(Font)              scaled to size 12.0pt on input line 50.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `LinuxBiolinumT-TLF' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/b/n' will be
-(Font)              scaled to size 17.28pt on input line 50.
+(Font)              scaled to size 12.0pt on input line 50.
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 14.4pt on input line 50.
-LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
-(Font)              scaled to size 14.4pt on input line 50.
+(Font)              scaled to size 10.95pt on input line 50.
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
 (Font)              scaled to size 10.95pt on input line 50.
+LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
+(Font)              scaled to size 9.0pt on input line 50.
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 10.0pt on input line 50.
+(Font)              scaled to size 8.0pt on input line 50.
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/b/n' will be
-(Font)              scaled to size 10.95pt on input line 53.
+(Font)              scaled to size 9.0pt on input line 53.
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/it' will be
-(Font)              scaled to size 10.95pt on input line 69.
+(Font)              scaled to size 9.0pt on input line 69.
 
 
-Package fancyhdr Warning: \fancyfoot's `E' option without twoside option is useless on input line 80.
-
-
-Package fancyhdr Warning: \footskip is too small (12.0pt): 
-(fancyhdr)                Make it at least 12.3pt, for example:
-(fancyhdr)                \setlength{\footskip}{12.3pt}.
+Package fancyhdr Warning: \fancyfoot's `E' option without twoside option is useless on input line 92.
 
 [1.1{/usr/local/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/b/n' will be
-(Font)              scaled to size 10.95pt on input line 93.
+(Font)              scaled to size 9.0pt on input line 95.
 LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 10.95pt on input line 111.
+(Font)              scaled to size 9.0pt on input line 106.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `LinuxLibertineT-TLF' (encoding: OT1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 8.0pt on input line 111.
-LaTeX Font Info:    Font shape `OT1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 6.1pt on input line 111.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 ) (/usr/local/texlive/2022/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    Font shape `T1/LinuxLibertineT-TLF/m/n' will be
-(Font)              scaled to size 8.0pt on input line 114.
- [2.2] [3.3]
-Underfull \vbox (badness 4531) has occurred while \output is active []
-
- [4.4] [5.5] [6.6] [7.7]
-LaTeX Font Info:    Trying to load font information for T1+zi4 on input line 331.
+(Font)              scaled to size 6.0pt on input line 149.
+ [2.2] [3.3] [4.4] [5.5] [6.6] [7.7]
+LaTeX Font Info:    Trying to load font information for T1+zi4 on input line 418.
  (/usr/local/texlive/2022/texmf-dist/tex/latex/inconsolata/t1zi4.fd
 File: t1zi4.fd 2018/01/14 T1/zi4 (Inconsolata)
 )
 LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
-(Font)              scaled to size 10.95pt on input line 331.
+(Font)              scaled to size 9.0pt on input line 418.
 Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `zi4' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
- [8.8]
-
-LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 378.
-
 LaTeX Font Info:    Font shape `T1/LinuxBiolinumT-TLF/m/n' will be
-(Font)              scaled to size 10.0pt on input line 409.
-
-LaTeX Warning: File `../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png' not found on input line 418.
-
-
-/Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/write_up/01_fdk_tech_report_TS.tex:418: Package pdftex.def Error: File `../plots/full/pm2.5_forecast_for_delhi_for_the_next_57_weeks_with_sarima.png' not found: using draft setting.
-
-See the pdftex.def package documentation for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.418 ...hi_for_the_next_57_weeks_with_sarima.png}
-                                                  
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
+(Font)              scaled to size 8.0pt on input line 496.
+</Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/plots/Indian city pollution/Bengaluru/Prophet/PM2.5_forecast_full.png, id=195, 600.5637pt x 339.669pt>
+File: /Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/plots/Indian city pollution/Bengaluru/Prophet/PM2.5_forecast_full.png Graphic file (type png)
+<use /Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/plots/Indian city pollution/Bengaluru/Prophet/PM2.5_forecast_full.png>
+Package pdftex.def Info: /Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/plots/Indian city pollution/Bengaluru/Prophet/PM2.5_forecast_full.png  used on input line 506.
+(pdftex.def)             Requested size: 361.14113pt x 204.26425pt.
 
 
-Class acmart Warning: A possible image without description on input line 421.
+Class acmart Warning: A possible image without description on input line 510.
 
 
-Underfull \vbox (badness 3657) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [9.9] [10.10] (/usr/local/texlive/2022/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
+ [8.8]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [9.9] (/usr/local/texlive/2022/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 File: se-pdfdoc.def 2019/11/29 v1.12 stringenc: PDFDocEncoding
 ) (/usr/local/texlive/2022/texmf-dist/tex/generic/stringenc/se-utf8.def
 File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
@@ -986,37 +962,23 @@ File: se-utf8.def 2019/11/29 v1.12 stringenc: UTF-8
 
 Class acmart Warning: Some images may lack descriptions.
 
-[11.11] (./01_fdk_tech_report_TS.aux
-
-Package natbib Warning: Citation(s) may have changed.
-(natbib)                Rerun to get citations correct.
-
-)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
-Package rerunfilecheck Warning: File `01_fdk_tech_report_TS.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `01_fdk_tech_report_TS.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  EE953E6F9F8E27EBCFF0479A851D7D98;5688.
+[10.10 </Users/frankkelly/Dropbox/Projects-new/india_air_pollution_study/plots/Indian city pollution/Bengaluru/Prophet/PM2.5_forecast_full.png>] (./01_fdk_tech_report_TS.aux)
+Package rerunfilecheck Info: File `01_fdk_tech_report_TS.out' has not changed.
+(rerunfilecheck)             Checksum: F5C0D19264DF5D990C4D6DF3B42D9C91;5851.
  ) 
 Here is how much of TeX's memory you used:
- 22525 strings out of 478268
- 382036 string characters out of 5846347
- 734383 words of memory out of 5000000
- 39749 multiletter control sequences out of 15000+600000
- 601742 words of font info for 299 fonts, out of 8000000 for 9000
+ 22508 strings out of 478268
+ 380409 string characters out of 5846347
+ 736737 words of memory out of 5000000
+ 39730 multiletter control sequences out of 15000+600000
+ 587646 words of font info for 274 fonts, out of 8000000 for 9000
  1302 hyphenation exceptions out of 8191
  84i,11n,131p,1092b,548s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_oexx6f.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_nh77jq.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc}{/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/libertine/lbtn_76gpa5.enc}</usr/local/texlive/2022/texmf-dist/fonts/type1/public/inconsolata/Inconsolata-zi4r.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/LibertineMathMI.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/LibertineMathMI7.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumT.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumTB.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinBiolinumTI.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinLibertineT.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/libertine/LinLibertineTB.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txexs.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txmiaX.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/newtx/txsys.pfb>
-Output written on 01_fdk_tech_report_TS.pdf (11 pages, 416832 bytes).
+Output written on 01_fdk_tech_report_TS.pdf (10 pages, 456443 bytes).
 PDF statistics:
- 192 PDF objects out of 1000 (max. 8388607)
- 151 compressed objects within 2 object streams
- 66 named destinations out of 1000 (max. 500000)
- 59921 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 296 PDF objects out of 1000 (max. 8388607)
+ 253 compressed objects within 3 object streams
+ 75 named destinations out of 1000 (max. 500000)
+ 60166 words of extra memory for PDF output out of 61914 (max. 10000000)
 
