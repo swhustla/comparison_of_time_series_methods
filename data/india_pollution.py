@@ -4,6 +4,9 @@ from pathlib import Path
 from typing import TypeVar, Callable, Dict, Tuple, List, Generator, Optional, Union
 import pandas as pd
 
+import logging
+# set logging level
+logging.basicConfig(level=logging.DEBUG)
 from geopy import geocoders
 
 Data = TypeVar("Data", contravariant=True)
@@ -76,15 +79,18 @@ def get_lat_long_for_city(city: list) -> Dict[str, Tuple[float, float]]:
     return dict_of_lat_long
 
 
-def get_list_of_city_names(dataframe: pd.DataFrame) -> list:
+def get_list_of_city_names() -> list:
     """Get a list of city names."""
-    return dataframe.City.unique().tolist()
+    logging.info("Getting list of city names")
+    path = __download_if_needed()
+    data = __load_data(path)
+    return list(data.City.unique())
 
 
 def india_pollution(
     city_list: list = __city_choice,
     pollution_columns: list = __column_choice,
-    get_lat_long: bool = False,
+    get_lat_long: bool = True,
 ) -> Generator[Dataset, None, None]:
     """Load in India Pollution data."""
     path = __download_if_needed()
@@ -94,20 +100,22 @@ def india_pollution(
         dataframe_all_cities = pd.DataFrame()
 
         lat_long_dict = get_lat_long_for_city(city_list)
+        logging.debug(f"Lat long dict: {lat_long_dict}")
         for city_this in city_list:
             lat_long_dataframe = data[data.City == city_this][pollution_columns]
             lat_long_dataframe = __preprocess(lat_long_dataframe)
             lat_long_dataframe = __resample(lat_long_dataframe)
             lat_long_dataframe = __add_inferred_freq_to_index(lat_long_dataframe)
-            lat_long_dataframe.loc[:, "Latitude"] = lat_long_dict[city_this][0]
-            lat_long_dataframe.loc[:, "Longitude"] = lat_long_dict[city_this][1]
-            lat_long_dataframe.loc[:, "City"] = city_this
+            lat_long_dataframe["Latitude"] = lat_long_dict[city_this][0]
+            lat_long_dataframe["Longitude"] = lat_long_dict[city_this][1]
+            lat_long_dataframe["City"] = city_this
 
             dataframe_all_cities = pd.concat(
                 [dataframe_all_cities, lat_long_dataframe], axis=0
             )
         # store the data to data folder
-        dataframe_all_cities.to_csv("data/india_pollution_multi_city.csv")
+        logging.info(f"Storing data for {city_list} to data folder")
+        dataframe_all_cities.to_csv("data/india_pollution.csv")
 
     for city in city_list:
         data_this_city = data[data["City"].isin([city])][pollution_columns]
@@ -115,11 +123,11 @@ def india_pollution(
         data_this_city = __resample(data_this_city)
         data_this_city = __add_inferred_freq_to_index(data_this_city)
         yield Dataset(
-            "Indian city pollution",
-            data_this_city,
-            "weeks",
-            pollution_columns,
-            city,
-            pollution_columns[0],
-            True,
+            name="Indian city pollution",
+            values= data_this_city,
+            time_unit= "weeks",
+            number_columns= pollution_columns,
+            subset_row_name= city,
+            subset_column_name= pollution_columns[0],
+            seasonality= True,
         )
