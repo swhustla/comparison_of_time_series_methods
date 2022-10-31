@@ -38,7 +38,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 
 __dataset_row_items: dict[str, list[str]] = {
-    "india_pollution": ["Delhi", "Bengaluru"], #get_list_of_city_names(),
+    "india_pollution": get_list_of_city_names(),
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -81,7 +81,7 @@ def predict_measure_plot(data: Dataset, method_name: str) -> Report:
     """Generate a report for the given data and method."""
 
     start_time = time.time()
-    print(f"Predicting {data.name} using {method_name}...")
+    print(f"Predicting {data.name}, specifically {data.subset_row_name} using {method_name}...")
     prediction = __predictors[method_name](data)
     metrics = calculate_metrics(prediction)
 
@@ -126,12 +126,12 @@ __methods = [
     # "AR",
     # "linear_regression",
     # "ARIMA",
-    # "Prophet",
+    "Prophet",
     # "FCNN",
     # "FCNN_embedding",
     # "SES",
     # "HoltWinters",
-    "SARIMA",
+    # "SARIMA",
     # "TsetlinMachine",
 ]
 
