@@ -15,3 +15,5 @@ write_up/*.synctex*.gz
 plots/*/*/*.png
 plots/*/*/*/*.png
 .DS_Store
+write_up/*.fdb_latexmk
+write_up/*.log
