@@ -80,6 +80,7 @@ import pandas as pd
 import numpy as np
 
 import logging
+# turn on logging
 
 logging.basicConfig(level=logging.INFO)
 
@@ -123,6 +124,7 @@ def __get_test_set(data: Dataset) -> Dataset:
 
 def __determine_if_trend_with_acf(decomposed_dataset: Dataset) -> bool:
     """Determines if the data has a trend component"""
+    print(f"Determining if {decomposed_dataset.name} has a trend component")
     if type(decomposed_dataset.values) is pd.DataFrame:
         series = pd.Series(
             decomposed_dataset.values[decomposed_dataset.subset_column_name],
@@ -131,26 +133,38 @@ def __determine_if_trend_with_acf(decomposed_dataset: Dataset) -> bool:
 
     else:
         series = decomposed_dataset.values.observed
+
+    if series.autocorr(lag=1) > 0.5:
+        print(f"Concluded that {decomposed_dataset.name} has a trend component")
+    else:
+        print(f"Concluded that {decomposed_dataset.name} has no trend component")
+    
     return series.autocorr(lag=1) > 0.5
 
 
 def __determine_if_seasonal_with_acf(dataset: Dataset) -> bool:
-    """Determines if the data has a seasonal component"""
-    if type(dataset.values) is pd.DataFrame:
-        series = pd.Series(
-            dataset.values[dataset.subset_column_name],
-            index=dataset.values.index,
+    """Determines if the data has a seasonal component
+    overriden by the Dataset metadata"""
+    if dataset.seasonality is None:
+
+        if type(dataset.values) is pd.DataFrame:
+            series = pd.Series(
+                dataset.values[dataset.subset_column_name],
+                index=dataset.values.index,
+            )
+        else:
+            series = dataset.values.observed
+        series.dropna(inplace=True)
+
+        return (
+            series.autocorr(
+                lag=__get_seasonal_period(dataset),
+            )
+            > 0.5
         )
     else:
-        series = dataset.values.observed
-    series.dropna(inplace=True)
+        return dataset.seasonality
 
-    return (
-        series.autocorr(
-            lag=__get_seasonal_period(dataset),
-        )
-        > 0.5
-    )
 
 
 def __moving_average(data: Dataset, window_size: int = 12) -> pd.DataFrame:
@@ -226,6 +240,7 @@ def __detect_an_increase_in_a_series(series: pd.Series) -> bool:
     by calculating the average of the first and last 20% of the series
     and comparing them.
     If the difference is significant, then there is a trend."""
+    print(f"Detecting trend in {series.name}")
     series = series.dropna()
     first_20_percent = series[: int(len(series) * 0.2)].mean()
     last_20_percent = series[-int(len(series) * 0.2) :].mean()
@@ -238,6 +253,7 @@ def __determine_if_seasonality_is_multiplicative(
     training_dataset: Dataset,
 ) -> bool:
     """Determines if the seasonal component is multiplicative"""
+    print("Determining if seasonality is multiplicative")
     if type(training_dataset.values) is pd.DataFrame:
         series = pd.Series(
             training_dataset.values[training_dataset.subset_column_name],
@@ -246,6 +262,7 @@ def __determine_if_seasonality_is_multiplicative(
     else:
         series = training_dataset.values.observed
     seasonal_period = __get_seasonal_period(training_dataset)
+    print(f"Seasonal period: {seasonal_period}")
     seasonal_index = series / __moving_average(series, seasonal_period)
     data_minus_moving_av_index = series - __moving_average(
         series, seasonal_period
@@ -262,14 +279,18 @@ def __determine_if_seasonality_is_multiplicative(
 
 def __seasonal_decompose_data(data: Dataset) -> Dataset:
     """Removes trend and seasonality from the training data"""
-
+    print(f"Decomposing {data.name}")
     training_data = __get_training_set(data)
 
     seasonal_component_present = __determine_if_seasonal_with_acf(
         training_data
     )
 
+    print(f"Seasonal component present: {seasonal_component_present}")
+
     seasonal_period = __get_seasonal_period(training_data)
+
+    print(f"Seasonal period: {seasonal_period}")
 
     if seasonal_component_present:
         seasonal_component = (
@@ -379,7 +400,7 @@ def __predict(
         else:
             seasonal_component_type = "additive"
 
-        logging.info(
+        print(
             f"Type of seasonal component: {seasonal_component_type} for {data.name}"
         )
         if seasonal_component_type == "multiplicative":
