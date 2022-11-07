@@ -259,14 +259,19 @@ def __exp_smoothing_configs(seasonal: List[int]) -> list:
 
 
 def __get_seasonal_period_list(data: Dataset) -> List[int]:
-    """Get a list of seasonal periods to try."""
+    """Get a list of seasonal periods to try.
+    In Exponential Smoothing, the seasonal_periods parameter is the number of
+    periods in each season. For example, if the data is monthly, and you believe
+    there is a yearly seasonality, then the seasonal_periods parameter would be
+    12. 
+    """
     if data.seasonality is None:
-        return None
+        return [None]
     else:
         if data.time_unit == "days":
             return [365]
         elif data.time_unit == "weeks":
-            return [4, 13, 26, 52]
+            return [4, 5, 10, 52]
         elif data.time_unit == "months":
             return [3, 12, 24]
         elif data.time_unit == "quarters":
@@ -274,7 +279,7 @@ def __get_seasonal_period_list(data: Dataset) -> List[int]:
         elif data.time_unit == "years":
             return [11, 12, 13]
         else:
-            return None
+            return [None]
 
 
 def __get_best_model(
