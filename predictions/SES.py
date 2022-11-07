@@ -124,7 +124,7 @@ def __get_test_set(data: Dataset) -> Dataset:
 
 def __determine_if_trend_with_acf(decomposed_dataset: Dataset) -> bool:
     """Determines if the data has a trend component"""
-    print(f"Determining if {decomposed_dataset.name} has a trend component")
+    logging.info(f"Determining if {decomposed_dataset.name} has a trend component")
     if type(decomposed_dataset.values) is pd.DataFrame:
         series = pd.Series(
             decomposed_dataset.values[decomposed_dataset.subset_column_name],
@@ -135,9 +135,9 @@ def __determine_if_trend_with_acf(decomposed_dataset: Dataset) -> bool:
         series = decomposed_dataset.values.observed
 
     if series.autocorr(lag=1) > 0.5:
-        print(f"Concluded that {decomposed_dataset.name} has a trend component")
+        logging.info(f"Concluded that {decomposed_dataset.name} has a trend component")
     else:
-        print(f"Concluded that {decomposed_dataset.name} has no trend component")
+        logging.info(f"Concluded that {decomposed_dataset.name} has a flat trend component")
     
     return series.autocorr(lag=1) > 0.5
 
@@ -188,6 +188,7 @@ def __calculate_next_trend_values(
     train_trend_component: pd.DataFrame, number_of_steps: int
 ) -> pd.DataFrame:
     """Calculates the next trend values for the forecast"""
+    logging.info(f"Calculating the next {number_of_steps} trend values")
     m, c = __extract_trend_equation_parameters(train_trend_component)
     x = np.arange(
         len(train_trend_component),
@@ -216,6 +217,7 @@ def __calculate_next_seasonal_values(
     seasonal_period: int,
 ) -> list:
     """Calculates the next seasonal values for the forecast"""
+    logging.info(f"Calculating the next {number_of_steps} seasonal values")
     seasonal_values_one_season = train_seasonal_component.values[
         -seasonal_period:
     ]
@@ -224,6 +226,8 @@ def __calculate_next_seasonal_values(
         seasonal_values_test.append(
             seasonal_values_one_season[i % seasonal_period]
         )
+
+    logging.info(f"Sample of the next {number_of_steps} seasonal values: {seasonal_values_test[:5]}")
 
     return pd.Series(
         seasonal_values_test,
@@ -240,12 +244,12 @@ def __detect_an_increase_in_a_series(series: pd.Series) -> bool:
     by calculating the average of the first and last 20% of the series
     and comparing them.
     If the difference is significant, then there is a trend."""
-    print(f"Detecting trend in {series.name}")
+    logging.info(f"Detecting trend in {series.name}")
     series = series.dropna()
     first_20_percent = series[: int(len(series) * 0.2)].mean()
     last_20_percent = series[-int(len(series) * 0.2) :].mean()
-    print(f"{first_20_percent} {last_20_percent}")
-    print(f"absolutediff: {abs(first_20_percent - last_20_percent)}")
+    logging.info(f"{first_20_percent} {last_20_percent}")
+    logging.info(f"absolutediff: {abs(first_20_percent - last_20_percent)}")
     return abs(first_20_percent - last_20_percent) > (0.1 * series.mean())
 
 
@@ -253,7 +257,7 @@ def __determine_if_seasonality_is_multiplicative(
     training_dataset: Dataset,
 ) -> bool:
     """Determines if the seasonal component is multiplicative"""
-    print("Determining if seasonality is multiplicative")
+    logging.info("Determining if seasonality is multiplicative")
     if type(training_dataset.values) is pd.DataFrame:
         series = pd.Series(
             training_dataset.values[training_dataset.subset_column_name],
@@ -262,7 +266,7 @@ def __determine_if_seasonality_is_multiplicative(
     else:
         series = training_dataset.values.observed
     seasonal_period = __get_seasonal_period(training_dataset)
-    print(f"Seasonal period: {seasonal_period}")
+    logging.info(f"Seasonal period: {seasonal_period}")
     seasonal_index = series / __moving_average(series, seasonal_period)
     data_minus_moving_av_index = series - __moving_average(
         series, seasonal_period
@@ -273,24 +277,24 @@ def __determine_if_seasonality_is_multiplicative(
     rolling_max = data_minus_moving_av_index.rolling(
         window=seasonal_period
     ).max()
-    print(f"rolling max for {training_dataset.name} every 20: {rolling_max[::20]}")
+    logging.info(f"rolling max for {training_dataset.name} every 20: {rolling_max[::20]}")
     return __detect_an_increase_in_a_series(rolling_max)
 
 
 def __seasonal_decompose_data(data: Dataset) -> Dataset:
     """Removes trend and seasonality from the training data"""
-    print(f"Decomposing {data.name}")
+    logging.info(f"Decomposing {data.name}")
     training_data = __get_training_set(data)
 
     seasonal_component_present = __determine_if_seasonal_with_acf(
         training_data
     )
 
-    print(f"Seasonal component present: {seasonal_component_present}")
+    logging.info(f"Seasonal component present: {seasonal_component_present} for {data.name}")
 
     seasonal_period = __get_seasonal_period(training_data)
 
-    print(f"Seasonal period: {seasonal_period}")
+    logging.info(f"Seasonal period: {seasonal_period} for  {data.name}")
 
     if seasonal_component_present:
         seasonal_component = (
@@ -331,7 +335,7 @@ def __seasonal_decompose_data(data: Dataset) -> Dataset:
 
 def __tidy_up_decomposition_data(data: Dataset) -> Dataset:
     """Tidies up the decomposition data"""
-
+    logging.info(f"Tidying up decomposition data for {data.name}")
     residual_values = data.values.resid
     residual_values = np.abs(residual_values)  # remove negative values
 
@@ -348,6 +352,7 @@ def __tidy_up_decomposition_data(data: Dataset) -> Dataset:
 
 def __fit_model(data: Dataset) -> Model:
     """Fits the model to the data"""
+    logging.info(f"Fitting model to {data.name}")
     de_trended_data = __tidy_up_decomposition_data(data).values
 
     return SimpleExpSmoothing(de_trended_data).fit(
@@ -378,29 +383,37 @@ def __predict(
     """Predicts the next values in the time series"""
     title = f"{decomposed_dataset.subset_column_name} forecast for {decomposed_dataset.subset_row_name} with SES"
     forecasted_resid = model.forecast(__number_of_steps(data))
+    logging.info(f"Forecasted residual short sample: {forecasted_resid[:20]}")
 
     # add seasonal and trend components back to the forecast for the correct number of steps
-    if __determine_if_trend_with_acf(decomposed_dataset):
-        trend_component = __calculate_next_trend_values(
-            decomposed_dataset.values.trend, __number_of_steps(data)
-        )
-
-        forecasted_resid = __sum_of_two_series(
-            forecasted_resid, trend_component["trend"]
-        )
+    # if __determine_if_trend_with_acf(decomposed_dataset):
+    logging.debug(
+        f"Trend component present for {decomposed_dataset.name} with SES"
+    )
+    trend_component = __calculate_next_trend_values(
+        decomposed_dataset.values.trend, __number_of_steps(data)
+    )
+    logging.debug(f"Calulating residual values for {decomposed_dataset.name}")
+    forecasted_resid = __sum_of_two_series(
+        forecasted_resid, trend_component["trend"]
+    )
 
     if __determine_if_seasonal_with_acf(decomposed_dataset):
+        logging.debug(
+            f"Seasonal component present for {decomposed_dataset.name} with SES... calculating seasonal values"
+        )
         seasonal_component = __calculate_next_seasonal_values(
             decomposed_dataset.values.seasonal,
             __number_of_steps(data),
             __get_seasonal_period(data),
         )
+        logging.debug(f"Sample of seasonal values: {seasonal_component[::20]}")
         if __determine_if_seasonality_is_multiplicative(decomposed_dataset):
             seasonal_component_type = "multiplicative"
         else:
             seasonal_component_type = "additive"
 
-        print(
+        logging.info(
             f"Type of seasonal component: {seasonal_component_type} for {data.name}"
         )
         if seasonal_component_type == "multiplicative":
