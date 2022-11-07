@@ -6,7 +6,8 @@ import pandas as pd
 
 import logging
 # set logging level
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+
 from geopy import geocoders
 
 Data = TypeVar("Data", contravariant=True)
