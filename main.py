@@ -38,7 +38,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 
 __dataset_row_items: dict[str, list[str]] = {
-    "india_pollution": ["Bengaluru"], #get_list_of_city_names(),
+    "india_pollution": get_list_of_city_names(),
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -101,6 +101,9 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
         for dataset_name in datasets:
             data_list = load_dataset(dataset_name)
             for data in data_list:
+                if len(data.values) < int(106*1.2):
+                    print(f"Skipping {data.name} - {data.subset_row_name} as it is too small.")
+                    continue
                 if method_name in ["SARIMA"]:
                     if data.time_unit == "days":
                         print(
@@ -113,7 +116,7 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 
 __datasets = [
-    "india_pollution",
+    # "india_pollution",
     "stock_prices",
     "airline_passengers",
     "list_of_tuples",
@@ -129,8 +132,8 @@ __methods = [
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    "SES",
-    # "HoltWinters",
+    # "SES",
+    "HoltWinters",
     # "SARIMA",
     # "TsetlinMachine",
 ]

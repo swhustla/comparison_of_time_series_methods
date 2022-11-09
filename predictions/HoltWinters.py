@@ -151,10 +151,6 @@ def __exp_smoothing_forecast(data: Dataset, config: dict) -> np.array:
     return yhat
 
 
-def __measure_rmse(actual: Dataset, predicted: np.array) -> float:
-    return np.sqrt(np.mean((actual.values - predicted) ** 2))
-
-
 def __measure_mape(actual: Dataset, predicted: np.array) -> float:
     return np.mean(np.abs((actual.values - predicted) / actual.values)) * 100
 
@@ -271,11 +267,11 @@ def __get_seasonal_period_list(data: Dataset) -> List[int]:
         if data.time_unit == "days":
             return [365]
         elif data.time_unit == "weeks":
-            return [4, 5, 10, 52]
+            return [51, 52, 53]
         elif data.time_unit == "months":
-            return [3, 12, 24]
+            return [11, 12, 13]
         elif data.time_unit == "quarters":
-            return [4, 5]
+            return [3, 4, 5]
         elif data.time_unit == "years":
             return [11, 12, 13]
         else:
