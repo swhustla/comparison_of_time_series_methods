@@ -207,6 +207,9 @@ def __grid_search_configs(
     else:
         scores = [__score_model(data, cfg, __validation) for cfg in cfg_list]
 
+    # remove empty results
+    scores = [r for r in scores if r[0] is not None]
+
     # sort configs by error, asc
     scores.sort(key=lambda tup: tup[0])
 
@@ -214,8 +217,6 @@ def __grid_search_configs(
     for cfg, error in scores[:3]:
         print(f" > {cfg}, error = {error}")
 
-    # remove empty results
-    scores = [r for r in scores if r[0] is not None]
 
     return scores
 
