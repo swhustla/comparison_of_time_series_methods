@@ -104,7 +104,6 @@ def india_pollution(
         logging.debug(f"Lat long dict: {lat_long_dict}")
         for city_this in city_list:
             lat_long_dataframe = data[data.City == city_this][pollution_columns]
-            lat_long_dataframe = __preprocess(lat_long_dataframe)
             lat_long_dataframe = __resample(lat_long_dataframe)
             lat_long_dataframe = __add_inferred_freq_to_index(lat_long_dataframe)
             lat_long_dataframe["Latitude"] = lat_long_dict[city_this][0]
