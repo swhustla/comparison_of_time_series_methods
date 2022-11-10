@@ -151,10 +151,6 @@ def __exp_smoothing_forecast(data: Dataset, config: dict) -> np.array:
     return yhat
 
 
-def __measure_rmse(actual: Dataset, predicted: np.array) -> float:
-    return np.sqrt(np.mean((actual.values - predicted) ** 2))
-
-
 def __measure_mape(actual: Dataset, predicted: np.array) -> float:
     return np.mean(np.abs((actual.values - predicted) / actual.values)) * 100
 
@@ -211,6 +207,9 @@ def __grid_search_configs(
     else:
         scores = [__score_model(data, cfg, __validation) for cfg in cfg_list]
 
+    # remove empty results
+    scores = [r for r in scores if r[0] is not None]
+
     # sort configs by error, asc
     scores.sort(key=lambda tup: tup[0])
 
@@ -218,8 +217,6 @@ def __grid_search_configs(
     for cfg, error in scores[:3]:
         print(f" > {cfg}, error = {error}")
 
-    # remove empty results
-    scores = [r for r in scores if r[0] is not None]
 
     return scores
 
@@ -259,22 +256,27 @@ def __exp_smoothing_configs(seasonal: List[int]) -> list:
 
 
 def __get_seasonal_period_list(data: Dataset) -> List[int]:
-    """Get a list of seasonal periods to try."""
+    """Get a list of seasonal periods to try.
+    In Exponential Smoothing, the seasonal_periods parameter is the number of
+    periods in each season. For example, if the data is monthly, and you believe
+    there is a yearly seasonality, then the seasonal_periods parameter would be
+    12. 
+    """
     if data.seasonality is None:
-        return None
+        return [None]
     else:
         if data.time_unit == "days":
             return [365]
         elif data.time_unit == "weeks":
-            return [4, 13, 26, 52]
+            return [51, 52, 53]
         elif data.time_unit == "months":
-            return [3, 12, 24]
+            return [11, 12, 13]
         elif data.time_unit == "quarters":
-            return [4, 5]
+            return [3, 4, 5]
         elif data.time_unit == "years":
             return [11, 12, 13]
         else:
-            return None
+            return [None]
 
 
 def __get_best_model(

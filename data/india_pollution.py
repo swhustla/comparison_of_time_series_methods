@@ -6,7 +6,8 @@ import pandas as pd
 
 import logging
 # set logging level
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+
 from geopy import geocoders
 
 Data = TypeVar("Data", contravariant=True)
@@ -90,7 +91,7 @@ def get_list_of_city_names() -> list:
 def india_pollution(
     city_list: list = __city_choice,
     pollution_columns: list = __column_choice,
-    get_lat_long: bool = True,
+    get_lat_long: bool = False,
 ) -> Generator[Dataset, None, None]:
     """Load in India Pollution data."""
     path = __download_if_needed()

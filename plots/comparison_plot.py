@@ -91,11 +91,11 @@ def __plot(
 
 def __save_plot(figure: Figure, folder: str, file_name: str, plot_type: str, title: str) -> None:
     """Save the plot to disk."""
-    print(f"Saving {plot_type} plot for {title} to {folder}/{file_name}.png")
+    print(f"Saving {plot_type} plot for {title} to {folder}{file_name}.png")
     if not os.path.exists(f"plots/{folder}"):
         os.makedirs(f"plots/{folder}")
         
-    figure.savefig(f"plots/{folder}/{file_name}_{plot_type}.png", bbox_inches="tight")
+    figure.savefig(f"plots/{folder}{file_name}_{plot_type}.png", bbox_inches="tight")
 
 
 comparison_plot = method(__full_data_plus_prediction_plot, __plot, __save_plot)
