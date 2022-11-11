@@ -11,6 +11,7 @@ from data.stock_prices import stock_prices
 from data.list_of_tuples import list_of_tuples
 from data.airline_passengers import airline_passengers
 from data.sun_spots import sun_spots
+from data.data_from_csv import load_from_csv
 from predictions.AR import ar
 from predictions.MA import ma
 from predictions.HoltWinters import holt_winters
@@ -34,6 +35,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
     "list_of_tuples": list_of_tuples,
     "airline_passengers": airline_passengers,
     "sun_spots": sun_spots,
+    "csv": load_from_csv,
 }
 
 
@@ -101,15 +103,21 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
         for dataset_name in datasets:
             data_list = load_dataset(dataset_name)
             for data in data_list:
-                if len(data.values) < int(106*1.2) and method_name in ["SARIMA", "SES", "HoltWinters"]:
+                if data.time_unit == "days":
+                    minimum_length = 365*2.2
+                elif data.time_unit == "weeks":
+                    minimum_length = 52*2.2
+                elif data.time_unit == "months":
+                    minimum_length = 12*2.2
+                elif data.time_unit == "years":
+                    minimum_length = 12*2.2
+                else:
+                    minimum_length = 0
+
+                if len(data.values) < int(minimum_length) and method_name in [ "SES", "HoltWinters", "SARIMA"]:
                     print(f"Skipping {data.name} - {data.subset_row_name} as it is too small.")
                     continue
-                if method_name in ["SARIMA"]:
-                    if data.time_unit == "days":
-                        print(
-                            f"Skipping {method_name} on {data.name} because it does not support daily data."
-                        )
-                        continue
+
                 report = predict_measure_plot(data, method_name)
                 store_metrics(report)
                 yield report
@@ -117,25 +125,26 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 __datasets = [
     # "india_pollution",
-    "stock_prices",
-    "airline_passengers",
-    "list_of_tuples",
-    "sun_spots",
+    # "stock_prices",
+    # "airline_passengers",
+    # "list_of_tuples",
+    # "sun_spots",
+    "csv",
 ]
 
 
 __methods = [
-    # "MA",
-    # "AR",
-    # "linear_regression",
+    "MA",
+    "AR",
+    "linear_regression",
     # "ARIMA",
-    # "Prophet",
+    "Prophet",
     # "FCNN",
-    # "FCNN_embedding",
-    # "SES",
+    "FCNN_embedding",
+    "SES",
     "HoltWinters",
-    # "SARIMA",
-    # "TsetlinMachine",
+    "SARIMA",
+    "TsetlinMachine",
 ]
 
 

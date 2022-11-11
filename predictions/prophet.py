@@ -61,6 +61,7 @@ def __fit_prophet_model(data: Dataset) -> Model:
 
 def __get_future_dates(data: Dataset) -> pd.DataFrame:
     """# construct a dataframe with the future dates"""
+    #TODO: Ensure that the frequency is correct (e.g. daily, weekly, monthly, etc.)
     future_dates = __get_test_set(data)["Date"]
     datetime_version = pd.to_datetime(future_dates)
     return pd.DataFrame({"ds": datetime_version})
@@ -69,6 +70,10 @@ def __forecast(model: Model, data:Dataset) -> PredictionData:
     """ Forecast the next 20% of the data """
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with Prophet"
     future = __get_future_dates(data)
+    #TODO: Add settings for the model to include seasonality, holidays, etc.
+    # ideally changepoint_range=1.0, changepoint_prior_scale=0.05 (Suman used 0.75)
+    # daily_seasonality=True 
+
     forecast = model.predict(future)
     forecast_df = forecast.set_index(keys=["ds"])
     ground_truth_df = __get_test_set(data).rename(columns={"Date": "ds", data.subset_column_name: "y"}).set_index(keys=["ds"])

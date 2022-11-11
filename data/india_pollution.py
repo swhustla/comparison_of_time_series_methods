@@ -19,6 +19,22 @@ from .load import Load
 import zipfile
 
 
+# TODO: add weather data per city
+# Boundary layer height and radiation data / cloud cover data (ECMWF) - also have a forecast for this (Blaise has a script for this)
+# ECMWF data comes in a netcdf format, so we need to convert it to a csv format
+# https://towardsdatascience.com/read-netcdf-data-with-python-901f7ff61648
+
+# Temperature / wind speed / wind direction / humidity (NOAA weather data source)
+# Phase II
+# Benzene,Toluene,Xylene? (VOCs) -> VOCs are one of the main drivers of PM2.5 in the presence of sunlight (radiation data might be a good predictor of this)
+
+# TODO - add electricity consumption data / electricitymap.org
+# TODO - add coal / renewable energy data breakdown
+# https://app.electricitymaps.com/zone/IN-DL?utm_source=electricitymaps.com&utm_medium=website&utm_campaign=banner 
+# https://www.electricitymaps.com/
+# https://github.com/electricitymaps/electricitymaps-contrib#data-sources/blob/master/DATA_SOURCES.md#real-time-electricity-data-sources
+
+
 def __download_if_needed():
     """Download the data from Kaggle if it is not already downloaded."""
 
