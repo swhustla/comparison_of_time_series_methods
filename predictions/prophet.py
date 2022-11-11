@@ -56,10 +56,13 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
     return __get_dataframe_with_date_column(data.values[-__number_of_steps(data) :])
 
 
+#TODO: Add support for multiple time series
+#TODO: Add a validation set
+
 def __get_configs() -> Generator:
     """Get the configs for a grid search on Prophet"""
-    for changepoint_range in [0.5, 0.8, 0.95]:
-        for seasonality_prior_scale in [0.01, 0.1, 1.0]:
+    for changepoint_range in [0.01, 0.1, 1.0]:
+        for seasonality_prior_scale in [0.1, 1.0, 10]:
             for changepoint_prior_scale in [0.01, 0.1, 1.0]:
                 for seasonality_mode in ["additive", "multiplicative"]:
                     yield {
@@ -71,19 +74,20 @@ def __get_configs() -> Generator:
 
 
 
-def __measure_mape(actual: pd.DataFrame, predicted: np.array) -> float:
+def __measure_mape(data: Dataset, actual: pd.DataFrame, predicted: np.array) -> float:
     """Measure the Mean Absolute Percentage Error"""
     # change actual to a numpy array
-    actual = actual.drop(columns=["Date"]).values
+    actual = actual.loc[:, data.subset_column_name].values
     return np.mean(np.abs((actual - predicted) / actual)) * 100
 
 
 def __score_model(model: Model, data: Dataset) -> float:
     """Score the model on the last 20% of the data"""
+    #TODO: Use a validation set instead of the last 20% of the data
     test_df = __get_test_set(data)
     future_dates = __get_future_dates(data)
     forecast = model.predict(future_dates)
-    return __measure_mape(test_df, forecast["yhat"].values)
+    return __measure_mape(data, test_df, forecast["yhat"].values)
 
 
 def __get_best_model(data: Dataset) -> Model:
@@ -91,7 +95,7 @@ def __get_best_model(data: Dataset) -> Model:
     best_score = float("inf")
     best_model = None
     for config in __get_configs():
-        logging.info(f"Trying config: {str(config)}")
+        logging.info(f"Trying config: {str(config)} for dataset {data.name} - {data.subset_row_name}")
         try:
             model = __fit_prophet_model(data, config)
         except Exception as e:
@@ -102,7 +106,7 @@ def __get_best_model(data: Dataset) -> Model:
             logging.info(f"New best score: {score}")
             best_score = score
             best_model = model
-        logging.info(f"Best config: {config} -> {best_score}")
+    logging.info(f"Best config: {config} -> {best_score}")
     return best_model
 
 
@@ -115,6 +119,12 @@ def __fit_prophet_model(data: Dataset, config:dict) -> Model:
     weekly_seasonality = __check_if_data_is_seasonal_this_time_unit(data, "days")
     yearly_seasonality = __check_if_data_is_seasonal_this_time_unit(data, "months")
 
+    monthly_seasonality = __check_if_data_is_seasonal_this_time_unit(data, "weeks")
+
+    if not yearly_seasonality and  monthly_seasonality:
+        logging.info("Monthly seasonality detected")
+        yearly_seasonality = True
+
     model = Prophet(
         daily_seasonality=daily_seasonality,
         weekly_seasonality=weekly_seasonality,
@@ -125,8 +135,9 @@ def __fit_prophet_model(data: Dataset, config:dict) -> Model:
         seasonality_mode=config["seasonality_mode"],
     )
 
-    # in the case of monthly data, Prophet will automatically detect seasonality
-
+    # in the case of weekly data, with monthly and yearly seasonalty then we add the seasonality manually
+    if monthly_seasonality and yearly_seasonality:
+        model.add_seasonality(name="monthly", period=30.5, fourier_order=5)
 
     renamed_df = train_df.rename(columns={"Date": "ds", data.subset_column_name: "y"})
     model.fit(renamed_df)
@@ -142,7 +153,7 @@ def __get_future_dates(data: Dataset) -> pd.DataFrame:
 
 
 def __check_if_data_is_seasonal_this_time_unit(data: Dataset, time_unit: str) -> bool:
-    """Check if the data is daily"""
+    """Check if the data is or other time unit is seasonal"""
     if data.seasonality == True:
         return data.time_unit == time_unit
     else:
