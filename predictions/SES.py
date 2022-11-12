@@ -71,15 +71,18 @@ component, then the seasonal component should be added back also.
 
 
 """
-
+import os
 from typing import TypeVar
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
-from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.seasonal import seasonal_decompose, DecomposeResult
+
+import matplotlib.pyplot as plt
 
 import pandas as pd
 import numpy as np
 
 import logging
+
 # turn on logging
 
 logging.basicConfig(level=logging.INFO)
@@ -93,6 +96,7 @@ Model = TypeVar("Model")
 
 __alpha = 0.2
 
+PROJECT_FOLDER = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def __number_of_steps(data: Dataset) -> int:
     return int(len(data.values) * 0.2)
@@ -137,8 +141,10 @@ def __determine_if_trend_with_acf(decomposed_dataset: Dataset) -> bool:
     if series.autocorr(lag=1) > 0.5:
         logging.info(f"Concluded that {decomposed_dataset.name} has a trend component")
     else:
-        logging.info(f"Concluded that {decomposed_dataset.name} has a flat trend component")
-    
+        logging.info(
+            f"Concluded that {decomposed_dataset.name} has a flat trend component"
+        )
+
     return series.autocorr(lag=1) > 0.5
 
 
@@ -164,7 +170,6 @@ def __determine_if_seasonal_with_acf(dataset: Dataset) -> bool:
         )
     else:
         return dataset.seasonality
-
 
 
 def __moving_average(data: Dataset, window_size: int = 12) -> pd.DataFrame:
@@ -218,16 +223,14 @@ def __calculate_next_seasonal_values(
 ) -> list:
     """Calculates the next seasonal values for the forecast"""
     logging.info(f"Calculating the next {number_of_steps} seasonal values")
-    seasonal_values_one_season = train_seasonal_component.values[
-        -seasonal_period:
-    ]
+    seasonal_values_one_season = train_seasonal_component.values[-seasonal_period:]
     seasonal_values_test = []
     for i in range(number_of_steps):
-        seasonal_values_test.append(
-            seasonal_values_one_season[i % seasonal_period]
-        )
+        seasonal_values_test.append(seasonal_values_one_season[i % seasonal_period])
 
-    logging.info(f"Sample of the next {number_of_steps} seasonal values: {seasonal_values_test[:5]}")
+    logging.info(
+        f"Sample of the next {number_of_steps} seasonal values: {seasonal_values_test[:5]}"
+    )
 
     return pd.Series(
         seasonal_values_test,
@@ -268,17 +271,28 @@ def __determine_if_seasonality_is_multiplicative(
     seasonal_period = __get_seasonal_period(training_dataset)
     logging.info(f"Seasonal period: {seasonal_period}")
     seasonal_index = series / __moving_average(series, seasonal_period)
-    data_minus_moving_av_index = series - __moving_average(
-        series, seasonal_period
-    )
+    data_minus_moving_av_index = series - __moving_average(series, seasonal_period)
     seasonal_index.dropna(inplace=True)
     data_minus_moving_av_index.dropna(inplace=True)
 
-    rolling_max = data_minus_moving_av_index.rolling(
-        window=seasonal_period
-    ).max()
-    logging.info(f"rolling max for {training_dataset.name} every 20: {rolling_max[::20]}")
+    rolling_max = data_minus_moving_av_index.rolling(window=seasonal_period).max()
+    logging.info(
+        f"rolling max for {training_dataset.name} every 20: {rolling_max[::20]}"
+    )
     return __detect_an_increase_in_a_series(rolling_max)
+
+
+def __store_plot_of_decomposition_results(
+    data: Dataset, decompose_result: DecomposeResult
+) -> None:
+    """Stores a plot of the decomposition results"""
+    logging.info("Storing plot of decomposition results")
+    plt.rcParams.update({"figure.figsize": (10, 9)})
+    fig = decompose_result.plot()
+
+    fig.savefig(
+        f"{PROJECT_FOLDER}/plots/{data.name}/{data.subset_row_name}/SES/seasonal_decomposition.png"
+    )
 
 
 def __seasonal_decompose_data(data: Dataset) -> Dataset:
@@ -286,11 +300,11 @@ def __seasonal_decompose_data(data: Dataset) -> Dataset:
     logging.info(f"Decomposing {data.name}")
     training_data = __get_training_set(data)
 
-    seasonal_component_present = __determine_if_seasonal_with_acf(
-        training_data
-    )
+    seasonal_component_present = __determine_if_seasonal_with_acf(training_data)
 
-    logging.info(f"Seasonal component present: {seasonal_component_present} for {data.name}")
+    logging.info(
+        f"Seasonal component present: {seasonal_component_present} for {data.name}"
+    )
 
     seasonal_period = __get_seasonal_period(training_data)
 
@@ -321,6 +335,8 @@ def __seasonal_decompose_data(data: Dataset) -> Dataset:
             period=seasonal_period,
             extrapolate_trend="freq",
         )
+
+    __store_plot_of_decomposition_results(data, decomposition)
 
     return Dataset(
         name=data.name,
@@ -368,9 +384,7 @@ def __sum_of_two_series(series1: pd.Series, series2: pd.Series) -> pd.Series:
     return series1.add(series2, fill_value=0)
 
 
-def __product_of_two_series(
-    series1: pd.Series, series2: pd.Series
-) -> pd.Series:
+def __product_of_two_series(series1: pd.Series, series2: pd.Series) -> pd.Series:
     """Multiplies two series together and ensures the index is correct"""
 
     series2.index = series1.index
@@ -387,16 +401,12 @@ def __predict(
 
     # add seasonal and trend components back to the forecast for the correct number of steps
     # if __determine_if_trend_with_acf(decomposed_dataset):
-    logging.debug(
-        f"Trend component present for {decomposed_dataset.name} with SES"
-    )
+    logging.debug(f"Trend component present for {decomposed_dataset.name} with SES")
     trend_component = __calculate_next_trend_values(
         decomposed_dataset.values.trend, __number_of_steps(data)
     )
     logging.debug(f"Calulating residual values for {decomposed_dataset.name}")
-    forecasted_resid = __sum_of_two_series(
-        forecasted_resid, trend_component["trend"]
-    )
+    forecasted_resid = __sum_of_two_series(forecasted_resid, trend_component["trend"])
 
     if __determine_if_seasonal_with_acf(decomposed_dataset):
         logging.debug(
@@ -421,16 +431,12 @@ def __predict(
                 forecasted_resid, seasonal_component
             )
         else:
-            forecasted_resid = __sum_of_two_series(
-                forecasted_resid, seasonal_component
-            )
+            forecasted_resid = __sum_of_two_series(forecasted_resid, seasonal_component)
 
     return PredictionData(
         values=forecasted_resid,
         prediction_column_name=None,
-        ground_truth_values=__get_test_set(data).values[
-            data.subset_column_name
-        ],
+        ground_truth_values=__get_test_set(data).values[data.subset_column_name],
         confidence_columns=None,
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/SES/",
