@@ -40,7 +40,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 
 __dataset_row_items: dict[str, list[str]] = {
-    "india_pollution": ["Bengaluru"],#get_list_of_city_names(),
+    "india_pollution": get_list_of_city_names(),
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -113,9 +113,10 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
                     minimum_length = 12*2.2
                 else:
                     minimum_length = 0
-
+                if method_name == "SES":
+                    minimum_length = 20
                 if len(data.values) < int(minimum_length) and method_name in [ "SES", "HoltWinters", "SARIMA"]:
-                    print(f"Skipping {data.name} - {data.subset_row_name} as it is too small.")
+                    print(f"Skipping {data.name} - {data.subset_row_name} for method {method_name} as at {len(data.values)} {data.time_unit} length it is too small.")
                     continue
 
                 report = predict_measure_plot(data, method_name)
@@ -124,12 +125,12 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 
 __datasets = [
-    "india_pollution",
+    # "india_pollution",
     # "stock_prices",
     # "airline_passengers",
     # "list_of_tuples",
     # "sun_spots",
-    # "csv",
+    "csv",
 ]
 
 
@@ -138,10 +139,10 @@ __methods = [
     # "AR",
     # "linear_regression",
     # "ARIMA",
-    "Prophet",
+    # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    # "SES",
+    "SES",
     # "HoltWinters",
     # "SARIMA",
     # "TsetlinMachine",
