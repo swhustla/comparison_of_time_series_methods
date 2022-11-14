@@ -88,7 +88,7 @@ def __get_period_of_seasonality(data: Dataset) -> int:
     Returns the period of seasonality.
     """
     if data.time_unit == "years":
-        return 11
+        return 12
     elif data.time_unit == "months":
         return 12
     elif data.time_unit == "weeks":
@@ -215,11 +215,9 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
     """Forecast the next 20% of the data"""
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with ARIMA"
     prediction = model.forecast(__number_of_steps(data))
-    print(f"Sample of the forecast for {data.name}: {prediction[:5]}")
     prediction_summary = model.model_result.get_forecast(__number_of_steps(data)).summary_frame()
     combined_data = pd.concat([prediction, prediction_summary], axis=1)
     combined_data.rename(columns={0: "forecast"}, inplace=True)
-    print(f"Sample of the combined data for {data.name}: {combined_data.head()}")
     return PredictionData(
         values=combined_data,
         prediction_column_name="forecast",
