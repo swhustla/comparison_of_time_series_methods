@@ -124,7 +124,7 @@ def __get_differencing_term(data: Dataset) -> int:
 
 
 def __evaluate_arima_model(
-    data: Dataset, arima_order: tuple, use_validation: bool
+    data: Dataset, arima_order: tuple, use_validation: bool, trend: str
 ) -> Result:
     """Evaluate an ARIMA model for a given order (p,d,q) and return RMSE"""
     # prepare training and test datasets
@@ -139,7 +139,7 @@ def __evaluate_arima_model(
         training_set,
         period=__get_period_of_seasonality(data),
         model=sm.tsa.ARIMA,
-        model_kwargs={"order": arima_order},
+        model_kwargs={"order": arima_order, "trend": trend},
     )
     model_fit = model.fit()
     if use_validation:
@@ -154,52 +154,53 @@ def __evaluate_arima_model(
 
 
 def __evaluate_models(
-    data: Dataset, p_values: list, d_values: list, q_values: list
+    data: Dataset, p_values: list, d_values: list, q_values: list, trend_values: list   
 ) -> Result:
     """Evaluate combinations of p, d and q values for an ARIMA model"""
-    best_score, best_cfg = float("inf"), None
+    best_score, best_cfg, best_trend = float("inf"), None, None
     for p in p_values:
         for d in d_values:
             for q in q_values:
-                order = (p, d, q)
-                try:
-                    mse = __evaluate_arima_model(
-                        data, arima_order=order, use_validation=True
-                    )
-                    if mse < best_score:
-                        best_score, best_cfg = mse, order
-                    logging.info(f"ARIMA{order} MSE={mse}")
-                except Exception as e:
-                    logging.error(f"ARIMA{order} failed with error: {e}")
-                    continue
-    logging.info(f"Best ARIMA{best_cfg} MSE={best_score}")
-    return best_cfg
+                for t in trend_values:
+                    order = (p, d, q)
+                    try:
+                        mse = __evaluate_arima_model(
+                            data, arima_order=order, use_validation=True, trend=t
+                        )
+                        if mse < best_score:
+                            best_score, best_cfg, best_trend = mse, order, t
+                        logging.info(f"ARIMA{order} Trend={t} MSE={mse}")
+                    except Exception as e:
+                        logging.error(f"ARIMA{order} Trend={t} failed with error: {e}")
+                        continue
+    logging.info(f"Best ARIMA: {best_cfg} Best trend: {t} MSE={best_score}")
+    return best_cfg, best_trend
 
 
-__p_values = [0, 1, 2, 4, 6, 8, 10]
+__p_values = [0, 1, 2, 4, 8, 10]
 __d_values = [0, 1, 2]
-__q_values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+__q_values = [0, 1, 2, 4, 8, 10]
+__trend_values = ["c", "t", "ct"]
 
 
 def __get_best_model_order(data: Dataset) -> Model:
     """Get the best model order for the ARIMA model"""
-    return __evaluate_models(data, __p_values, __d_values, __q_values)
+    return __evaluate_models(data, __p_values, __d_values, __q_values, __trend_values)
 
 
 def __fit_auto_regressive_model(data: Dataset) -> Model:
     """Fit the best ARIMA model to the first 80% of the data"""
 
-    ar_order, differencing_term, ma_order = __get_best_model_order(data)
+    (ar_order, differencing_term, ma_order), trend = __get_best_model_order(data)
 
     model = STLForecast(
         __get_training_set(data),
         period=__get_period_of_seasonality(data),
         model=sm.tsa.ARIMA,
-        model_kwargs={"order": (ar_order, differencing_term, ma_order)},
+        model_kwargs={"order": (ar_order, differencing_term, ma_order), "trend": trend},
     )
 
-    model_result = model.fit().model_result
-    return model_result
+    return model.fit()
 
 
 def __get_model_order_snake_case(model: Model) -> str:
@@ -213,10 +214,15 @@ def __get_model_order_snake_case(model: Model) -> str:
 def __forecast(model: Model, data: Dataset) -> PredictionData:
     """Forecast the next 20% of the data"""
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with ARIMA"
-    # print(f"Sample of the forecast for {data.name}: \n{model.get_forecast(__number_of_steps(data)).summary_frame()}")
+    prediction = model.forecast(__number_of_steps(data))
+    print(f"Sample of the forecast for {data.name}: {prediction[:5]}")
+    prediction_summary = model.model_result.get_forecast(__number_of_steps(data)).summary_frame()
+    combined_data = pd.concat([prediction, prediction_summary], axis=1)
+    combined_data.rename(columns={0: "forecast"}, inplace=True)
+    print(f"Sample of the combined data for {data.name}: {combined_data.head()}")
     return PredictionData(
-        values=model.get_forecast(steps=__number_of_steps(data)).summary_frame(),
-        prediction_column_name="mean",
+        values=combined_data,
+        prediction_column_name="forecast",
         ground_truth_values=__get_test_set(data),
         confidence_columns=["mean_ci_lower", "mean_ci_upper"],
         title=title,
