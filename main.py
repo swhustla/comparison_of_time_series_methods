@@ -95,6 +95,25 @@ def predict_measure_plot(data: Dataset, method_name: str) -> Report:
     return Report(start_time, method_name, data, prediction, metrics)
 
 
+def __get_minimum_length_for_dataset(dataset: Dataset, method_name: str) -> int:
+    """ Get the minimum length of the given dataset. """
+    minimum_length = 0
+    if dataset.time_unit == "days":
+        minimum_length = 365*2.2
+    elif dataset.time_unit == "weeks":
+        minimum_length = 52*2.2
+    elif dataset.time_unit == "months":
+        minimum_length = 12*2.2
+    elif dataset.time_unit == "years":
+        minimum_length = 12*2.2
+    if method_name == "SES":
+        minimum_length = 20
+
+    return int(minimum_length)
+
+
+
+
 def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[Report, None, None]:
     """
     Generate a report for each method and dataset combination.
@@ -103,18 +122,7 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
         for dataset_name in datasets:
             data_list = load_dataset(dataset_name)
             for data in data_list:
-                if data.time_unit == "days":
-                    minimum_length = 365*2.2
-                elif data.time_unit == "weeks":
-                    minimum_length = 52*2.2
-                elif data.time_unit == "months":
-                    minimum_length = 12*2.2
-                elif data.time_unit == "years":
-                    minimum_length = 12*2.2
-                else:
-                    minimum_length = 0
-                if method_name == "SES":
-                    minimum_length = 20
+                minimum_length = __get_minimum_length_for_dataset(data, method_name)
                 if len(data.values) < int(minimum_length) and method_name in [ "SES", "HoltWinters", "SARIMA"]:
                     print(f"Skipping {data.name} - {data.subset_row_name} for method {method_name} as at {len(data.values)} {data.time_unit} length it is too small.")
                     continue
@@ -125,24 +133,24 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 
 __datasets = [
-    # "india_pollution",
+    "india_pollution",
     # "stock_prices",
     # "airline_passengers",
     # "list_of_tuples",
     # "sun_spots",
-    "csv",
+    # "csv",
 ]
 
 
 __methods = [
-    # "MA",
+    "MA",
     # "AR",
     # "linear_regression",
     # "ARIMA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    "SES",
+    # "SES",
     # "HoltWinters",
     # "SARIMA",
     # "TsetlinMachine",
