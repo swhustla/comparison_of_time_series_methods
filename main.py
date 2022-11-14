@@ -40,7 +40,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 
 __dataset_row_items: dict[str, list[str]] = {
-    "india_pollution": ["Ahmedabad"],
+    "india_pollution": get_list_of_city_names(),
     "stock_prices": ["JPM", "AAPL"],
 }
 

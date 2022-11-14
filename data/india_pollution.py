@@ -68,11 +68,13 @@ __city_choice = ["Delhi"]
 
 
 def __impute_data_if_needed(data: pd.DataFrame) -> pd.DataFrame:
-    """Impute the data if needed."""
-    
-    if data.isnull().values.any():
-        print("Imputing data")
-        data = impute(data, target_columns=__column_choice)
+    """Impute the data if any columns have at least 5% missing data."""
+
+    # TODO - cache imputed data
+    # TODO - add a check to see if the data is already imputed
+
+    print("Imputing data")
+    data = impute(data, target_columns=__column_choice)
 
     return data
 

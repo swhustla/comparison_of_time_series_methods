@@ -201,6 +201,14 @@ css = ["tinycss2 (>=1.1.0,<1.2)"]
 dev = ["build (==0.8.0)", "flake8 (==4.0.1)", "hashin (==0.17.0)", "pip-tools (==6.6.2)", "pytest (==7.1.2)", "Sphinx (==4.3.2)", "tox (==3.25.0)", "twine (==4.0.1)", "wheel (==0.37.1)", "black (==22.3.0)", "mypy (==0.961)"]
 
 [[package]]
+name = "blosc"
+version = "1.10.6"
+description = "Blosc data compressor"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "branca"
 version = "0.5.0"
 description = "Generate complex HTML+JS pages with Python"
@@ -398,7 +406,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "dill"
 version = "0.3.5.1"
 description = "serialize all of python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*"
 
@@ -1057,6 +1065,22 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "lightgbm"
+version = "3.3.3"
+description = "LightGBM Python Package"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+numpy = "*"
+scikit-learn = "!=0.22.0"
+scipy = "*"
+
+[package.extras]
+dask = ["dask[array] (>=2.0.0)", "dask[dataframe] (>=2.0.0)", "dask[distributed] (>=2.0.0)", "pandas"]
+
+[[package]]
 name = "llvmlite"
 version = "0.39.1"
 description = "lightweight wrapper around basic LLVM functionality"
@@ -1173,6 +1197,25 @@ description = "McCabe checker, plugin for flake8"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
+
+[[package]]
+name = "miceforest"
+version = "5.6.2"
+description = "Missing Value Imputation using LightGBM"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+blosc = "*"
+dill = "*"
+lightgbm = ">=3.3.1"
+numpy = "*"
+
+[package.extras]
+default_mm = ["scipy (>=1.6.0)"]
+plotting = ["seaborn (>=0.11.0)", "matplotlib (>=3.3.0)"]
+testing = ["pandas", "sklearn"]
 
 [[package]]
 name = "mistune"
@@ -2428,7 +2471,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "flake8 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.10"
-content-hash = "1a17b843802001cfc18c037aadb9c60b5bd43852ffec3884bbfc7f96365f3aed"
+content-hash = "6bda7532ddfb4a4edaf4b5c854c315b49480f9a2db694c70abd4d4d3d6a9991a"
 
 [metadata.files]
 absl-py = []
@@ -2489,6 +2532,7 @@ beautifulsoup4 = [
 ]
 black = []
 bleach = []
+blosc = []
 branca = []
 cachetools = [
     {file = "cachetools-5.2.0-py3-none-any.whl", hash = "sha256:f9f17d2aec496a9aa6b76f53e3b614c965223c061982d434d160f930c698a9db"},
@@ -2737,6 +2781,7 @@ lazy-object-proxy = [
     {file = "lazy_object_proxy-1.7.1-pp37.pp38-none-any.whl", hash = "sha256:d66906d5785da8e0be7360912e99c9188b70f52c422f9fc18223347235691a84"},
 ]
 libclang = []
+lightgbm = []
 llvmlite = []
 locket = [
     {file = "locket-1.0.0-py2.py3-none-any.whl", hash = "sha256:b6c819a722f7b6bd955b80781788e4a66a55628b858d347536b7e81325a3a5e3"},
@@ -2811,6 +2856,7 @@ matrixprofile = [
     {file = "matrixprofile-1.1.10.tar.gz", hash = "sha256:d6d7dd13c2d1a1a725ce09c621960ee309ebac0b7b3cab680c4d91c683fff1b5"},
 ]
 mccabe = []
+miceforest = []
 mistune = []
 msgpack = [
     {file = "msgpack-1.0.4-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:4ab251d229d10498e9a2f3b1e68ef64cb393394ec477e3370c457f9430ce9250"},
