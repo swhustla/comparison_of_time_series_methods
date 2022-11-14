@@ -12,9 +12,8 @@ from geopy import geocoders
 
 Data = TypeVar("Data", contravariant=True)
 from data.dataset import Dataset
+from data.impute_data import impute
 
-
-from .load import Load
 
 import zipfile
 
@@ -33,6 +32,8 @@ import zipfile
 # https://app.electricitymaps.com/zone/IN-DL?utm_source=electricitymaps.com&utm_medium=website&utm_campaign=banner 
 # https://www.electricitymaps.com/
 # https://github.com/electricitymaps/electricitymaps-contrib#data-sources/blob/master/DATA_SOURCES.md#real-time-electricity-data-sources
+
+
 
 
 def __download_if_needed():
@@ -66,12 +67,20 @@ __column_choice = ["PM2.5", "PM10", "O3", "CO", "SO2", "NO2"]
 __city_choice = ["Delhi"]
 
 
+def __impute_data_if_needed(data: pd.DataFrame) -> pd.DataFrame:
+    """Impute the data if needed."""
+    
+    if data.isnull().values.any():
+        print("Imputing data")
+        data = impute(data, target_columns=__column_choice)
+
+    return data
+
+
 def __preprocess(dataframe: Data) -> pd.DataFrame:
     """Preprocess the data."""
-    for column in __column_choice:
-        dataframe[column] = dataframe[column].interpolate(method="spline", order=1)
-    dataframe.bfill(inplace=True)
-    dataframe.dropna(inplace=True, axis=0)
+    dataframe = __impute_data_if_needed(dataframe)
+
     return dataframe
 
 
