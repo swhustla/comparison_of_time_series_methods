@@ -57,6 +57,7 @@ def __get_training_set(data: Dataset) -> pd.DataFrame:
 def __get_test_set(data: Dataset) -> pd.DataFrame:
     return data.values[-__number_of_steps(data) :][data.subset_column_name]
 
+
 def __quick_check_for_auto_correlation(data: Dataset) -> bool:
     """
     Checks if the data is auto-correlated using the Augmented Dickey-Fuller test.
@@ -64,6 +65,7 @@ def __quick_check_for_auto_correlation(data: Dataset) -> bool:
     """
     adf = ADF(data.values[data.subset_column_name])
     return adf.pvalue < 0.05
+
 
 def __get_number_of_lags(data: Dataset) -> int:
     """
@@ -85,6 +87,7 @@ def __transform_data(data: Dataset) -> pd.DataFrame:
     """
     return pd.DataFrame(data.values[data.subset_column_name])
 
+
 def __get_period_of_seasonality(data: Dataset) -> int:
     """
     Returns the period of seasonality.
@@ -98,6 +101,7 @@ def __get_period_of_seasonality(data: Dataset) -> int:
     elif data.time_unit == "days":
         return 365
 
+
 def __determine_lag_order(data: Dataset) -> int:
     """
     Determines the lag order of the model.
@@ -107,10 +111,17 @@ def __determine_lag_order(data: Dataset) -> int:
     logging.info(f"Max lag: {max_lag}")
     if data.seasonality:
         max_lag = 1
-        ar_order = ar_select_order(__get_training_set(data), maxlag=max_lag, seasonal=data.seasonality, period=__get_period_of_seasonality(data))
+        ar_order = ar_select_order(
+            __get_training_set(data),
+            maxlag=max_lag,
+            seasonal=data.seasonality,
+            period=__get_period_of_seasonality(data),
+        )
     else:
         ar_order = ar_select_order(__get_training_set(data), maxlag=max_lag)
-    logging.info(f"AR lag order for {data.name} {data.subset_column_name}: {ar_order.ar_lags}")
+    logging.info(
+        f"AR lag order for {data.name} {data.subset_column_name}: {ar_order.ar_lags}"
+    )
     return ar_order.ar_lags[0]
 
 
@@ -128,8 +139,8 @@ def __train_auto_regressive_model(data: Dataset) -> Model:
         model_kwargs=dict(order=(ar_order, int_order, ma_order), trend="t"),
         period=__get_period_of_seasonality(data),
     )
-    model_result = model.fit().model_result
-    return model_result
+    return model.fit()
+
 
 def __get_model_order_snake_case(model: Model) -> str:
     """convert model order dict to snake case filename"""
@@ -139,22 +150,29 @@ def __get_model_order_snake_case(model: Model) -> str:
     return model_order.replace(" ", "_")
 
 
-
 def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
     """
     Makes a forecast using the trained model.
     """
-    title =f"{data.subset_column_name} for {data.subset_row_name} forecast using Auto Regressive model"
+    title = f"{data.subset_column_name} for {data.subset_row_name} forecast using Auto Regressive model"
+
+    prediction = model.forecast(__number_of_steps(data))
+    prediction_summary = model.model_result.get_forecast(
+        __number_of_steps(data)
+    ).summary_frame()
+    combined_data = pd.concat([prediction, prediction_summary], axis=1)
+    combined_data.rename(columns={0: "forecast"}, inplace=True)
 
     return PredictionData(
-        values=model.get_forecast(steps=__number_of_steps(data)).summary_frame(),
-        prediction_column_name="mean",
+        values=combined_data,
+        prediction_column_name="forecast",
         ground_truth_values=__get_test_set(data),
         confidence_columns=["mean_ci_lower", "mean_ci_upper"],
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/AR/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
     )
+
 
 ar = method(
     __quick_check_for_auto_correlation,

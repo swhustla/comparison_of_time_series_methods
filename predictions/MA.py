@@ -37,6 +37,7 @@ import pandas as pd
 from arch.unitroot import ADF
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.tsa.forecasting.stl import STLForecast
+
 import statsmodels.api as sm
 
 from matplotlib import pyplot as plt
@@ -116,13 +117,12 @@ def __fit_simple_ma(data: Dataset, ma_order: int = 1) -> Model:
     integ_order = 0
     model = STLForecast(
         __get_training_set(data),
-        sm.tsa.ARIMA,
+        model=sm.tsa.ARIMA,
         model_kwargs=dict(order=(ar_order, integ_order, ma_order), trend="t"),
         period=__get_number_of_lags(data),
     )
 
-    model_result = model.fit().model_result
-    return model_result
+    return model.fit()
 
 
 def __get_model_order_snake_case(model: Model) -> str:
@@ -138,9 +138,14 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
     Makes a prediction for the next 20% of the data using the fitted model.
     """
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with simple MA"
+    prediction = model.forecast(__number_of_steps(data))
+    prediction_summary = model.model_result.get_forecast(__number_of_steps(data)).summary_frame()
+    combined_data = pd.concat([prediction, prediction_summary], axis=1)
+    combined_data.rename(columns={0: "forecast"}, inplace=True)
+
     return PredictionData(
-        values=model.get_forecast(steps=__number_of_steps(data)).summary_frame(),
-        prediction_column_name="mean",
+        values=combined_data,
+        prediction_column_name="forecast",
         ground_truth_values=__get_test_set(data),
         confidence_columns=["mean_ci_lower", "mean_ci_upper"],
         title=title,
