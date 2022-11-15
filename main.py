@@ -40,7 +40,8 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 
 __dataset_row_items: dict[str, list[str]] = {
-    "india_pollution": get_list_of_city_names(),
+    # from city Guhwati onwards
+    "india_pollution": get_list_of_city_names()[14:],
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -109,6 +110,9 @@ def __get_minimum_length_for_dataset(dataset: Dataset, method_name: str) -> int:
     if method_name == "SES":
         minimum_length = 20
 
+    if method_name in ["MA", "AR", "ARIMA"]:
+        minimum_length = int(minimum_length/2 *1.2)
+
     return int(minimum_length)
 
 
@@ -118,12 +122,13 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
     """
     Generate a report for each method and dataset combination.
     """
-    for method_name in methods:
-        for dataset_name in datasets:
-            data_list = load_dataset(dataset_name)
+    
+    for dataset_name in datasets:
+        data_list = load_dataset(dataset_name)
+        for method_name in methods:
             for data in data_list:
                 minimum_length = __get_minimum_length_for_dataset(data, method_name)
-                if len(data.values) < int(minimum_length) and method_name in [ "SES", "HoltWinters", "SARIMA"]:
+                if len(data.values) < int(minimum_length) and method_name in [ "SES", "HoltWinters", "SARIMA", "MA", "AR", "ARIMA"]:
                     print(f"Skipping {data.name} - {data.subset_row_name} for method {method_name} as at {len(data.values)} {data.time_unit} length it is too small.")
                     continue
 
@@ -133,9 +138,9 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 
 __datasets = [
-    # "india_pollution",
+    "india_pollution",
     # "stock_prices",
-    "airline_passengers",
+    # "airline_passengers",
     # "list_of_tuples",
     # "sun_spots",
     # "csv",
@@ -144,9 +149,9 @@ __datasets = [
 
 __methods = [
     # "MA",
-    "AR",
+    # "AR",
     # "linear_regression",
-    # "ARIMA",
+    "ARIMA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",

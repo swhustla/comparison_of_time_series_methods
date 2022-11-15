@@ -20,9 +20,9 @@ from .predict import Predict
 __ma_order = 1
 
 def ma(
-    fit_simple_ma: Callable[[Data], Model],
-    forecast: Callable[[Model, int], Prediction],
-) -> Predict[Data, Prediction]:
+    fit_simple_ma: Callable[[Dataset], Model],
+    forecast: Callable[[Model, Dataset], PredictionData],
+) -> Predict[Dataset, PredictionData]:
     """
     Create a simple moving average prediction method.
     """
