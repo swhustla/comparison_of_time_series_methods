@@ -173,7 +173,7 @@ def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
     )
 
-
+# TODO: add grid search for AR model
 ar = method(
     __quick_check_for_auto_correlation,
     __train_auto_regressive_model,
