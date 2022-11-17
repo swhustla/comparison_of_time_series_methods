@@ -153,5 +153,5 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
     )
 
-
+# TODO: add grid search for MA order
 ma = method(__fit_simple_ma, __forecast)
