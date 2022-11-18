@@ -30,15 +30,19 @@ The best Python library for simple MA models is statsmodels. It provides a wide 
 """
 
 
-from typing import TypeVar, Callable
+from typing import TypeVar, Callable, Tuple, List, Dict, Any, Optional
 from methods.MA import ma as method
 import pandas as pd
+
+import logging
 
 from arch.unitroot import ADF
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.tsa.forecasting.stl import STLForecast
 
 import statsmodels.api as sm
+
+from sklearn.metrics import mean_squared_error
 
 from matplotlib import pyplot as plt
 
@@ -59,6 +63,22 @@ def __get_training_set(data: Dataset) -> pd.DataFrame:
 def __get_test_set(data: Dataset) -> pd.DataFrame:
     return data.values[-__number_of_steps(data) :][data.subset_column_name]
 
+def __get_train_and_test_sets(data: Dataset) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Prepare the data for the MA model"""
+    training_set = __get_training_set(data)
+    test_set = __get_test_set(data)
+    return training_set, test_set
+
+
+def __get_train_validation_and_test_sets(
+    data: Dataset,
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Prepare the data for the MA model"""
+    training_set, test_set = __get_train_and_test_sets(data)
+    validation_set = training_set[-__number_of_steps(data) :]
+    training_set = training_set[: -__number_of_steps(data)]
+    return training_set, validation_set, test_set
+
 
 def __check_for_stationarity(data: Dataset) -> bool:
     """
@@ -78,6 +98,19 @@ def __transform_data(data: Dataset) -> pd.DataFrame:
     else:
         return data.values[data.subset_column_name].diff()
 
+
+def __get_period_of_seasonality(data: Dataset) -> int:
+    """
+    Returns the period of seasonality.
+    """
+    if data.time_unit == "years":
+        return 12
+    elif data.time_unit == "months":
+        return 12
+    elif data.time_unit == "weeks":
+        return 52
+    elif data.time_unit == "days":
+        return 365
 
 def __get_number_of_lags(data: Dataset) -> int:
     """
@@ -106,20 +139,82 @@ def __check_for_auto_correlation(data: Dataset) -> bool:
     return input("Does the data have auto-correlation? (y/n): ") == "y"
 
 
-def __fit_simple_ma(data: Dataset, ma_order: int = 1) -> Model:
+def __evaluate_ma_model(
+    data: Dataset, arima_order: tuple, use_validation: bool, trend: str
+) -> Result:
+    """Evaluate an ARIMA model for a given order (p,d,q) and return RMSE"""
+    # prepare training and test datasets
+    if use_validation:
+        training_set, validation_set, test_set = __get_train_validation_and_test_sets(
+            data
+        )
+    else:
+        training_set, test_set = __get_train_and_test_sets(data)
+    # make predictions
+    model = STLForecast(
+        training_set,
+        period=__get_period_of_seasonality(data),
+        model=sm.tsa.ARIMA,
+        model_kwargs={"order": arima_order, "trend": trend},
+    )
+    model_fit = model.fit()
+    if use_validation:
+        predictions = model_fit.forecast(len(validation_set))
+        error = mean_squared_error(validation_set, predictions)
+    else:
+        predictions = model_fit.forecast(len(test_set))
+        error = mean_squared_error(test_set, predictions)
+
+    # return out of sample error
+    return error 
+
+def __evaluate_models(
+    data: Dataset, p_values: list, d_values: list, q_values: list, trend_values: list   
+) -> Result:
+    """Evaluate combinations of p, d and q values for an ARIMA model"""
+    best_score, best_cfg, best_trend = float("inf"), None, None
+    for p in p_values:
+        for d in d_values:
+            for q in q_values:
+                for t in trend_values:
+                    order = (p, d, q)
+                    try:
+                        mse = __evaluate_ma_model(
+                            data, arima_order=order, use_validation=True, trend=t
+                        )
+                        if mse < best_score:
+                            best_score, best_cfg, best_trend = mse, order, t
+                        logging.info(f"ARIMA{order} Trend={t} MSE={mse}")
+                    except Exception as e:
+                        logging.error(f"ARIMA{order} Trend={t} failed with error: {e}")
+                        continue
+    logging.info(f"Best MA: {best_cfg} Best trend: {best_trend} MSE={best_score}")
+    return best_cfg, best_trend
+
+__p_values = [0] # auto-regressive
+__d_values = [0] # differencing
+__q_values = [0, 1, 2, 4, 5, 6, 8, 10] # moving average 
+__trend_values = ["c", "t", "ct"]
+
+def __get_best_model_order(data: Dataset) -> Model:
+    """Get the best model order for the ARIMA model"""
+    return __evaluate_models(data, __p_values, __d_values, __q_values, __trend_values)
+
+
+def __fit_simple_ma(data: Dataset) -> Model:
     """
     Fits the simple MA model to the first 80% of the data.
     """
     # We can use the ARIMA class to create an MA model and
     # setting a zeroth-order AR model and an integration order of 0.
     # We must specify the order of the MA model in the order argument.
-    ar_order = 0
-    integ_order = 0
+    (ar_order, integ_order, ma_order), trend = __get_best_model_order(data)
+
     model = STLForecast(
         __get_training_set(data),
         model=sm.tsa.ARIMA,
-        model_kwargs=dict(order=(ar_order, integ_order, ma_order), trend="t"),
-        period=__get_number_of_lags(data),
+        model_kwargs=dict(order=(ar_order, integ_order, ma_order), trend=trend),
+        period=__get_period_of_seasonality(data),
     )
 
     return model.fit()
