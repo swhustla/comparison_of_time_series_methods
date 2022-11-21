@@ -127,12 +127,47 @@ def __get_test_set(data: Dataset) -> Dataset:
         seasonality=data.seasonality,
     )
 
+def __get_training_and_test_set(data: Dataset) -> Tuple[Dataset, Dataset]:
+    return (
+        __get_training_set(data),
+        __get_test_set(data),
+    )
 
-def __exp_smoothing_forecast(data: Dataset, config: dict) -> np.array:
+def __get_training_test_and_validation_set(data: Dataset) -> Tuple[Dataset, Dataset, Dataset]:
+    training, test = __get_training_and_test_set(data)
+    validation = Dataset(
+        name=data.name,
+        values=training.values[-__number_of_steps(data) :][data.subset_column_name],
+        subset_column_name=data.subset_column_name,
+        number_columns=data.number_columns,
+        time_unit=data.time_unit,
+        subset_row_name=data.subset_row_name,
+        seasonality=data.seasonality,
+    )
+    training = Dataset(
+        name=data.name,
+        values=training.values[: -__number_of_steps(data)][data.subset_column_name],
+        subset_column_name=data.subset_column_name,
+        number_columns=data.number_columns,
+        time_unit=data.time_unit,
+        subset_row_name=data.subset_row_name,
+        seasonality=data.seasonality,
+    )
+    return training, validation, test
+
+
+def __exp_smoothing_forecast(data: Dataset, config: dict, use_validation: bool) -> np.array:
     # multi-step Holt-Winters Exponential Smoothing forecast
     t, d, s, p, b, r = config
     # define model
-    training_data = np.array(__get_training_set(data).values)
+    if use_validation:
+        training_dataset, validation_dataset, test_dataset = __get_training_test_and_validation_set(data)
+
+    else:
+        training_dataset, test_dataset = __get_training_test_and_validation_set(data)
+
+    training_data = np.array(training_dataset.values)
+
     model = ExponentialSmoothing(
         training_data,
         trend=t,
@@ -157,8 +192,8 @@ def __measure_mape(actual: Dataset, predicted: np.array) -> float:
 
 def __validation(data: Dataset, config: dict) -> float:
     """Validation for uni-variate data."""
-    test = __get_test_set(data)
-    yhat = __exp_smoothing_forecast(data, config)
+    test = __get_training_test_and_validation_set(data)[2]
+    yhat = __exp_smoothing_forecast(data, config, use_validation=True)
     # estimate prediction error
     error = __measure_mape(test, yhat)
 
@@ -255,6 +290,7 @@ def __exp_smoothing_configs(seasonal: List[int]) -> list:
     return model_configs
 
 
+
 def __get_seasonal_period_list(data: Dataset) -> List[int]:
     """Get a list of seasonal periods to try.
     In Exponential Smoothing, the seasonal_periods parameter is the number of
@@ -281,10 +317,11 @@ def __get_seasonal_period_list(data: Dataset) -> List[int]:
 
 def __get_best_model(
     data: Dataset, parallel: bool = True
-) -> Tuple[ExponentialSmoothing, dict]:
+) -> Tuple[ExponentialSmoothing, dict, int]:
     """Get the best model for the data."""
     # define config lists
     cfg_list = __exp_smoothing_configs(seasonal=__get_seasonal_period_list(data))
+    number_of_configurations = len(cfg_list)
     # grid search configs
     scores = __grid_search_configs(data, cfg_list, parallel)
     # get the best config
@@ -306,11 +343,11 @@ def __get_best_model(
         use_boxcox=best_cfg[4],
     )
     model_fit = model.fit(optimized=True, remove_bias=best_cfg[5])
-    return model_fit, best_cfg
+    return model_fit, best_cfg, number_of_configurations
 
 
 def __get_forecast(
-    data: Dataset, model: ExponentialSmoothing, best_config: dict
+    data: Dataset, model: ExponentialSmoothing, best_config: dict, number_of_configurations: int
 ) -> PredictionData:
     """Get the forecast for the data."""
     title = f"Forecast for {data.name} {data.subset_column_name} using Holt-Winters Exponential Smoothing"
@@ -331,6 +368,7 @@ def __get_forecast(
         plot_folder=f"{data.name}/{data.subset_row_name}/Holts-Winters-ES/",
         plot_file_name=f"{data.subset_column_name}_forecast",
         model_config=best_config,
+        number_of_iterations=number_of_configurations,
     )
 
 
