@@ -1,17 +1,21 @@
 % ----- DO NOT CHANGE WITHIN THIS BLOCK ---------------------------------------------
-\documentclass[manuscript,screen,nonacm]{acmart}                                              																
-%% \BibTeX command to typeset BibTeX logo in the docs														
-\AtBeginDocument{%																											
-  \providecommand\BibTeX{{%																							
-    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}							
-																																		
-\usepackage{geometry}																			\geometry{twoside=false}																		
-\usepackage{xcolor}																												
-\usepackage{framed}																											
-\colorlet{shadecolor}{blue!30}																								
+\documentclass[manuscript,screen,nonacm,11pt]{acmart}                                                          % |
+																																			%|
+																																			%|
+%% \BibTeX command to typeset BibTeX logo in the docs														%|
+\AtBeginDocument{%																											%|
+  \providecommand\BibTeX{{%																								%|
+    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}								%|
+																																			%|
+\usepackage{geometry}																											%|
+\geometry{twoside=false}																										%|
+																																			%|
+\usepackage{xcolor}																												%|
+\usepackage{framed}																											%|
+\colorlet{shadecolor}{blue!30}																								%|
 % ----- DO NOT CHANGE WITHIN THIS BLOCK --------------------------------------------
-\usepackage{amsmath}
-\numberwithin{equation}{section}
+
+
 \usepackage{hyperref}
 \usepackage{float}
 \usepackage{subcaption,graphicx}
@@ -19,8 +23,10 @@
 \usepackage{multirow,multicol}
 % add any more custom packages as required
 \usepackage{csvsimple} % for reading csv files
+\usepackage{amsmath}
+\numberwithin{equation}{section}
 
-\graphicspath{{./plots/}}
+\graphicspath{{./plots}}
 
 \begin{document}
 
@@ -462,6 +468,10 @@ For time series data, the data is preprocessed by:
 \label{sec:results}
 \subsection{Performance of the models}
 \label{sec:performance}
+
+\subsubsection*{Airline passengers}
+\label{sec:airlineperformance}
+
 \begin{table}[ht]
 	\begin{tabular}{|c|c|c|c|c|c|}
 	\hline
