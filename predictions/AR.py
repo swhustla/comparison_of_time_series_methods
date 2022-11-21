@@ -25,20 +25,18 @@ The best Python library for AR models is statsmodels. It provides a wide range o
 """
 
 
-from typing import TypeVar, Callable
+from typing import TypeVar, Callable, Tuple
 from methods.AR import ar as method
 import pandas as pd
 
 import logging
 
 from arch.unitroot import ADF
-from statsmodels.tsa.ar_model import AutoReg
 from statsmodels.tsa.ar_model import ar_select_order
 from statsmodels.tsa.forecasting.stl import STLForecast
 import statsmodels.api as sm
-from statsmodels.graphics.tsaplots import plot_pacf
 
-import matplotlib.pyplot as plt
+from sklearn.metrics import mean_squared_error
 
 from data.dataset import Dataset, Result
 from predictions.Prediction import PredictionData
@@ -56,6 +54,22 @@ def __get_training_set(data: Dataset) -> pd.DataFrame:
 
 def __get_test_set(data: Dataset) -> pd.DataFrame:
     return data.values[-__number_of_steps(data) :][data.subset_column_name]
+
+def __get_train_and_test_sets(data: Dataset) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Prepare the data for the ARIMA model"""
+    training_set = __get_training_set(data)
+    test_set = __get_test_set(data)
+    return training_set, test_set
+
+
+def __get_train_validation_and_test_sets(
+    data: Dataset,
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Prepare the data for the ARIMA model"""
+    training_set, test_set = __get_train_and_test_sets(data)
+    validation_set = training_set[-__number_of_steps(data) :]
+    training_set = training_set[: -__number_of_steps(data)]
+    return training_set, validation_set, test_set
 
 
 def __quick_check_for_auto_correlation(data: Dataset) -> bool:
@@ -125,18 +139,82 @@ def __determine_lag_order(data: Dataset) -> int:
     return ar_order.ar_lags[0]
 
 
+def __evaluate_auto_regressive_model(
+    data: Dataset, arima_order: tuple, use_validation: bool, trend: str
+) -> Result:
+    """Evaluate an ARIMA model for a given order (p,d,q) and return RMSE"""
+    # prepare training and test datasets
+    if use_validation:
+        training_set, validation_set, test_set = __get_train_validation_and_test_sets(
+            data
+        )
+    else:
+        training_set, test_set = __get_train_and_test_sets(data)
+    # make predictions
+    model = STLForecast(
+        training_set,
+        period=__get_period_of_seasonality(data),
+        model=sm.tsa.ARIMA,
+        model_kwargs={"order": arima_order, "trend": trend},
+    )
+    model_fit = model.fit()
+    if use_validation:
+        predictions = model_fit.forecast(len(validation_set))
+        error = mean_squared_error(validation_set, predictions)
+    else:
+        predictions = model_fit.forecast(len(test_set))
+        error = mean_squared_error(test_set, predictions)
+
+    # return out of sample error
+    return error
+
+
+def __evaluate_models(
+    data: Dataset, p_values: list, d_values: list, q_values: list, trend_values: list   
+) -> Result:
+    """Evaluate combinations of p, d and q values for an ARIMA model"""
+    best_score, best_cfg, best_trend = float("inf"), None, None
+    for p in p_values:
+        for d in d_values:
+            for q in q_values:
+                for t in trend_values:
+                    order = (p, d, q)
+                    try:
+                        mse = __evaluate_auto_regressive_model(
+                            data, arima_order=order, use_validation=True, trend=t
+                        )
+                        if mse < best_score:
+                            best_score, best_cfg, best_trend = mse, order, t
+                        logging.info(f"ARIMA{order} Trend={t} MSE={mse}")
+                    except Exception as e:
+                        logging.error(f"ARIMA{order} Trend={t} failed with error: {e}")
+                        continue
+    logging.info(f"Best AR: {best_cfg} Best trend: {best_trend} MSE={best_score}")
+    return best_cfg, best_trend
+
+
+__p_values = [0, 1, 2, 4, 8, 10]
+__d_values = [0]
+__q_values = [0]
+__trend_values = ["c", "t", "ct"]
+
+
+def __get_best_model_order(data: Dataset) -> Model:
+    """Get the best model order for the ARIMA model"""
+    return __evaluate_models(data, __p_values, __d_values, __q_values, __trend_values)
+
+
 def __train_auto_regressive_model(data: Dataset) -> Model:
     """
-    Trains an auto-regressive model using the training set.
+    Fit an AR model, chosen by the best model order.
     """
-    ar_order = __determine_lag_order(data)
-    ma_order = 0
-    int_order = 0
+    (ar_order, int_order, ma_order), trend = __get_best_model_order(data)
+
 
     model = STLForecast(
         __get_training_set(data),
         sm.tsa.ARIMA,
-        model_kwargs=dict(order=(ar_order, int_order, ma_order), trend="t"),
+        model_kwargs=dict(order=(ar_order, int_order, ma_order), trend=trend),
         period=__get_period_of_seasonality(data),
     )
     return model.fit()

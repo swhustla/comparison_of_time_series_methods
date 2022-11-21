@@ -17,7 +17,6 @@ Prediction = TypeVar("Prediction")
 
 from .predict import Predict
 
-__ma_order = 1
 
 def ma(
     fit_simple_ma: Callable[[Dataset], Model],
@@ -31,7 +30,7 @@ def ma(
         """
         Predict using the simple moving average method.
         """
-        model = fit_simple_ma(data, __ma_order)
+        model = fit_simple_ma(data)
         return forecast(model, data)
 
     return predict

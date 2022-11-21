@@ -173,7 +173,7 @@ def __evaluate_models(
                     except Exception as e:
                         logging.error(f"ARIMA{order} Trend={t} failed with error: {e}")
                         continue
-    logging.info(f"Best ARIMA: {best_cfg} Best trend: {t} MSE={best_score}")
+    logging.info(f"Best ARIMA: {best_cfg} Best trend: {best_trend} MSE={best_score}")
     return best_cfg, best_trend
 
 
