@@ -15,6 +15,8 @@ def __write_summary_report(report) -> None:
     """Write a summary report to a file."""
     filepath = "reports/summary_report.csv"
     time_taken = time.time() - report.tstart
+    if report.number_of_iterations > 1:
+        time_taken = time_taken / report.number_of_iterations
     this_summary_dataframe = pd.DataFrame(
         {
             "Start Time": datetime.datetime.fromtimestamp(report.tstart).strftime(

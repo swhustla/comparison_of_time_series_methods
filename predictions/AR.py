@@ -198,6 +198,10 @@ __d_values = [0]
 __q_values = [0]
 __trend_values = ["c", "t", "ct"]
 
+def __calculate_number_of_configurations() -> int:
+    """Calculate the number of configurations to be tested"""
+    return len(__p_values) * len(__d_values) * len(__q_values) * len(__trend_values)
+
 
 def __get_best_model_order(data: Dataset) -> Model:
     """Get the best model order for the ARIMA model"""
@@ -249,6 +253,7 @@ def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/AR/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
+        number_of_iterations=__calculate_number_of_configurations(),
     )
 
 # TODO: add grid search for AR model
