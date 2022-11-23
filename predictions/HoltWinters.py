@@ -137,7 +137,7 @@ def __get_training_test_and_validation_set(data: Dataset) -> Tuple[Dataset, Data
     training, test = __get_training_and_test_set(data)
     validation = Dataset(
         name=data.name,
-        values=training.values[-__number_of_steps(data) :][data.subset_column_name],
+        values=training.values[-__number_of_steps(data) :],
         subset_column_name=data.subset_column_name,
         number_columns=data.number_columns,
         time_unit=data.time_unit,
@@ -146,7 +146,7 @@ def __get_training_test_and_validation_set(data: Dataset) -> Tuple[Dataset, Data
     )
     training = Dataset(
         name=data.name,
-        values=training.values[: -__number_of_steps(data)][data.subset_column_name],
+        values=training.values[: -__number_of_steps(data)],
         subset_column_name=data.subset_column_name,
         number_columns=data.number_columns,
         time_unit=data.time_unit,
@@ -192,10 +192,10 @@ def __measure_mape(actual: Dataset, predicted: np.array) -> float:
 
 def __validation(data: Dataset, config: dict) -> float:
     """Validation for uni-variate data."""
-    test = __get_training_test_and_validation_set(data)[2]
+    _, validation, _ = __get_training_test_and_validation_set(data)
     yhat = __exp_smoothing_forecast(data, config, use_validation=True)
     # estimate prediction error
-    error = __measure_mape(test, yhat)
+    error = __measure_mape(validation, yhat)
 
     return error
 

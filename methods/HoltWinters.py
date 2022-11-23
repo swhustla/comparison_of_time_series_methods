@@ -20,8 +20,8 @@ Prediction = TypeVar("Prediction")
 __parallel = False
 
 def holt_winters(
-    get_best_model: Callable[[Dataset, bool], Tuple[Model, dict]],
-    get_forecast: Callable[[Dataset, Model, dict], Prediction],
+    get_best_model: Callable[[Dataset, bool], Tuple[Model, dict, int]],
+    get_forecast: Callable[[Dataset, Model, dict, int], Prediction],
 ) -> Predict[Dataset, PredictionData]:
     """
     Return a function that takes a dataset and returns a prediction.
@@ -31,6 +31,6 @@ def holt_winters(
         Return a prediction for the given dataset.
         """
         logging.info("Holt-Winters Exponential Smoothing forecast")
-        model, params = get_best_model(dataset, parallel)
-        return get_forecast(dataset, model, params)
+        model, params, number_of_configs = get_best_model(dataset, parallel)
+        return get_forecast(dataset, model, params, number_of_configs)
     return predict

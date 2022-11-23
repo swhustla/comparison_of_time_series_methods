@@ -31,8 +31,8 @@ def sarima(
         Predict the given dataset using the SARIMA method.
         """
         logging.info("Starting SARIMA prediction")
-        model = get_best_sarima_model(dataset)
-        prediction = forecast(model, dataset)
+        model, number_of_configs = get_best_sarima_model(dataset)
+        prediction = forecast(model, dataset, number_of_configs)
         logging.info("Finished SARIMA prediction")
         return prediction
 

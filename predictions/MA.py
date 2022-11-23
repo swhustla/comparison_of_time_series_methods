@@ -196,6 +196,10 @@ __d_values = [0] # differencing
 __q_values = [0, 1, 2, 4, 5, 6, 8, 10] # moving average 
 __trend_values = ["c", "t", "ct"]
 
+def __calculate_number_of_configs(p_values: list, d_values: list, q_values: list, trend_values: list) -> int:
+    """Calculate the total number of models to evaluate"""
+    return len(p_values) * len(d_values) * len(q_values) * len(trend_values)
+
 def __get_best_model_order(data: Dataset) -> Model:
     """Get the best model order for the ARIMA model"""
     return __evaluate_models(data, __p_values, __d_values, __q_values, __trend_values)
@@ -246,6 +250,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/MA/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
+        number_of_iterations=__calculate_number_of_configs(__p_values, __d_values, __q_values, __trend_values),
     )
 
 # TODO: add grid search for MA order
