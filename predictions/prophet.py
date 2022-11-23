@@ -25,7 +25,7 @@ Downsides of Prophet:
 """
 
 
-from typing import TypeVar, List, Dict, Generator
+from typing import TypeVar, List, Dict, Generator, Tuple
 from prophet import Prophet
 import pandas as pd
 import numpy as np
@@ -90,11 +90,12 @@ def __score_model(model: Model, data: Dataset) -> float:
     return __measure_mape(data, test_df, forecast["yhat"].values)
 
 
-def __get_best_model(data: Dataset) -> Model:
+def __get_best_model(data: Dataset) -> Tuple[Model, int]:
     """Get the best model based on the configs"""
     best_score = float("inf")
     best_model = None
-    for config in __get_configs():
+    configs = __get_configs()
+    for config in configs:
         logging.info(f"Trying config: {str(config)} for dataset {data.name} - {data.subset_row_name}")
         try:
             model = __fit_prophet_model(data, config)
@@ -107,7 +108,8 @@ def __get_best_model(data: Dataset) -> Model:
             best_score = score
             best_model = model
     logging.info(f"Best config: {config} -> {best_score}")
-    return best_model
+    # get length of the configs geenrator
+    return best_model, len(list(configs))
 
 
 
@@ -160,7 +162,7 @@ def __check_if_data_is_seasonal_this_time_unit(data: Dataset, time_unit: str) ->
         return False
 
 
-def __forecast(model: Model, data: Dataset) -> PredictionData:
+def __forecast(model: Model, data: Dataset, number_of_configs: int) -> PredictionData:
     """Forecast the next 20% of the data"""
     title = (
         f"{data.subset_column_name} forecast for {data.subset_row_name} with Prophet"
@@ -185,7 +187,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/Prophet/",
         plot_file_name=f"{data.subset_column_name}_forecast",
-        number_of_iterations=
+        number_of_iterations=number_of_configs,
     )
 
 

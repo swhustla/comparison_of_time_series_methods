@@ -142,22 +142,22 @@ __datasets = [
     "stock_prices",
     # "airline_passengers",
     # "list_of_tuples",
-    "sun_spots",
+    # "sun_spots",
     # "csv",
 ]
 
 
 __methods = [
-    "MA",
-    "AR",
-    "linear_regression",
-    "ARIMA",
+    # "MA",
+    # "AR",
+    # "linear_regression",
+    # "ARIMA",
     "Prophet",
-    "FCNN",
-    "FCNN_embedding",
-    "SES",
-    "HoltWinters",
-    "SARIMA",
+    # "FCNN",
+    # "FCNN_embedding",
+    # "SES",
+    # "HoltWinters",
+    # "SARIMA",
     # "TsetlinMachine",
 ]
 
