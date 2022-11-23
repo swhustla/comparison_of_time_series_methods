@@ -286,7 +286,8 @@ def __get_sarima_configs(
     return model_configs
 
 
-def __get_best_sarima_model(data: Dataset) -> SARIMAX:
+
+def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
     """Get the best SARIMA model"""
     logging.info("Finding the best SARIMA model")
     if __stationarity(data):
@@ -299,6 +300,7 @@ def __get_best_sarima_model(data: Dataset) -> SARIMAX:
     
     seasonal = __get_seasonal_period(data)
     configs = __get_sarima_configs(m_params=[seasonal], d_params=[d])
+    
     # grid search
     scores = __grid_search_configs(data, configs)
     logging.debug("done")
@@ -328,7 +330,7 @@ def __get_best_sarima_model(data: Dataset) -> SARIMAX:
     # fit model
     model_fit = model.fit(disp=False)
 
-    return model_fit
+    return model_fit, len(configs)
 
 
 def __fit_model(data: Dataset) -> Model:
@@ -376,7 +378,7 @@ def __get_model_order_snake_case(model: Model) -> str:
     return f"ar_{dict_of_model_orders['ar']}_trend_{dict_of_model_orders['trend']}_ma_{dict_of_model_orders['ma']}_seasonal_ar_{dict_of_model_orders['seasonal_ar']}_seasonal_ma_{dict_of_model_orders['seasonal_ma']}_exog_{dict_of_model_orders['exog']}"
 
 
-def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
+def __forecast(model: Model, data: Dataset, number_of_configs: int) -> pd.DataFrame:
     """Forecast the next 20% of the data"""
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} for the next {__number_of_steps(data)} {data.time_unit} with SARIMA"
     logging.info(f"Forecasting {title}")
@@ -388,6 +390,7 @@ def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/SARIMA/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
+        number_of_iterations=number_of_configs,
     )
 
 

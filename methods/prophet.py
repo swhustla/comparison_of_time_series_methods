@@ -23,8 +23,8 @@ def prophet(
     def predict(
         data: Dataset,
     ) -> Prediction:
-        trained_model = fit_prophet_model(data)
-        return forecast(trained_model, data)
+        trained_model, number_of_configs = fit_prophet_model(data)
+        return forecast(trained_model, data, number_of_configs)
 
     return predict
     

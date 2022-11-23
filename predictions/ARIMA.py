@@ -183,6 +183,9 @@ __q_values = [0, 1, 2, 4, 8, 10]
 __trend_values = ["c", "t", "ct"]
 
 
+def __calculate_number_of_configurations() -> int:
+    return len(__p_values) * len(__d_values) * len(__q_values) * len(__trend_values)
+
 def __get_best_model_order(data: Dataset) -> Model:
     """Get the best model order for the ARIMA model"""
     return __evaluate_models(data, __p_values, __d_values, __q_values, __trend_values)
@@ -226,6 +229,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/ARIMA/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
+        number_of_iterations=__calculate_number_of_configurations(),
     )
 
 
