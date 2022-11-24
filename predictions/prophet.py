@@ -56,8 +56,20 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
     return __get_dataframe_with_date_column(data.values[-__number_of_steps(data) :])
 
 
+def __get_training_and_test_set(data: Dataset) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Get the training and test set"""
+    training_set = __get_training_set(data)
+    test_set = __get_test_set(data)
+    return training_set, test_set
+
+def __get_training_test_and_validation_set(data: Dataset) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Get the training, test and validation set"""
+    training_set, test_set = __get_training_and_test_set(data)
+    validation_set = training_set[-__number_of_steps(data) :]
+    training_set = training_set[: -__number_of_steps(data)]
+    return training_set, validation_set, test_set
+
 #TODO: Add support for multiple time series
-#TODO: Add a validation set
 
 def __get_configs() -> Generator:
     """Get the configs for a grid search on Prophet"""
@@ -81,13 +93,15 @@ def __measure_mape(data: Dataset, actual: pd.DataFrame, predicted: np.array) -> 
     return np.mean(np.abs((actual - predicted) / actual)) * 100
 
 
-def __score_model(model: Model, data: Dataset) -> float:
-    """Score the model on the last 20% of the data"""
-    #TODO: Use a validation set instead of the last 20% of the data
-    test_df = __get_test_set(data)
-    future_dates = __get_future_dates(data)
+def __score_model(model: Model, data: Dataset, use_validation: bool=False) -> float:
+    """Score the model on a validation set or test set"""
+    if use_validation:
+        _, validation_set, _ = __get_training_test_and_validation_set(data)
+    else:
+        validation_set = __get_test_set(data)
+    future_dates = __get_future_dates(data, use_validation=use_validation)
     forecast = model.predict(future_dates)
-    return __measure_mape(data, test_df, forecast["yhat"].values)
+    return __measure_mape(data, validation_set, forecast["yhat"].values)
 
 
 def __get_best_model(data: Dataset) -> Tuple[Model, int]:
@@ -102,7 +116,7 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
         except Exception as e:
             logging.error(f"Error: {e}")
             continue
-        score = __score_model(model, data)
+        score = __score_model(model, data, use_validation=True)
         if score < best_score:
             logging.info(f"New best score: {score}")
             best_score = score
@@ -146,10 +160,15 @@ def __fit_prophet_model(data: Dataset, config:dict) -> Model:
     return model
 
 
-def __get_future_dates(data: Dataset) -> pd.DataFrame:
+def __get_future_dates(data: Dataset, use_validation: bool = False) -> pd.DataFrame:
     """# construct a dataframe with the future dates"""
     # TODO: Ensure that the frequency is correct (e.g. daily, weekly, monthly, etc.)
-    future_dates = __get_test_set(data)["Date"]
+    if use_validation:
+        _, validation_set, _ = __get_training_test_and_validation_set(data)
+        future_dates = validation_set["Date"]
+    else:
+        test_set = __get_test_set(data)
+        future_dates = test_set["Date"]
     datetime_version = pd.to_datetime(future_dates)
     return pd.DataFrame({"ds": datetime_version})
 
@@ -167,10 +186,8 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
     title = (
         f"{data.subset_column_name} forecast for {data.subset_row_name} with Prophet"
     )
-    future = __get_future_dates(data)
-    # TODO: Add settings for the model to include seasonality, holidays, etc.
-    # ideally changepoint_range=1.0, changepoint_prior_scale=0.05 (Suman used 0.75)
-    # daily_seasonality=True
+    future = __get_future_dates(data, use_validation=False)
+    # TODO: Add settings for the model to include holidays, etc.
 
     forecast = model.predict(future)
     forecast_df = forecast.set_index(keys=["ds"])
