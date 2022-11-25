@@ -1,6 +1,7 @@
 install:
 	poetry shell
 	pip install pip --upgrade
+	pip install prophet==1.0      
 	pip install pystan==2.19.1.1
 	pip install torch==1.12.1
 	poetry install
