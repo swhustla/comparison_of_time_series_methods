@@ -152,11 +152,11 @@ __methods = [
     # "AR",
     # "linear_regression",
     # "ARIMA",
-    "Prophet",
+    # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
     # "SES",
-    # "HoltWinters",
+    "HoltWinters",
     # "SARIMA",
     # "TsetlinMachine",
 ]

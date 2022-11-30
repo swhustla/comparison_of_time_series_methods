@@ -215,7 +215,7 @@ def __fit_simple_ma(data: Dataset) -> Model:
     (ar_order, integ_order, ma_order), trend = __get_best_model_order(data)
 
     model = STLForecast(
-        __get_training_set(data),
+        endog=__get_training_set(data),
         model=sm.tsa.ARIMA,
         model_kwargs=dict(order=(ar_order, integ_order, ma_order), trend=trend),
         period=__get_period_of_seasonality(data),
@@ -251,6 +251,8 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         plot_folder=f"{data.name}/{data.subset_row_name}/MA/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
         number_of_iterations=__calculate_number_of_configs(__p_values, __d_values, __q_values, __trend_values),
+        confidence_on_mean=True,
+        confidence_method="95% confidence interval",
     )
 
 # TODO: add grid search for MA order

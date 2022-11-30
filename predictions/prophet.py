@@ -14,6 +14,10 @@ A quick summary of the library is as follows:
     Prophet is robust to missing data and shifts in the trend, and typically handles outliers
     well.
 
+    Prophet estimates uncertainty intervals as well as forecasts. For uncertainty intervals, it uses Monte Carlo sampling.
+    The uncertainty intervals are not guaranteed to be accurate, but they should be a reasonable fit for most applications.
+    The default uncertainty interval is 80%.
+
     A great introduction to Prophet can be found on Towards Data Science:
     https://towardsdatascience.com/an-end-to-end-project-on-time-series-analysis-and-forecasting-with-python-4835e6bf050b
 
@@ -205,6 +209,8 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
         plot_folder=f"{data.name}/{data.subset_row_name}/Prophet/",
         plot_file_name=f"{data.subset_column_name}_forecast",
         number_of_iterations=number_of_configs,
+        confidence_on_mean=False,
+        confidence_method="80% confidence interval by Monte Carlo sampling",
     )
 
 

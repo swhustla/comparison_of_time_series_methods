@@ -197,7 +197,7 @@ def __fit_auto_regressive_model(data: Dataset) -> Model:
     (ar_order, differencing_term, ma_order), trend = __get_best_model_order(data)
 
     model = STLForecast(
-        __get_training_set(data),
+        endog=__get_training_set(data),
         period=__get_period_of_seasonality(data),
         model=sm.tsa.ARIMA,
         model_kwargs={"order": (ar_order, differencing_term, ma_order), "trend": trend},
@@ -230,6 +230,8 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         plot_folder=f"{data.name}/{data.subset_row_name}/ARIMA/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
         number_of_iterations=__calculate_number_of_configurations(),
+        confidence_on_mean=True,
+        confidence_method="95% confidence interval",
     )
 
 
