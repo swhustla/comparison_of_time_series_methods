@@ -251,6 +251,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         plot_folder=f"{data.name}/{data.subset_row_name}/MA/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
         number_of_iterations=__calculate_number_of_configs(__p_values, __d_values, __q_values, __trend_values),
+        confidence_on_mean=True,
     )
 
 # TODO: add grid search for MA order

@@ -149,10 +149,10 @@ __datasets = [
 
 __methods = [
     # "MA",
-    # "AR",
+    "AR",
     # "linear_regression",
     # "ARIMA",
-    "Prophet",
+    # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
     # "SES",

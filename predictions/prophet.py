@@ -205,6 +205,7 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
         plot_folder=f"{data.name}/{data.subset_row_name}/Prophet/",
         plot_file_name=f"{data.subset_column_name}_forecast",
         number_of_iterations=number_of_configs,
+        confidence_on_mean=False,
     )
 
 

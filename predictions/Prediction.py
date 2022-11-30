@@ -14,3 +14,4 @@ class PredictionData:
     plot_file_name: str
     model_config: Optional[dict] = None
     number_of_iterations: Optional[int] = 1
+    confidence_on_mean: Optional[bool] = True

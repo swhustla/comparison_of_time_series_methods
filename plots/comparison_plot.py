@@ -67,16 +67,35 @@ def __plot(
 
     ground_truth_series.plot(ax=ax, label="Ground truth")
     prediction_series.plot(ax=ax, label="Forecast")
-    if prediction.confidence_columns is not None:
-        confidence_interval_df = prediction.values.loc[:, prediction.confidence_columns]
-        ax.fill_between(
-            x=prediction_series.index,
-            y1=confidence_interval_df.iloc[:, 0],
-            y2=confidence_interval_df.iloc[:, 1],
-            alpha=0.2,
-            color="orange",
-            label="Confidence interval",
-        )
+
+    if prediction.confidence_columns is None:
+        print(f"\n\nPlotting {title} without pre-defined confidence intervals\n\n")
+        upper_limit = prediction_series + prediction.values["std"]
+        lower_limit = prediction_series - prediction.values["std"]
+        confidence_interval_label = "Confidence interval - 1 S.D."
+    else:
+        if prediction.confidence_on_mean == False:
+            print(f"\n\nPlotting {title} with pre-defined confidence intervals\n\n")
+            upper_limit = prediction.values.loc[:, prediction.confidence_columns[1]]
+            lower_limit = prediction.values.loc[:, prediction.confidence_columns[0]]
+            confidence_interval_label = "Confidence interval - pre-defined"
+        elif prediction.confidence_on_mean == True:
+            print(f"\n\nPlotting {title} with pre-defined confidence intervals\n\n")
+            upper_limit = prediction_series + (prediction_series.mean() - prediction.values.loc[:, prediction.confidence_columns[0]])
+            lower_limit = prediction_series - (prediction.values.loc[:, prediction.confidence_columns[1]] - prediction_series.mean())
+            confidence_interval_label = "Confidence interval - pre-defined"
+
+
+    # add confidence interval around the prediction, not the mean
+
+    ax.fill_between(
+        x=prediction_series.index,
+        y1=lower_limit,
+        y2=upper_limit,
+        alpha=0.2,
+        color="orange",
+        label=confidence_interval_label,
+    )
     ax.set_title(title)
     if type(ground_truth_series) is pd.DataFrame:
         ground_truth_series = ground_truth_series.iloc[:, 0]

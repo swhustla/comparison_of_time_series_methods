@@ -230,6 +230,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         plot_folder=f"{data.name}/{data.subset_row_name}/ARIMA/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
         number_of_iterations=__calculate_number_of_configurations(),
+        confidence_on_mean=True,
     )
 
 

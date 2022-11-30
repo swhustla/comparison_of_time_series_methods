@@ -254,6 +254,7 @@ def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
         plot_folder=f"{data.name}/{data.subset_row_name}/AR/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
         number_of_iterations=__calculate_number_of_configurations(),
+        confidence_on_mean=True,
     )
 
 # TODO: add grid search for AR model
