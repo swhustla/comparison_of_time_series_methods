@@ -368,19 +368,19 @@ def __seasonal_decompose_data(data: Dataset) -> Dataset:
 
     logging.info(f"Seasonal period: {seasonal_period} for  {data.name}")
 
-    decomposition_STL = STL(
+    decomposition_stl = STL(
         training_data.values[training_data.subset_column_name],
         period=seasonal_period,
         robust=True,
     ).fit()
 
-    __store_plot_of_decomposition_results(data, decomposition_STL, "STL")
+    __store_plot_of_decomposition_results(data, decomposition_stl, "STL")
 
     return Dataset(
         name=data.name,
         time_unit=data.time_unit,
         number_columns=data.number_columns,
-        values=decomposition_STL,
+        values=decomposition_stl,
         subset_column_name=data.subset_column_name,
         subset_row_name=data.subset_row_name,
         seasonality=data.seasonality,
@@ -409,7 +409,7 @@ def __fit_model(data: Dataset) -> Model:
     logging.info(f"Fitting model to {data.name}")
     de_trended_data = __tidy_up_decomposition_data(data).values
 
-    return SimpleExpSmoothing(de_trended_data).fit(
+    return SimpleExpSmoothing(endog=de_trended_data).fit(
         smoothing_level=__alpha,
         optimized=False,
     )
@@ -434,7 +434,7 @@ def __predict(
 ) -> PredictionData:
     """Predicts the next values in the time series"""
     title = f"{decomposed_dataset.subset_column_name} forecast for {decomposed_dataset.subset_row_name} with SES"
-    forecasted_resid = model.forecast(__number_of_steps(data))
+    forecasted_resid = model.forecast(__number_of_steps(data))  # out of sample prediction
 
     # add seasonal and trend components back to the forecast for the correct number of steps
     # if __determine_if_trend_with_acf(decomposed_dataset):
@@ -484,6 +484,8 @@ def __predict(
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/SES/",
         plot_file_name=f"{data.subset_column_name}_forecast",
+        confidence_on_mean=False,
+        confidence_method=None,
     )
 
 

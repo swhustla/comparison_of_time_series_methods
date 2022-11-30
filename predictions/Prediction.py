@@ -15,3 +15,4 @@ class PredictionData:
     model_config: Optional[dict] = None
     number_of_iterations: Optional[int] = 1
     confidence_on_mean: Optional[bool] = True
+    confidence_method: Optional[str] = "std"

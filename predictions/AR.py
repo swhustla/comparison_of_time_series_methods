@@ -216,8 +216,8 @@ def __train_auto_regressive_model(data: Dataset) -> Model:
 
 
     model = STLForecast(
-        __get_training_set(data),
-        sm.tsa.ARIMA,
+        endog=__get_training_set(data),
+        model=sm.tsa.ARIMA,
         model_kwargs=dict(order=(ar_order, int_order, ma_order), trend=trend),
         period=__get_period_of_seasonality(data),
     )
@@ -255,6 +255,7 @@ def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
         number_of_iterations=__calculate_number_of_configurations(),
         confidence_on_mean=True,
+        confidence_method="95% confidence interval",
     )
 
 # TODO: add grid search for AR model
