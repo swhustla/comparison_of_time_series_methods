@@ -23,8 +23,8 @@ def __get_prediction_series(prediction: PredictionData) -> pd.Series:
 def __figure_out_confidence_interval_plot(prediction: PredictionData, prediction_series: pd.Series) -> Tuple[float, float, str]:
     if prediction.confidence_columns is None:
         print(f"\n\nPlotting {prediction.title} without pre-defined confidence intervals\n\n")
-        upper_limit = prediction_series + prediction.values["std"]
-        lower_limit = prediction_series - prediction.values["std"]
+        upper_limit = prediction_series + prediction.values.std()
+        lower_limit = prediction_series - prediction.values.std()
         confidence_interval_label = "Confidence interval - 1 S.D."
     else:
         if prediction.confidence_on_mean == False:
