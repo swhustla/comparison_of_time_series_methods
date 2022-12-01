@@ -41,7 +41,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 __dataset_row_items: dict[str, list[str]] = {
     # from city Guhwati onwards
-    "india_pollution": get_list_of_city_names()[:5],
+    "india_pollution": ['Delhi'], #get_list_of_city_names(),
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -138,11 +138,11 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 
 __datasets = [
-    # "india_pollution",
+     "india_pollution",
     # "stock_prices",
-    "airline_passengers",
+    #"airline_passengers",
     # "list_of_tuples",
-    # "sun_spots",
+    #"sun_spots",
     # "csv",
 ]
 
@@ -157,7 +157,7 @@ __methods = [
     # "FCNN_embedding",
     # "SES",
     "HoltWinters",
-    # "SARIMA",
+    #"SARIMA",
     # "TsetlinMachine",
 ]
 
