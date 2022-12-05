@@ -383,6 +383,7 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> pd.DataFr
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} for the next {__number_of_steps(data)} {data.time_unit} with SARIMA"
     logging.info(f"Forecasting {title}")
     return PredictionData(
+        method_name="SARIMA",
         values=model.get_forecast(steps=__number_of_steps(data)).predicted_mean,
         prediction_column_name=None,
         ground_truth_values=__get_test_set(data),
@@ -391,6 +392,7 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> pd.DataFr
         plot_folder=f"{data.name}/{data.subset_row_name}/SARIMA/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
         number_of_iterations=number_of_configs,
+        color="darkred",
     )
 
 

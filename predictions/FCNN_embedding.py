@@ -158,6 +158,7 @@ def __get_predictions(
 
     print(f"y_test sample: {y_test.head()}")
     return PredictionData(
+        method_name="FCNN embedding",
         values=prediction_series,
         prediction_column_name=None,
         ground_truth_values=y_test,

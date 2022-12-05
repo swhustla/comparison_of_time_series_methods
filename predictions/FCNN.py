@@ -150,6 +150,7 @@ def __get_predictions(
     )
 
     return PredictionData(
+        method_name="FCNN",
         values=prediction_series,
         prediction_column_name=None,
         ground_truth_values=y_test[data.subset_column_name],

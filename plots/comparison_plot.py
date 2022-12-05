@@ -46,12 +46,24 @@ def __full_data_plus_prediction_plot(training_data: pd.DataFrame, prediction: Pr
     figure, axes = plt.subplots(figsize=(10, 5))
 
     training_data_series = training_data.iloc[:, 0]
+    print(f"training_data_series: {training_data_series[:10]}")
+    print(f"training_data_series.index: {training_data_series.index[:10]}")
+
     training_data_series.plot(ax=axes, label="Training data", style=".")
 
     prediction_series = __get_prediction_series(prediction)
     if type(prediction_series) is np.ndarray:
         prediction_series = pd.Series(prediction_series, index=prediction.ground_truth_values.index)
-    prediction_series.plot(ax=axes, label="Forecast", style="-")
+    print(f"prediction_series.index = {prediction_series.index[:10]}")
+    print(f"prediction_series = {prediction_series[:10]}")
+
+
+    try:
+        prediction_series.plot(ax=axes, label="Forecast", style="-")
+    except Exception as e:
+        # make index compatible with matplotlib
+        prediction_series.index = pd.to_datetime(prediction_series.index)
+        prediction_series.plot(ax=axes, label="Forecast", style="-")
 
 
     upper_limit, lower_limit, confidence_interval_label = __figure_out_confidence_interval_plot(prediction, prediction_series)

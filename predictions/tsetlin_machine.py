@@ -527,6 +527,7 @@ def __predict_with_tsetlin_machine_regression_model(
     # convert to numpy array
     x_test_array = np.array(x_test)
     return PredictionData(
+        method_name="Tsetlin Machine Regression",
         values=model.predict(x_test_array),
         prediction_column_name=None,
         ground_truth_values=y_test,
@@ -534,6 +535,7 @@ def __predict_with_tsetlin_machine_regression_model(
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/tsetlin_machine_regression_model/",
         plot_file_name=f"{data.subset_column_name}_forecast",
+        color="lightgray",
     )
 
 

@@ -477,6 +477,7 @@ def __predict(
         forecasted_resid = __sum_of_two_series(forecasted_resid, seasonal_component)
 
     return PredictionData(
+        method_name="SES",
         values=forecasted_resid,
         prediction_column_name=None,
         ground_truth_values=__get_test_set(data).values[data.subset_column_name],
@@ -486,6 +487,7 @@ def __predict(
         plot_file_name=f"{data.subset_column_name}_forecast",
         confidence_on_mean=False,
         confidence_method=None,
+        color="darkorange",
     )
 
 
