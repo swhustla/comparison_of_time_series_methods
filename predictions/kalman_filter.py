@@ -43,6 +43,7 @@ def __fit_kalman_filter_model(data: Dataset) -> Model:
 def __forecast(model: Model, data: Dataset) -> PredictionData:
     """Forecast the next 20% of the data"""
     return PredictionData(
+        method_name="Kalman Filter",
         values=model.smooth(__get_test_set(data))[0],
         prediction_column_name=data.subset_column_name,
         ground_truth_values=__get_test_set(data),

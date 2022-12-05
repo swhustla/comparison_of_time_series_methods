@@ -360,6 +360,7 @@ def __get_forecast(
         len(__get_training_set(data).values) + __number_of_steps(data) - 1,
     )
     return PredictionData(
+        method_name="Holt-Winters Exponential Smoothing",
         values=yhat,
         prediction_column_name=None,
         ground_truth_values=__get_test_set(data).values,
@@ -369,6 +370,7 @@ def __get_forecast(
         plot_file_name=f"{data.subset_column_name}_forecast",
         model_config=best_config,
         number_of_iterations=number_of_configurations,
+        color="gray",
     )
 
 

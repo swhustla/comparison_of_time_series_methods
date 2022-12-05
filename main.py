@@ -26,6 +26,8 @@ from predictions.tsetlin_machine import tsetlin_machine
 from measurements.get_metrics import get_metrics
 from measurements.store_metrics import store_metrics
 from plots.comparison_plot import comparison_plot
+from plots.comparison_plot_multi import comparison_plot_multi
+
 import time
 
 
@@ -124,17 +126,30 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
     """
     
     for dataset_name in datasets:
+        
         data_list = load_dataset(dataset_name)
-        for method_name in methods:
-            for data in data_list:
-                minimum_length = __get_minimum_length_for_dataset(data, method_name)
-                if len(data.values) < int(minimum_length) and method_name in [ "SES", "HoltWinters", "SARIMA", "MA", "AR", "ARIMA"]:
-                    print(f"Skipping {data.name} - {data.subset_row_name} for method {method_name} as at {len(data.values)} {data.time_unit} length it is too small.")
-                    continue
+        for dataset in data_list:
+            predictions_per_dataset = []
+            reports_per_dataset = []
+            training_index = dataset.values.index[: int(len(dataset.values.index) * (1 - __testset_size))]
+            for method_name in methods:
 
-                report = predict_measure_plot(data, method_name)
+                minimum_length = __get_minimum_length_for_dataset(dataset, method_name)
+                if len(dataset.values) < int(minimum_length) and method_name in [ "SES", "HoltWinters", "SARIMA", "MA", "AR", "ARIMA"]:
+                    print(f"Skipping {dataset.name} - {dataset.subset_row_name} for method {method_name} as at {len(dataset.values)} {dataset.time_unit} length it is too small.")
+                    continue
+                
+                report = predict_measure_plot(dataset, method_name)
                 store_metrics(report)
-                yield report
+
+                predictions_per_dataset.append(report.prediction)
+                reports_per_dataset.append(report)
+
+            #TODO: figure out index mismatch for comparison plot (due to linear regression)
+            print(f"dataset.values.index[-1]: {dataset.values.index[-1]}")
+            print(f"training_index[-1]: {training_index[-1]}")
+            comparison_plot_multi(dataset.values.loc[training_index, :], predictions_per_dataset)
+            yield reports_per_dataset
 
 
 __datasets = [
@@ -149,18 +164,18 @@ __datasets = [
 
 __methods = [
     # "MA",
-    # "AR",
+    "AR",
     # "linear_regression",
     # "ARIMA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    # "SES",
+    "SES",
     "HoltWinters",
-    # "SARIMA",
+    "SARIMA",
     # "TsetlinMachine",
 ]
 
 
-for report in generate_predictions(__methods, __datasets):
-    print(report)
+for list_of_reports in generate_predictions(__methods, __datasets):
+    print(list_of_reports)

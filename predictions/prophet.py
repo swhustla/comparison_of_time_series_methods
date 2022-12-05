@@ -201,6 +201,7 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
         .set_index(keys=["ds"])
     )
     return PredictionData(
+        method_name="Prophet",
         values=forecast_df,
         prediction_column_name="yhat",
         ground_truth_values=ground_truth_df["y"],
@@ -211,6 +212,7 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
         number_of_iterations=number_of_configs,
         confidence_on_mean=False,
         confidence_method="80% confidence interval by Monte Carlo sampling",
+        color="violet",
     )
 
 

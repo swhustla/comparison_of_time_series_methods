@@ -41,9 +41,6 @@ from predictions.Prediction import PredictionData
 from methods.linear_regression import linear_regression as method
 
 
-
-
-
 def __get_x_matrix(data: Dataset):
     data.reset_index(inplace=True, drop=True)
     x = data.index.values
@@ -66,26 +63,34 @@ __percent_test = 0.2
 
 
 def __get_training_data(data: Dataset) -> Tuple[np.ndarray, np.ndarray]:
-    print(type(data))
-    print(data)
-    number_of_points = int(len(data.values) * (1 - __percent_test))
+    data_this = data.values.copy()
+    number_of_points = int(len(data_this) * (1 - __percent_test))
     return (
-        __get_x_matrix(data.values)[:number_of_points],
-        __get_y_matrix(data.values)[:number_of_points],
+        __get_x_matrix(data_this)[:number_of_points],
+        __get_y_matrix(data_this)[:number_of_points],
     )
 
 
 def __get_test_data(data: Dataset) -> Tuple[np.ndarray, np.ndarray]:
-    number_of_points = int(len(data.values) * __percent_test)
+    data_this = data.values.copy()
+    number_of_points = int(len(data_this) * __percent_test)
     return (
-        __get_x_matrix(data.values)[-number_of_points:],
-        __get_y_matrix(data.values)[-number_of_points:],
+        __get_x_matrix(data_this)[-number_of_points:],
+        __get_y_matrix(data_this)[-number_of_points:],
     )
 
 
 def __train(data: Dataset) -> np.ndarray:
     x, y = __get_training_data(data)
     return __get_beta_hat(x, y)
+
+
+def __revert_index_to_date(data: Dataset, prediction: PredictionData) -> PredictionData:
+    prediction.values.index = data.values.index[prediction.values.index]
+    prediction.ground_truth_values.index = data.values.index[
+        prediction.ground_truth_values.index
+    ]
+    return prediction
 
 
 def __convert_to_pandas_series(data: np.ndarray, start_value: int = 0) -> pd.Series:
@@ -97,14 +102,19 @@ def __test(data: Dataset, theta) -> Tuple[PredictionData, Dataset]:
     prediction = __predict_using_coefficients(x, theta)
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with Linear Regression"
     start_value = len(data.values) - len(prediction)
-    return PredictionData(
-        values=__convert_to_pandas_series(prediction, start_value=start_value),
-        prediction_column_name=None,
-        ground_truth_values=__convert_to_pandas_series(y, start_value=start_value),
-        confidence_columns=None,
-        title=title,
-        plot_folder=f"{data.name}/{data.subset_row_name}/linear_regression/",
-        plot_file_name=f"{data.subset_column_name}_forecast",
+    return __revert_index_to_date(
+        data=data,
+        prediction=PredictionData(
+            method_name="Linear Regression",
+            values=__convert_to_pandas_series(prediction, start_value=start_value),
+            prediction_column_name=None,
+            ground_truth_values=__convert_to_pandas_series(y, start_value=start_value),
+            confidence_columns=None,
+            title=title,
+            plot_folder=f"{data.name}/{data.subset_row_name}/linear_regression/",
+            plot_file_name=f"{data.subset_column_name}_forecast",
+            color="green",
+        ),
     )
 
 

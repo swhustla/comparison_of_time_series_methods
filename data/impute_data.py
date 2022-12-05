@@ -4,7 +4,10 @@ import pandas as pd
 import logging
 from data.dataset import Dataset
 
-import miceforest as mf
+try:
+    import miceforest as mf
+except Exception as e:
+    logging.error(f"Error importing miceforest: {e}")
 
 
 def __impute_with_pandas_interpolate(dataframe: pd.DataFrame) -> pd.DataFrame:

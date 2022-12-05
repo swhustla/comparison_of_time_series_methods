@@ -243,6 +243,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
     combined_data.rename(columns={0: "forecast"}, inplace=True)
 
     return PredictionData(
+        method_name="MA",
         values=combined_data,
         prediction_column_name="forecast",
         ground_truth_values=__get_test_set(data),
@@ -253,6 +254,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         number_of_iterations=__calculate_number_of_configs(__p_values, __d_values, __q_values, __trend_values),
         confidence_on_mean=True,
         confidence_method="95% confidence interval",
+        color="indigo",
     )
 
 # TODO: add grid search for MA order
