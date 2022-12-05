@@ -22,8 +22,8 @@ __dict_of_metrics = {
         "mean_absolute_error": __get_mean_absolute_error,
     }
 
-def __round_to_4dp(value: float) -> float:
-    return round(value, 4)
+def __round_to_2dp(value: float) -> float:
+    return round(value, 2)
 
 def __metrics(prediction: PredictionData) -> Dict[str, float]:
     if type(prediction.ground_truth_values) == np.ndarray:
@@ -34,7 +34,7 @@ def __metrics(prediction: PredictionData) -> Dict[str, float]:
         prediction = prediction.values[prediction.prediction_column_name].values
     else:
         prediction = prediction.values
-    return dict(map(lambda metric: (metric, __round_to_4dp(__dict_of_metrics[metric](ground_truth, prediction))), __dict_of_metrics))
+    return dict(map(lambda metric: (metric, __round_to_2dp(__dict_of_metrics[metric](ground_truth, prediction))), __dict_of_metrics))
 
 
 get_metrics = method(__metrics)
