@@ -46,16 +46,12 @@ def __full_data_plus_prediction_plot(training_data: pd.DataFrame, prediction: Pr
     figure, axes = plt.subplots(figsize=(10, 5))
 
     training_data_series = training_data.iloc[:, 0]
-    print(f"training_data_series: {training_data_series[:10]}")
-    print(f"training_data_series.index: {training_data_series.index[:10]}")
 
     training_data_series.plot(ax=axes, label="Training data", style=".")
 
     prediction_series = __get_prediction_series(prediction)
     if type(prediction_series) is np.ndarray:
         prediction_series = pd.Series(prediction_series, index=prediction.ground_truth_values.index)
-    print(f"prediction_series.index = {prediction_series.index[:10]}")
-    print(f"prediction_series = {prediction_series[:10]}")
 
 
     try:
@@ -113,8 +109,7 @@ def __plot(
     ax.set_title(prediction.title)
     if type(ground_truth_series) is pd.DataFrame:
         ground_truth_series = ground_truth_series.iloc[:, 0]
-    print(f"ground_truth_series.max() = {ground_truth_series.max()}")
-    print(f"prediction_series.max() = {prediction_series.max()}")
+
     ax.set_ylim(bottom=0, top=1.1 * max(ground_truth_series.max(), prediction_series.max()))
 
     ax.legend()

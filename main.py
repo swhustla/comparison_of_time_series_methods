@@ -145,17 +145,14 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
                 predictions_per_dataset.append(report.prediction)
                 reports_per_dataset.append(report)
 
-            #TODO: figure out index mismatch for comparison plot (due to linear regression)
-            print(f"dataset.values.index[-1]: {dataset.values.index[-1]}")
-            print(f"training_index[-1]: {training_index[-1]}")
             comparison_plot_multi(dataset.values.loc[training_index, :], predictions_per_dataset)
             yield reports_per_dataset
 
 
 __datasets = [
-     "india_pollution",
+    #  "india_pollution",
     # "stock_prices",
-    #"airline_passengers",
+    "airline_passengers",
     # "list_of_tuples",
     #"sun_spots",
     # "csv",
@@ -163,16 +160,16 @@ __datasets = [
 
 
 __methods = [
-    # "MA",
-    "AR",
+    # "AR",
     # "linear_regression",
     # "ARIMA",
-    # "Prophet",
+    # "HoltWinters",
+    # "MA",
+    "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    "SES",
-    "HoltWinters",
-    "SARIMA",
+    # "SES",
+    # "SARIMA",
     # "TsetlinMachine",
 ]
 
