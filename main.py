@@ -165,11 +165,11 @@ __methods = [
     # "ARIMA",
     # "HoltWinters",
     # "MA",
-    "Prophet",
+    # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
+    "SARIMA",
     # "SES",
-    # "SARIMA",
     # "TsetlinMachine",
 ]
 

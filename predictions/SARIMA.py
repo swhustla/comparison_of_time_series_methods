@@ -84,22 +84,6 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
     return data.values[-__number_of_steps(data) :][data.subset_column_name]
 
 
-def __get_training_and_test_sets(data: Dataset) -> tuple:
-    """Get the training and test sets for the SARIMA model"""
-    training_set = __get_training_set(data)
-    test_set = __get_test_set(data)
-    return training_set, test_set
-
-
-def __get_training_validation_and_test_sets(data: Dataset) -> tuple:
-    """Get the training, validation and test sets for the SARIMA model"""
-    training_set, test_set = __get_training_and_test_sets(data)
-    validation_size = int(len(training_set) * 0.2)
-    validation_set = training_set[-validation_size:]
-    training_set = training_set[:-validation_size]
-    # logging.info (f"training set size for {data.name} is {len(training_set)}")
-    return training_set, validation_set, test_set
-
 
 def __stationarity(data: Dataset) -> bool:
     """Determines if the data is stationary"""
@@ -158,17 +142,14 @@ def __get_number_of_lags_or_trend_autoregression_order(data: Dataset) -> int:
         return 1
 
 
-def __sarima_forecast(data: Dataset, config: dict) -> tuple:
-    """Get the SARIMA forecast on the validation set"""
-    training_set, validation_set, _ = __get_training_validation_and_test_sets(
-        data
-    )
+def __evaluate_sarima_model(training_data: Dataset, config: dict) -> pd.Series:
+    """Evaluate the SARIMA forecast on the training set"""
 
     order, seasonal_order, trend = config
 
     # define model
     model = SARIMAX(
-        training_set,
+        endog=training_data,
         order=order,
         seasonal_order=seasonal_order,
         trend=trend,
@@ -179,31 +160,17 @@ def __sarima_forecast(data: Dataset, config: dict) -> tuple:
     # fit model
     model_fit = model.fit(disp=False)
 
-    # make prediction
-    prediction = model_fit.predict(
-        start=len(training_set),
-        end=len(training_set) + len(validation_set) - 1,
-    )
-
-    return prediction, validation_set
+    return model_fit.bic
 
 
-def __measure_rmse(actual: pd.Series, predicted: pd.Series) -> float:
-    """Measure the RMSE of the SARIMA model"""
-    # check if input contains NaN values
-    if actual.isnull().values.any() or predicted.isnull().values.any():
-        return np.nan
-    return np.sqrt(mean_squared_error(actual, predicted))
 
-
-def __validation(data: Dataset, config: dict) -> float:
-    """Get the RMSE of the SARIMA model"""
-    prediction, test_set = __sarima_forecast(data, config)
-    return __measure_rmse(test_set, prediction)
+def __validation(training_data: Dataset, config: dict) -> float:
+    """Get the BIC of the fitted SARIMA model"""
+    return __evaluate_sarima_model(training_data, config)
 
 
 def __score_model(
-    data: Dataset, config: list, debug: bool = False
+    training_data: pd.DataFrame, config: list, debug: bool = False
 ) -> Tuple[str, float]:
     """Score the SARIMA model"""
 
@@ -213,20 +180,20 @@ def __score_model(
     key = str(config)
     # show all warnings and fail on exception if debugging
     if debug:
-        result = __validation(data, config)
+        result = __validation(training_data, config)
     else:
         # one failure during model validation suggests an unstable config
         try:
             # never show warnings when grid searching, too noisy
             with catch_warnings():
                 filterwarnings("ignore")
-                result = __validation(data, config)
+                result = __validation(training_data, config)
         except Exception as error:
             logging.error(f"Error: {error}")
             result = None
     # check for an interesting result
     if result is not None:
-        logging.info(f" > Model[{key}] {result :.3f} RMSE")
+        logging.info(f" > Model[{key}] {result :.3f} BIC")
         # store best result so far compared to global best
         # ensure not referenced before assignment
         if "best_score" not in globals():
@@ -243,14 +210,16 @@ def __grid_search_configs(
     data: Dataset, cfg_list: list, parallel: bool = False
 ) -> list:
     """Grid search the SARIMA model"""
+
+    training_set = __get_training_set(data)
     scores = None
     if parallel:
         # execute configs in parallel
         executor = Parallel(n_jobs=cpu_count(), backend="multiprocessing")
-        tasks = (delayed(__score_model)(data, cfg, True) for cfg in cfg_list)
+        tasks = (delayed(__score_model)(training_set, cfg, True) for cfg in cfg_list)
         scores = executor(tasks)
     else:
-        scores = [__score_model(data, cfg, True) for cfg in cfg_list]
+        scores = [__score_model(training_set, cfg, True) for cfg in cfg_list]
     # remove empty results
     scores = [r for r in scores if r[1] != None]
     # sort configs by error, asc
@@ -306,7 +275,7 @@ def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
     logging.debug("done")
     # list top 3 configs
     for cfg, error in scores[:3]:
-        logging.info(f"Config: {cfg}, RMSE: {error}")
+        logging.info(f"Config: {cfg}, BIC: {error}")
     # get the parameters of the best model
     order, seasonal_order, trend = scores[0][0]
 
@@ -319,7 +288,7 @@ def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
 
     # define model
     model = SARIMAX(
-        training_set,
+        endog=training_set,
         order=order,
         seasonal_order=seasonal_order,
         trend=trend,
@@ -332,41 +301,6 @@ def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
 
     return model_fit, len(configs)
 
-
-def __fit_model(data: Dataset) -> Model:
-    """Fit the SARIMA model to the first 80% of the data"""
-    if __stationarity(data):
-        logging.info(f"Data {data.name} is stationary; no differencing required")
-        d = 0
-    else:
-        logging.info(f"Data {data.name} is not stationary")
-        d = __get_differencing_term(data)
-
-    D = __get_seasonal_differencing_term(data)
-    s = __get_seasonal_period(data)
-
-    p = __get_number_of_lags_or_trend_autoregression_order(data)
-
-    my_order = (p, d, 0)
-    my_seasonal_order = (1, D, 1, s)
-
-    model = SARIMAX(
-        __get_training_set(data),
-        order=my_order,
-        seasonal_order=my_seasonal_order,
-        enforce_stationarity=False,
-        enforce_invertibility=False,
-        trend=__get_trend_given_data(data),
-    )
-    logging.info(f"Number of observations for {data.name} is {len(data.values)}")
-    logging.info(
-        f"Training SARIMA model on {data.name} with order {my_order} and seasonal order {my_seasonal_order}"
-    )
-    if data.time_unit == "days":
-        # show progress bar for model fitting
-        return model.fit(disp=True)
-    else:
-        return model.fit(disp=False)
 
 
 def __get_model_order_snake_case(model: Model) -> str:
