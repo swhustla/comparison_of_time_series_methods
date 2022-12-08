@@ -127,45 +127,14 @@ def __get_test_set(data: Dataset) -> Dataset:
         seasonality=data.seasonality,
     )
 
-def __get_training_and_test_set(data: Dataset) -> Tuple[Dataset, Dataset]:
-    return (
-        __get_training_set(data),
-        __get_test_set(data),
-    )
-
-def __get_training_test_and_validation_set(data: Dataset) -> Tuple[Dataset, Dataset, Dataset]:
-    training, test = __get_training_and_test_set(data)
-    validation = Dataset(
-        name=data.name,
-        values=training.values[-__number_of_steps(data) :],
-        subset_column_name=data.subset_column_name,
-        number_columns=data.number_columns,
-        time_unit=data.time_unit,
-        subset_row_name=data.subset_row_name,
-        seasonality=data.seasonality,
-    )
-    training = Dataset(
-        name=data.name,
-        values=training.values[: -__number_of_steps(data)],
-        subset_column_name=data.subset_column_name,
-        number_columns=data.number_columns,
-        time_unit=data.time_unit,
-        subset_row_name=data.subset_row_name,
-        seasonality=data.seasonality,
-    )
-    return training, validation, test
 
 
-def __exp_smoothing_forecast(data: Dataset, config: dict, use_validation: bool) -> np.array:
+
+def __evaluate_exp_smoothing_model(data: Dataset, config: dict) -> np.array:
     # multi-step Holt-Winters Exponential Smoothing forecast
     t, d, s, p, b, r = config
     # define model
-    if use_validation:
-        training_dataset, validation_dataset, test_dataset = __get_training_test_and_validation_set(data)
-
-    else:
-        training_dataset, test_dataset = __get_training_test_and_validation_set(data)
-
+    training_dataset = __get_training_set(data)
     training_data = np.array(training_dataset.values)
 
     model = ExponentialSmoothing(
@@ -179,25 +148,9 @@ def __exp_smoothing_forecast(data: Dataset, config: dict, use_validation: bool) 
 
     # fit model
     model_fit = model.fit(optimized=True, remove_bias=r)
-    # make multi-step forecast
-    yhat = model_fit.predict(
-        len(training_data), len(training_data) + __number_of_steps(data) - 1
-    )
-    return yhat
+    
+    return model_fit.bic
 
-
-def __measure_mape(actual: Dataset, predicted: np.array) -> float:
-    return np.mean(np.abs((actual.values - predicted) / actual.values)) * 100
-
-
-def __validation(data: Dataset, config: dict) -> float:
-    """Validation for uni-variate data."""
-    _, validation, _ = __get_training_test_and_validation_set(data)
-    yhat = __exp_smoothing_forecast(data, config, use_validation=True)
-    # estimate prediction error
-    error = __measure_mape(validation, yhat)
-
-    return error
 
 
 def __score_model(
@@ -223,9 +176,10 @@ def __score_model(
         except Exception as e:
             logging.error(e)
             result = None
+            raise e
     # check for an interesting result
     if result is not None:
-        print(f" > Model[{key}] {result}")
+        print(f" > Model[{key}] BIC={result}")
     return (result, config)
 
 
@@ -233,14 +187,13 @@ def __grid_search_configs(
     data: Dataset, cfg_list: list, parallel: bool = True
 ) -> List[Tuple[float, dict]]:
     """Grid search the configs."""
-    scores = list()
     # use fork to avoid memory issues with multiprocessing
     if parallel:
         scores = Parallel(n_jobs=-1, backend="multiprocessing")(
-            delayed(__score_model)(data, cfg, __validation) for cfg in cfg_list
+            delayed(__score_model)(data, cfg, __evaluate_exp_smoothing_model) for cfg in cfg_list
         )
     else:
-        scores = [__score_model(data, cfg, __validation) for cfg in cfg_list]
+        scores = [__score_model(data, cfg, __evaluate_exp_smoothing_model) for cfg in cfg_list]
 
     # remove empty results
     scores = [r for r in scores if r[0] is not None]
