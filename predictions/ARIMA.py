@@ -66,23 +66,6 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
     return data.values[-__number_of_steps(data) :][data.subset_column_name]
 
 
-def __get_train_and_test_sets(data: Dataset) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Prepare the data for the ARIMA model"""
-    training_set = __get_training_set(data)
-    test_set = __get_test_set(data)
-    return training_set, test_set
-
-
-def __get_train_validation_and_test_sets(
-    data: Dataset,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Prepare the data for the ARIMA model"""
-    training_set, test_set = __get_train_and_test_sets(data)
-    validation_set = training_set[-__number_of_steps(data) :]
-    training_set = training_set[: -__number_of_steps(data)]
-    return training_set, validation_set, test_set
-
-
 def __get_period_of_seasonality(data: Dataset) -> int:
     """
     Returns the period of seasonality.
