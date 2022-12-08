@@ -51,8 +51,10 @@ def __full_data_plus_prediction_plot(training_data: pd.DataFrame, prediction: Pr
 
     prediction_series = __get_prediction_series(prediction)
     if type(prediction_series) is np.ndarray:
-        prediction_series = pd.Series(prediction_series, index=prediction.ground_truth_values.index)
-
+        if type(prediction.ground_truth_values) is pd.DataFrame:
+            prediction_series = pd.Series(prediction_series, index=prediction.ground_truth_values.index)
+        elif type(prediction.ground_truth_values) is np.array:
+            prediction_series = pd.Series(prediction_series, index=training_data_series.index)
 
     try:
         prediction_series.plot(ax=axes, label="Forecast", style="-")

@@ -168,9 +168,9 @@ __methods = [
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    "SARIMA",
+    # "SARIMA",
     # "SES",
-    # "TsetlinMachine",
+    "TsetlinMachine",
 ]
 
 

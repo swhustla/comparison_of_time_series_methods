@@ -129,7 +129,7 @@ The grid search is used to find the best parameters for the Tsetlin Machine.
 """
 
 from multiprocessing import Pool
-from typing import Callable, Tuple, TypeVar, List
+from typing import Callable, Tuple, TypeVar, List, Dict, Any
 
 import pandas as pd
 import numpy as np
@@ -148,6 +148,8 @@ from data.dataset import Dataset
 from predictions.Prediction import PredictionData
 
 import logging
+logging.basicConfig(level=logging.DEBUG)
+
 import warnings
 
 Model = TypeVar("Model")
@@ -194,7 +196,7 @@ def __add_ts_fresh_features_to_data(data: Dataset) -> pd.DataFrame:
         default_fc_parameters=tsf_settings,
     )
 
-    print(f"Data with features: {data_with_features.head()}")
+    logging.info(f"Data with features: {data_with_features.head()}")
     return data_with_features
 
 
@@ -219,17 +221,17 @@ def __binarize_data(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def __prepare_training_data(
-    x_train: pd.DataFrame, y_train: pd.DataFrame
+    x_data: pd.DataFrame, y_data: pd.DataFrame
 ) -> Tuple[np.array, np.array]:
     """
     Prepare the training data for the Tsetlin Machine.
     """
     logging.info("Preparing training data...")
     # convert to numpy array
-    x_train = np.array(x_train)
+    x_data = np.array(x_data)
     # convert to numpy array with 1 dimension
-    y_train = np.array(y_train).reshape(-1)
-    return x_train, y_train
+    y_data = np.array(y_data).reshape(-1)
+    return x_data, y_data
 
 
 def __get_train_and_test_sets(
@@ -240,27 +242,12 @@ def __get_train_and_test_sets(
         x_data, y_data, test_size=__test_size, shuffle=False
     )
     x_train, y_train = __prepare_training_data(x_train, y_train)
+    x_test, y_test = __prepare_training_data(x_test, y_test)
     return x_train, x_test, y_train, y_test
-
-
-def __get_train_validation_and_test_sets(
-    x_data: pd.DataFrame, y_data: pd.DataFrame
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Get the training, validation and test sets."""
-    x_train, x_test, y_train, y_test = train_test_split(
-        x_data, y_data, test_size=__test_size, shuffle=False
-    )
-    x_train, x_validation, y_train, y_validation = train_test_split(
-        x_train, y_train, test_size=__test_size, shuffle=False
-    )
-    x_train, y_train = __prepare_training_data(x_train, y_train)
-    
-    return x_train, x_validation, x_test, y_train, y_validation, y_test
 
 
 def __prepare_and_split_data(
     data: Dataset,
-    with_validation: bool = False,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Split data into training, validation and test sets."""
     data_with_extra_features = _add_month_and_year_columns(data)
@@ -271,23 +258,21 @@ def __prepare_and_split_data(
 
     logging.info("Splitting data into training, validation and test sets...")
 
-    if with_validation:
-        return __get_train_validation_and_test_sets(binarized_x_data, y_data)
+    return __get_train_and_test_sets(binarized_x_data, y_data)
 
-    else:
-        return __get_train_and_test_sets(binarized_x_data, y_data)
 
+def __get_test_date_index(data: Dataset, y_test_shape: int) -> pd.DatetimeIndex:
+    """Get the test date index."""
+    return data.values.index[-y_test_shape:]
 
 def __create_tsetlin_machine_regression_model(
-    data: Dataset, config: dict
+    data_targets: np.array, config: dict
 ) -> RegressionTsetlinMachine:
     """
     Create a Tsetlin Machine regression model for time series prediction.
     """
     logging.info("Creating Tsetlin Machine regression model...")
-    data_targets = data.values[data.subset_column_name]
     number_of_states = int(1 + (data_targets.max() - data_targets.min()) / (2 * __s))
-    logging.info(f"Number of states T = {number_of_states}")
     tm = RegressionTsetlinMachine(
         number_of_clauses=config["number_of_clauses"],
         s=config["s"],
@@ -300,41 +285,29 @@ def __create_tsetlin_machine_regression_model(
 
 
 def __tsetlin_machine_regression_forecast(
-    data: Dataset, config: dict, use_validation: bool
-) -> Tuple[List[float], List[float]]:
+    model: RegressionTsetlinMachine,
+    x_data: np.ndarray,
+    y_data: np.ndarray,
+    config: dict,
+) -> Tuple[np.array, np.array]:
     """
     Make a forecast using a Tsetlin Machine regression model.
     """
-    if use_validation:
-        x_train, x_val, x_test, y_train, y_val, y_test = __prepare_and_split_data(
-            data, with_validation=True
-        )
-
-    else:
-        x_train, x_test, y_train, y_test = __prepare_and_split_data(
-            data, with_validation=False
-        )
-
-    # define model
-    tm = __create_tsetlin_machine_regression_model(data=data, config=config)
     # fit model
     logging.info("Fitting Tsetlin Machine regression model...")
 
-    tm.fit(
-        x_train,
-        y_train,
+
+    model.fit(
+        X=x_data,
+        Y=y_data,
         epochs=__number_of_epochs,
         incremental=config["incremental"],
     )
     # make multi-step forecast
     logging.info("Making multi-step forecast...")
 
-    if use_validation:
-        yhat = tm.predict(x_val.values)
-        ground_truth = y_val
-    else:
-        yhat = tm.predict(x_test.values)
-        ground_truth = y_test
+    yhat = model.predict(x_data)
+    ground_truth = y_data
 
     return yhat, ground_truth
 
@@ -342,26 +315,26 @@ def __tsetlin_machine_regression_forecast(
 def __measure_mape(actual: pd.Series, predicted: pd.Series) -> float:
     """Calculate the mean absolute percentage error."""
     logging.info("Calculating the mean absolute percentage error...")
-    print(f"types: actual {type(actual)}, predicted {type(predicted)}")
     return np.mean(np.abs((actual - predicted) / actual)) * 100
 
 
-def __validation(data: Dataset, config: dict) -> float:
+def __validation(x_train: np.array, y_train: np.array, config: dict) -> float:
     """
     Evaluate a config using a given dataset.
     """
     logging.info("Evaluating config...")
-    y_pred, y_val = __tsetlin_machine_regression_forecast(
-        data, config, use_validation=True
-    )
-    if type(y_val) == pd.DataFrame:
-        y_val = pd.Series(y_val.values.flatten())
+    # create model
+    model = __create_tsetlin_machine_regression_model(y_train, config)
+    y_pred, y_val = __tsetlin_machine_regression_forecast(model=model, x_data=x_train, y_data=y_train, config=config)
+    if type(y_val) == np.array:
+        y_val = pd.Series(y_val.flatten())
     # calculate MAPE
     return __measure_mape(actual=y_val, predicted=y_pred)
 
 
 def __score_model(
-    data: Dataset,
+    x_train: np.array,
+    y_train: np.array,
     config: dict,
     func: Callable[[Dataset, dict], float],
     debug: bool = False,
@@ -373,17 +346,18 @@ def __score_model(
     key = str(config)
     # show all warnings and fail on exception if debugging
     if debug:
-        result = func(data, config)
+        result = func(x_train, y_train, config)
     else:
         # one failure during model validation suggests an unstable config
         try:
             # never show warnings when grid searching, too noisy
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore")
-                result = func(data, config)
+                result = func(x_train, y_train, config)
         except Exception as e:
             logging.error(f"Error during model validation: {e}")
             result = None
+            raise e
     # check for an interesting result
     if result is not None:
         print(f" > Model[{key}] MAPE={result:.3f}")
@@ -391,7 +365,7 @@ def __score_model(
 
 
 def __grid_search(
-    data: Dataset, cfg_list: list, parallel: bool = True
+    x_train: np.array, y_train: np.array, cfg_list: list, parallel: bool = True
 ) -> List[Tuple[float, dict]]:
     """
     Grid search over configs.
@@ -402,10 +376,13 @@ def __grid_search(
     if parallel:
         with Pool() as pool:
             scores = pool.starmap(
-                __score_model, [(data, cfg, __validation) for cfg in cfg_list]
+                __score_model,
+                [(x_train, y_train, cfg, __validation) for cfg in cfg_list],
             )
     else:
-        scores = [__score_model(data, cfg, __validation) for cfg in cfg_list]
+        scores = [
+            __score_model(x_train, y_train, cfg, __validation) for cfg in cfg_list
+        ]
 
     # Remove empty results
     scores = [r for r in scores if r[0] != None]
@@ -440,97 +417,66 @@ def __tsetlin_configs() -> list:
                                 "weighted_clauses": weighted_clauses,
                             }
                             model_configs.append(cfg)
-    print(f"Total number of configs: {len(model_configs)}")
+    logging.info(f"Total number of configs: {len(model_configs)}")
     return model_configs
 
 
-def __get_best_model(
+def __get_best_model_config(
     data: Dataset, parallel: bool = False
-) -> Tuple[RegressionTsetlinMachine, dict]:
+) -> Dict:
     """
     Get the best model from a grid search.
     """
     # grid search
     configs = __tsetlin_configs()
-    scores = __grid_search(data, configs, parallel)
-    print(f"sample of scores: {scores[:3]}")
+    x_train, _ , y_train, _ = __prepare_and_split_data(data)
+    scores = __grid_search(x_train=x_train, y_train=y_train, cfg_list=configs, parallel=parallel)
     # get the best config
     best_config = scores[0][1]
-    print(f"Best s: {best_config['s']}")
-    print(f"Best number_of_clauses: {best_config['number_of_clauses']}")
-    print(f"Best number_of_state_bits: {best_config['number_of_state_bits']}")
-    print(
+    logging.info(f"Best number_of_clauses: {best_config['number_of_clauses']}")
+    logging.info(f"Best number_of_state_bits: {best_config['number_of_state_bits']}")
+    logging.info(
         f"Best boost_true_positive_feedback: {best_config['boost_true_positive_feedback']}"
     )
-    print(f"Best incremental: {best_config['incremental']}")
-    print(f"Best weighted_clauses: {best_config['weighted_clauses']}")
+    logging.info(f"Best incremental: {best_config['incremental']}")
+    logging.info(f"Best weighted_clauses: {best_config['weighted_clauses']}")
 
-    # get the best model
-    best_model = __create_tsetlin_machine_regression_model(
-        data=data, config=best_config
-    )
-    x_train, x_test, y_train, y_test = __prepare_and_split_data(
-        data, with_validation=False
-    )
-    best_model.fit(
-        x_train,
-        y_train,
-        incremental=best_config["incremental"],
-        epochs=__number_of_epochs,
-    )
-
-    return (best_model, best_config)
+    return best_config
 
 
 def __train_tsetlin_machine_regression_model(
-    t_model: Model, x_train: pd.DataFrame, y_train: pd.DataFrame
-) -> Model:
+    t_model: RegressionTsetlinMachine, x_train: np.ndarray, y_train: np.ndarray, config: dict
+) -> RegressionTsetlinMachine:
     """
     Train a Tsetlin Machine regression model.
     """
-    # convert to numpy array
-    x_train = np.array(x_train)
     # convert to numpy array with 1 dimension
-    y_train = np.array(y_train).reshape(-1)
-    t_model.fit(x_train, y_train, epochs=__number_of_epochs)
+    y_train = y_train.reshape(-1)
+    t_model.fit(x_train, y_train, epochs=__number_of_epochs, incremental=config["incremental"])
     return t_model
 
 
 def __get_forecast(
-    data: Dataset, model: RegressionTsetlinMachine, best_config: dict
+    data: Dataset,
+    best_config: dict
 ) -> PredictionData:
     """
     Get the forecast for the test set.
     """
     title = f"Forecast for {data.name} {data.subset_column_name} using Tsetlin Machine Regression"
-    yhat, ground_truth = __tsetlin_machine_regression_forecast(
-        data, best_config, use_validation=False
-    )
-    return PredictionData(
-        values=yhat,
-        prediction_column_name=None,
-        ground_truth_values=ground_truth,
-        confidence_columns=None,
-        title=title,
-        plot_folder=f"{data.name}/{data.subset_row_name}/tsetlin_machine_regression_model/",
-        plot_file_name=f"{data.subset_column_name}_forecast",
-    )
+    x_train, x_test, y_train, y_test = __prepare_and_split_data(data=data)
 
+    model = __create_tsetlin_machine_regression_model(data_targets=y_train, config=best_config)
 
-def __predict_with_tsetlin_machine_regression_model(
-    model: Model, data: Dataset, x_test: pd.DataFrame, y_test: pd.DataFrame
-) -> PredictionData:
-    """
-    Predict with a Tsetlin Machine regression model.
-    """
-    title = f"{data.subset_column_name} forecast for {data.subset_row_name} with a Tsetlin Machine Regression Model"
-    # convert to numpy array
-    x_test_array = np.array(x_test)
+    trained_model = __train_tsetlin_machine_regression_model(t_model=model, x_train=x_train, y_train=y_train, config=best_config)
+
+    y_hat, _ = __tsetlin_machine_regression_forecast(model=trained_model, x_data=x_test, y_data=y_test, config=best_config)
+ 
     return PredictionData(
         method_name="Tsetlin Machine Regression",
-        values=model.predict(x_test_array),
+        values=pd.Series(y_hat, index=__get_test_date_index(data, y_test.shape[0])),
         prediction_column_name=None,
-        ground_truth_values=y_test,
+        ground_truth_values=pd.Series(y_test, index=__get_test_date_index(data, y_test.shape[0])),
         confidence_columns=None,
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/tsetlin_machine_regression_model/",
@@ -539,7 +485,8 @@ def __predict_with_tsetlin_machine_regression_model(
     )
 
 
+
 tsetlin_machine = method(
-    __get_best_model,
+    __get_best_model_config,
     __get_forecast,
 )
