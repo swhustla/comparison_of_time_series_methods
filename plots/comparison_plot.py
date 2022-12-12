@@ -58,7 +58,7 @@ def __full_data_plus_prediction_plot(training_data: pd.DataFrame, prediction: Pr
 
     try:
         prediction_series.plot(ax=axes, label="Forecast", style="-")
-    except Exception as e:
+    except Exception:
         # make index compatible with matplotlib
         prediction_series.index = pd.to_datetime(prediction_series.index)
         prediction_series.plot(ax=axes, label="Forecast", style="-")
