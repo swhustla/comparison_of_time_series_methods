@@ -27,8 +27,10 @@ from measurements.get_metrics import get_metrics
 from measurements.store_metrics import store_metrics
 from plots.comparison_plot import comparison_plot
 from plots.comparison_plot_multi import comparison_plot_multi
+from plots.plot_results_in_heatmap import plot_results_in_heatmap
 
 import time
+import logging
 
 
 __dataset_loaders: dict[str, Load[Dataset]] = {
@@ -128,6 +130,7 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
     for dataset_name in datasets:
         
         data_list = load_dataset(dataset_name)
+        results_store = []
         for dataset in data_list:
             predictions_per_dataset = []
             reports_per_dataset = []
@@ -147,7 +150,14 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
             if len(predictions_per_dataset) > 0:
                 comparison_plot_multi(dataset.values.loc[training_index, :], predictions_per_dataset)
+
+            results_store.append(reports_per_dataset)
             yield reports_per_dataset
+        
+        logging.info(f"Plotting results for all datasets in {dataset_name}")
+        plot_results_in_heatmap(results_store)
+
+
 
 
 __datasets = [

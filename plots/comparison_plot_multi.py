@@ -82,7 +82,7 @@ def __plot_full_dataset_plus_predictions(
 
 
 def __save_plot(
-    figure: Figure, folder: str, file_name: str, plot_type: str, title: str
+    figure: Figure, folder: str, file_name: str, plot_type: str
 ) -> None:
     """Save the plot to disk."""
     print(f"Saving plot to {folder}/{file_name}_{plot_type}.png")
