@@ -45,7 +45,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 __dataset_row_items: dict[str, list[str]] = {
     # from city Guhwati onwards
-    "india_pollution": get_list_of_city_names()[:5],
+    "india_pollution": get_list_of_city_names()[:4],
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -156,6 +156,7 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
         
         logging.info(f"Plotting results for all datasets in {dataset_name}")
         plot_results_in_heatmap(results_store)
+        logging.info(f"Plotting results for all datasets in {dataset_name} - done")
 
 
 
@@ -171,16 +172,16 @@ __datasets = [
 
 
 __methods = [
-    # "AR",
-    # "linear_regression",
+    "AR",
+    "linear_regression",
     # "ARIMA",
-    "HoltWinters",
+    # "HoltWinters",
     # "MA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
     # "SARIMA",
-    # "SES",
+    "SES",
     # "TsetlinMachine",
 ]
 
