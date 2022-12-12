@@ -50,7 +50,7 @@ def __get_plot_metadata(
 
 
 def __plot_full_dataset_plus_predictions(
-    training_data: pd.DataFrame, predictions: list[PredictionData]
+    training_data: pd.DataFrame, predictions: list[PredictionData], title: str
 ) -> Figure:
     """Plot the full data and the prediction."""
     figure, axis = plt.subplots(figsize=(10, 5))
@@ -78,11 +78,15 @@ def __plot_full_dataset_plus_predictions(
 
     axis.legend(loc="upper left")
 
+    axis.set_title(title)
+
+
+
     return figure
 
 
 def __save_plot(
-    figure: Figure, folder: str, file_name: str, plot_type: str, title: str
+    figure: Figure, folder: str, file_name: str, plot_type: str
 ) -> None:
     """Save the plot to disk."""
     print(f"Saving plot to {folder}/{file_name}_{plot_type}.png")
@@ -93,5 +97,5 @@ def __save_plot(
 
 
 comparison_plot_multi = method(
-    __plot_full_dataset_plus_predictions, __get_plot_metadata, __save_plot
+    __get_plot_metadata, __plot_full_dataset_plus_predictions, __save_plot
 )
