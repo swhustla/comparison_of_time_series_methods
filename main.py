@@ -154,10 +154,10 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
             results_store.append(reports_per_dataset)
             yield reports_per_dataset
         
-        if len(results_store) > 1:
-            logging.info(f"Plotting results for all datasets in {dataset_name}")
+        if len(results_store) > 1 and len(data_list) > 1:
+            logging.info(f"Plotting results for all {len(data_list)} datasets in {dataset_name} for all methods...")
             plot_results_in_heatmap(results_store)
-            logging.info(f"Plotting results for all datasets in {dataset_name} - done")
+            logging.info(f"Plotting results for all {len(data_list)} datasets in {dataset_name} - done")
 
 
 
