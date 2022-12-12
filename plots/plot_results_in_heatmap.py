@@ -45,7 +45,7 @@ def __get_dataset_name(results_dataframe: pd.DataFrame) -> str:
 
 def __get_title(results_dataframe: pd.DataFrame, chosen_metric: str) -> str:
     """Get the title of the plot"""
-    return f"{chosen_metric} results for {__get_dataset_name(results_dataframe)} for {results_dataframe['method'].unique().size} methods on {results_dataframe['subset_row'].unique().size} datasets"
+    return f"{chosen_metric} results for {__get_dataset_name(results_dataframe)} for {results_dataframe['method'].unique().size} predictive methods on {results_dataframe['subset_row'].unique().size} datasets"
 
 
 def __plot_heatmap(
@@ -56,6 +56,8 @@ def __plot_heatmap(
     title = __get_title(results_dataframe, chosen_metric)
     figure, axis = plt.subplots(figsize=(20, 10))
     axis.set_title(title)
+    axis.set_xlabel("Method")
+    axis.set_ylabel("Dataset")
     # chose sns colormap that goes from red (high error) to green (low error) without white in the middle
     colormap = sns.diverging_palette(220, 20, as_cmap=True)
 
