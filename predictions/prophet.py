@@ -31,11 +31,16 @@ Downsides of Prophet:
 
 from typing import TypeVar, List, Dict, Generator, Tuple
 from prophet import Prophet
-from sklearn.metrics import mean_absolute_percentage_error, mean_squared_error, mean_absolute_error
+from sklearn.metrics import (
+    mean_absolute_percentage_error,
+    mean_squared_error,
+    mean_absolute_error,
+)
 import pandas as pd
 import numpy as np
 
 import logging
+
 # set up logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -63,12 +68,13 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
     return __get_dataframe_with_date_column(data.values[-__number_of_steps(data) :])
 
 
-#TODO: Add support for multiple time series
+# TODO: Add support for multiple time series
+
 
 def __get_configs() -> Generator:
     """Get the configs for a grid search on Prophet"""
     for changepoint_range in [0.01, 0.1, 0.9, 0.99]:
-        for seasonality_prior_scale in [0.1, 0.9]: #[0.1, 0.9, 0.99, 1.0]:
+        for seasonality_prior_scale in [0.1, 0.9]:  # [0.1, 0.9, 0.99, 1.0]:
             for changepoint_prior_scale in [0.001, 0.05, 0.5, 0.95, 0.99]:
                 for seasonality_mode in ["additive", "multiplicative"]:
                     yield {
@@ -79,22 +85,23 @@ def __get_configs() -> Generator:
                     }
 
 
-
-def __measure_error_metric(data: Dataset, actual: pd.DataFrame, predicted: np.array) -> float:
+def __measure_error_metric(
+    data: Dataset, actual: pd.DataFrame, predicted: np.array
+) -> float:
     """Measure the error"""
     # change actual to a numpy array
     actual_this = actual.loc[:, data.subset_column_name].values
-    print(f"Actual: {actual_this[:10]}")
-    print(f"Predicted: {predicted[:10]}")
+    # calculate the error
     result = mean_absolute_percentage_error(y_true=actual_this, y_pred=predicted)
-    print(f"Error: {result}")
     return result
-    
+
 
 def __score_model(model: Model, data: Dataset) -> float:
     """Score the model on a data set"""
     forecast = model.predict()
-    return __measure_error_metric(data, __get_training_set(data), forecast["yhat"].values)
+    return __measure_error_metric(
+        data, __get_training_set(data), forecast["yhat"].values
+    )
 
 
 def __get_best_model(data: Dataset) -> Tuple[Model, int]:
@@ -102,35 +109,41 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
     best_score = float("inf")
     best_model = None
     configs = __get_configs()
-    
+
     training_df = __get_training_set(data)
-    renamed_training_df = training_df.rename(columns={"Date": "ds", data.subset_column_name: "y"})
+    renamed_training_df = training_df.rename(
+        columns={"Date": "ds", data.subset_column_name: "y"}
+    )
 
     for config in configs:
         model = None
-        print(f"Trying config: \n{str(config)} \nfor dataset {data.name} - {data.subset_row_name}")
+        print(
+            f"Trying config: \n{str(config)} \nfor dataset {data.name} - {data.subset_row_name}"
+        )
         try:
             model = __fit_prophet_model(renamed_training_df, config)
         except Exception as e:
             logging.error(f"Error: {e}")
-            raise e
-            
-            
+            model = None
+            continue
+
         score = __score_model(model, data)
 
         # print score if not nan
         if not np.isnan(score):
             logging.info(f"\n\nScore: {score}")
 
-        if score < best_score:
-            print(f"New best score: {score}")
-            best_score = score
-            best_model = model
-            best_config = config
-        
+            if score < best_score:
+                print(f"New best score: {score}")
+                best_score = score
+                best_model = model
+                best_config = config
+
         del model
     # log the best config formatted nicely
-    formatted_config = ", ".join([f"{key}={value}" for key, value in best_config.items()])
+    formatted_config = ", ".join(
+        [f"{key}={value}" for key, value in best_config.items()]
+    )
     print(f"\n\nBest config: {formatted_config} -> {best_score}")
     # get length of the configs geenrator
     return best_model, len(list(configs))
@@ -152,8 +165,10 @@ def __get_seasonality_settings(data: Dataset) -> Dict:
 
 
 # TODO: Add settings for the model to include seasonality, holidays, etc.
-def __fit_prophet_model(training_data: pd.DataFrame, config:dict) -> Model:
+def __fit_prophet_model(training_data: pd.DataFrame, config: dict) -> Model:
     """Fit a Prophet model to the first 80% of the data"""
+
+    logging.info(f"Fitting model with config: {str(config)}")
 
     model = Prophet(
         seasonality_prior_scale=config["seasonality_prior_scale"],
@@ -162,7 +177,7 @@ def __fit_prophet_model(training_data: pd.DataFrame, config:dict) -> Model:
         seasonality_mode=config["seasonality_mode"],
     )
 
-    model.fit(df=training_data)
+    model.fit(df=training_data, verbose=False)
     return model
 
 
@@ -174,6 +189,7 @@ def __get_future_dates(data: Dataset) -> pd.DataFrame:
     future_dates = test_set["Date"]
     datetime_version = pd.to_datetime(future_dates)
     return pd.DataFrame({"ds": datetime_version})
+
 
 def __get_training_dates(data: Dataset) -> pd.DataFrame:
     """# construct a dataframe with the future dates"""
@@ -200,13 +216,15 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
     )
     future = __get_future_dates(data)
     in_sample = __get_training_dates(data)
-    future_in_sample = pd.concat([in_sample,future])
+    future_in_sample = pd.concat([in_sample, future])
 
     # TODO: Add settings for the model to include holidays, etc.
 
     forecast_in_sample_plus_future = model.predict(future_in_sample)
-    forecast = forecast_in_sample_plus_future[-__number_of_steps(data):]
-    predict_in_sample = forecast_in_sample_plus_future[:len(__get_training_set(data).values)+2]
+    forecast = forecast_in_sample_plus_future[-__number_of_steps(data) :]
+    predict_in_sample = forecast_in_sample_plus_future[
+        : len(__get_training_set(data).values) + 2
+    ]
     forecast_df = forecast.set_index(keys=["ds"])
     predict_in_sample_df = predict_in_sample.set_index(keys=["ds"])
     ground_truth_df = (
