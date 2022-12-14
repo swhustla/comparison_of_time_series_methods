@@ -124,7 +124,7 @@ def __full_data_plus_prediction_plot(
     )
     axis.set_title(title)
     axis.set_xlabel("Date")
-    axis.set_ylabel(f"{training_data.columns[0]}")
+    axis.set_ylabel(f"{training_data.columns[0].capitalize()}")
 
     axis.set_ylim(
         bottom=0, top=1.1 * max(training_data_series.max(), prediction_series.max())
@@ -154,7 +154,7 @@ def __plot(
     figure, ax = plt.subplots(figsize=(12, 6))
 
     ground_truth_series.plot(ax=ax, label="Ground truth")
-    prediction_series.plot(ax=ax, label="Forecast")
+    prediction_series.plot(ax=ax, label=f"{prediction.method_name} forecast", c=prediction.color)
 
     # TODO: add confidence interval around the prediction, not the mean
 
@@ -163,12 +163,15 @@ def __plot(
         y1=lower_limit,
         y2=upper_limit,
         alpha=0.2,
-        color="orange",
+        color=prediction.color,
         label=confidence_interval_label,
     )
     ax.set_title(prediction.title)
     if type(ground_truth_series) is pd.DataFrame:
         ground_truth_series = ground_truth_series.iloc[:, 0]
+
+    ax.set_xlabel("Date")
+    ax.set_ylabel(f"{prediction_series.columns[0].capitalize()}")
 
     ax.set_ylim(
         bottom=0, top=1.1 * max(ground_truth_series.max(), prediction_series.max())

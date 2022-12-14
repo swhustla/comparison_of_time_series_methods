@@ -86,7 +86,7 @@ def __plot_full_dataset_plus_predictions(
 
     axis.legend(loc="upper left")
     axis.set_xlabel("Date")
-    axis.set_ylabel(f"{training_data.columns[0]}")
+    axis.set_ylabel(f"{training_data.columns[0].capitalize()}")
 
     axis.set_title(title)
 
