@@ -193,7 +193,7 @@ def __fit_simple_ma(data: Dataset) -> Model:
         model_kwargs=dict(order=(ar_order, integ_order, ma_order), trend=trend),
         period=__get_period_of_seasonality(data),
     )
-
+    print(f"In sample prediction\n{model.fit().get_prediction(10).summary_frame()}")
     return model.fit()
 
 
@@ -211,9 +211,12 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
     """
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with simple MA"
     prediction = model.forecast(__number_of_steps(data))
+    length_in_sample = len(__get_training_set(data).values)
+    prediction_in_sample = model.get_prediction(0,length_in_sample).summary_frame()
     prediction_summary = model.model_result.get_forecast(__number_of_steps(data)).summary_frame()
     combined_data = pd.concat([prediction, prediction_summary], axis=1)
     combined_data.rename(columns={0: "forecast"}, inplace=True)
+
 
     return PredictionData(
         method_name="MA",
@@ -228,6 +231,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         confidence_on_mean=True,
         confidence_method="95% confidence interval",
         color="indigo",
+        in_sample_prediction=prediction_in_sample.iloc[:, 0],
     )
 
 # TODO: add grid search for MA order

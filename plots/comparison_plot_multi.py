@@ -71,23 +71,29 @@ def __plot_full_dataset_plus_predictions(
             )
         prediction_series.plot(
             ax=axis,
-            label=prediction.method_name,
+            label=f"{prediction.method_name} prediction",
             style="-",
             c=prediction.color,
         )
+        if prediction.in_sample_prediction is not None:
+            prediction.in_sample_prediction.plot(
+                ax=axis,
+                label="_nolegend_",
+                style="-",
+                c=prediction.color,
+                alpha=0.7,
+            )
 
     axis.legend(loc="upper left")
+    axis.set_xlabel("Date")
+    axis.set_ylabel(f"{training_data.columns[0]}")
 
     axis.set_title(title)
-
-
 
     return figure
 
 
-def __save_plot(
-    figure: Figure, folder: str, file_name: str, plot_type: str
-) -> None:
+def __save_plot(figure: Figure, folder: str, file_name: str, plot_type: str) -> None:
     """Save the plot to disk."""
     print(f"Saving plot to {folder}/{file_name}_{plot_type}.png")
     if not os.path.exists(f"plots/{folder}"):

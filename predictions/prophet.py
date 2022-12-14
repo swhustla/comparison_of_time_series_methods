@@ -175,6 +175,18 @@ def __get_future_dates(data: Dataset) -> pd.DataFrame:
     datetime_version = pd.to_datetime(future_dates)
     return pd.DataFrame({"ds": datetime_version})
 
+def __get_training_dates(data: Dataset, use_validation: bool = False) -> pd.DataFrame:
+    """# construct a dataframe with the future dates"""
+    # TODO: Ensure that the frequency is correct (e.g. daily, weekly, monthly, etc.)
+    if use_validation:
+        _, validation_set, _ = __get_training_test_and_validation_set(data)
+        training_dates = validation_set["Date"]
+    else:
+        training_set = __get_training_set(data)
+        training_dates = training_set["Date"]
+    datetime_version = pd.to_datetime(training_dates)
+    return pd.DataFrame({"ds": datetime_version})
+
 
 def __check_if_data_is_seasonal_this_time_unit(data: Dataset, time_unit: str) -> bool:
     """Check if the data is or other time unit is seasonal"""
@@ -189,16 +201,23 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
     title = (
         f"{data.subset_column_name} forecast for {data.subset_row_name} with Prophet"
     )
-    future = __get_future_dates(data=data)
+    future = __get_future_dates(data, use_validation=False)
+    in_sample = __get_training_dates(data, use_validation=False)
+    future_in_sample = pd.concat([in_sample,future])
+
     # TODO: Add settings for the model to include holidays, etc.
 
-    forecast = model.predict(future)
+    forecast_in_sample_plus_future = model.predict(future_in_sample)
+    forecast = forecast_in_sample_plus_future[-__number_of_steps(data):]
+    predict_in_sample = forecast_in_sample_plus_future[:len(__get_training_set(data).values)+2]
     forecast_df = forecast.set_index(keys=["ds"])
+    predict_in_sample_df = predict_in_sample.set_index(keys=["ds"])
     ground_truth_df = (
         __get_test_set(data)
         .rename(columns={"Date": "ds", data.subset_column_name: "y"})
         .set_index(keys=["ds"])
     )
+
     return PredictionData(
         method_name="Prophet",
         values=forecast_df,
@@ -212,6 +231,7 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
         confidence_on_mean=False,
         confidence_method="80% confidence interval by Monte Carlo sampling",
         color="violet",
+        in_sample_prediction=predict_in_sample_df["yhat"],
     )
 
 

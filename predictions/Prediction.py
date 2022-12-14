@@ -18,3 +18,4 @@ class PredictionData:
     confidence_on_mean: Optional[bool] = True
     confidence_method: Optional[str] = "std"
     color: Optional[str] = "orange"
+    in_sample_prediction: Optional[Data] = None

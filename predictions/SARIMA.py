@@ -228,13 +228,13 @@ def __grid_search_configs(
 
 
 def __get_sarima_configs(
-    p_params: list = [0, 1, 2], # AR order
-    d_params: list = [0, 1], # differencing order
-    q_params: list = [0, 1, 2], # MA order
-    t_params: list = ["n", "c", "t", "ct"], # trend
-    large_p_params: list = [0, 1, 2], # seasonal AR order
-    large_d_params: list = [0, 1], # seasonal differencing order
-    large_q_params: list = [0, 1, 2], # seasonal MA order
+    p_params: list = [1],#[0, 1, 2], # AR order
+    d_params: list = [0],#[0, 1], # differencing order
+    q_params: list = [1],#[0, 1, 2], # MA order
+    t_params: list = ["t", "c"],#["n", "c", "t", "ct"], # trend
+    large_p_params: list = [1],#[0, 1, 2], # seasonal AR order
+    large_d_params: list = [0],#[0, 1], # seasonal differencing order
+    large_q_params: list = [1],#[0, 1, 2], # seasonal MA order
     m_params: list = [0], # seasonal period
 ) -> List:
     """Get the SARIMA configurations"""
@@ -315,6 +315,8 @@ def __get_model_order_snake_case(model: Model) -> str:
 def __forecast(model: Model, data: Dataset, number_of_configs: int) -> pd.DataFrame:
     """Forecast the next 20% of the data"""
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} for the next {__number_of_steps(data)} {data.time_unit} with SARIMA"
+    length_in_sample = len(__get_training_set(data).values)
+    prediction_in_sample = model.get_prediction(0,length_in_sample).summary_frame()
     logging.info(f"Forecasting {title}")
     return PredictionData(
         method_name="SARIMA",
@@ -327,6 +329,7 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> pd.DataFr
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_model_order_snake_case(model)}",
         number_of_iterations=number_of_configs,
         color="darkred",
+        in_sample_prediction=prediction_in_sample.iloc[:, 0],
     )
 
 

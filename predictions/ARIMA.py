@@ -189,6 +189,8 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
     """Forecast the next 20% of the data"""
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with ARIMA"
     prediction = model.forecast(__number_of_steps(data))
+    length_in_sample = len(__get_training_set(data).values)
+    prediction_in_sample = model.get_prediction(0,length_in_sample).summary_frame()
     prediction_summary = model.model_result.get_forecast(__number_of_steps(data)).summary_frame()
     combined_data = pd.concat([prediction, prediction_summary], axis=1)
     combined_data.rename(columns={0: "forecast"}, inplace=True)
@@ -205,6 +207,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         confidence_on_mean=True,
         confidence_method="95% confidence interval",
         color="orange",
+        in_sample_prediction=prediction_in_sample.iloc[:, 0],
     )
 
 

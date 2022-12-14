@@ -296,6 +296,7 @@ def __get_best_model(
         use_boxcox=best_cfg[4],
     )
     model_fit = model.fit(optimized=True, remove_bias=best_cfg[5])
+    print(f"In sample prediction\n{model_fit.predict(0,10)}")
     return model_fit, best_cfg, number_of_configurations
 
 
@@ -308,10 +309,13 @@ def __get_forecast(
     print(f"best config found for {data.name} {data.subset_column_name}: {best_config}")
 
     # make multi-step forecast
-    yhat = model.predict(
-        len(__get_training_set(data).values),
-        len(__get_training_set(data).values) + __number_of_steps(data) - 1,
+    in_sample_plus_yhat = model.predict(
+        0,
+        len(__get_training_set(data).values) + __number_of_steps(data),
     )
+    yhat = in_sample_plus_yhat[-__number_of_steps(data):]
+    in_sample = in_sample_plus_yhat[:len(__get_training_set(data).values)+2]
+
     return PredictionData(
         method_name="Holt-Winters Exponential Smoothing",
         values=yhat,
@@ -324,6 +328,7 @@ def __get_forecast(
         model_config=best_config,
         number_of_iterations=number_of_configurations,
         color="gray",
+        in_sample_prediction=in_sample,
     )
 
 
