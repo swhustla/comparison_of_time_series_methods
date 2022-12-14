@@ -228,13 +228,13 @@ def __grid_search_configs(
 
 
 def __get_sarima_configs(
-    p_params: list = [0, 1, 2], # AR order
-    d_params: list = [0, 1], # differencing order
-    q_params: list = [0, 1, 2], # MA order
-    t_params: list = ["n", "c", "t", "ct"], # trend
-    large_p_params: list = [0, 1, 2], # seasonal AR order
-    large_d_params: list = [0, 1], # seasonal differencing order
-    large_q_params: list = [0, 1, 2], # seasonal MA order
+    p_params: list = [1],#[0, 1, 2], # AR order
+    d_params: list = [0],#[0, 1], # differencing order
+    q_params: list = [1],#[0, 1, 2], # MA order
+    t_params: list = ["t", "c"],#["n", "c", "t", "ct"], # trend
+    large_p_params: list = [1],#[0, 1, 2], # seasonal AR order
+    large_d_params: list = [0],#[0, 1], # seasonal differencing order
+    large_q_params: list = [1],#[0, 1, 2], # seasonal MA order
     m_params: list = [0], # seasonal period
 ) -> List:
     """Get the SARIMA configurations"""

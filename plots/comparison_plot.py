@@ -61,15 +61,15 @@ def __full_data_plus_prediction_plot(
 ) -> Figure:
     """Plot the full data and the prediction."""
     title = prediction.title
-    figure, axes = plt.subplots(figsize=(10, 5))
+    figure, axis = plt.subplots(figsize=(10, 5))
 
     training_data_series = training_data.iloc[:, 0]
 
-    training_data_series.plot(ax=axes, label="Training data", style=".", c="blue")
+    training_data_series.plot(ax=axis, label="Training data", style=".", c="blue")
 
     ground_truth_series = prediction.ground_truth_values
     ground_truth_series.plot(
-        ax=axes, label="Ground truth", style="x", color="blue", alpha=0.5
+        ax=axis, label="Ground truth", style="x", color="blue", alpha=0.5
     )
 
     prediction_series = __get_prediction_series(prediction)
@@ -84,18 +84,37 @@ def __full_data_plus_prediction_plot(
             )
 
     try:
-        prediction_series.plot(ax=axes, label="Forecast", style="-")
+        prediction_series.plot(
+            ax=axis,
+            label=f"{prediction.method_name} prediction",
+            style="-",
+            c=prediction.color,
+        )
     except Exception:
         # make index compatible with matplotlib
         prediction_series.index = pd.to_datetime(prediction_series.index)
-        prediction_series.plot(ax=axes, label="Forecast", style="-")
+        prediction_series.plot(
+            ax=axis,
+            label=f"{prediction.method_name} prediction",
+            style="-",
+            c=prediction.color,
+        )
+
+    if prediction.in_sample_prediction is not None:
+        prediction.in_sample_prediction.plot(
+            ax=axis,
+            label="_nolegend_",
+            style="-",
+            c=prediction.color,
+            alpha=0.7,
+        )
 
     (
         upper_limit,
         lower_limit,
         confidence_interval_label,
     ) = __figure_out_confidence_interval_plot(prediction, prediction_series)
-    axes.fill_between(
+    axis.fill_between(
         x=prediction.values.index,
         y1=lower_limit,
         y2=upper_limit,
@@ -103,12 +122,14 @@ def __full_data_plus_prediction_plot(
         color="orange",
         label=confidence_interval_label,
     )
-    axes.set_title(title)
+    axis.set_title(title)
+    axis.set_xlabel("Date")
+    axis.set_ylabel(f"{training_data.columns[0]}")
 
-    axes.set_ylim(
+    axis.set_ylim(
         bottom=0, top=1.1 * max(training_data_series.max(), prediction_series.max())
     )
-    axes.legend()
+    axis.legend()
     return figure
 
 
