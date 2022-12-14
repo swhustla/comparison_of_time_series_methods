@@ -100,8 +100,14 @@ def __convert_to_pandas_series(data: np.ndarray, start_value: int = 0) -> pd.Ser
 def __test(data: Dataset, theta) -> Tuple[PredictionData, Dataset]:
     x, y = __get_test_data(data)
     prediction = __predict_using_coefficients(x, theta)
+    x_insample, y_insample = __get_training_data(data)
+    in_sample = __predict_using_coefficients(x_insample, theta)
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} with Linear Regression"
     start_value = len(data.values) - len(prediction)
+    in_sample_prediction = __convert_to_pandas_series(in_sample)
+    forecast = __convert_to_pandas_series(prediction, start_value=start_value)
+    in_sample_prediction = pd.concat([in_sample_prediction,forecast])[:len(x_insample)+2]
+    print(f"in_sample_prediction\n{in_sample_prediction}")
     return __revert_index_to_date(
         data=data,
         prediction=PredictionData(
@@ -114,6 +120,7 @@ def __test(data: Dataset, theta) -> Tuple[PredictionData, Dataset]:
             plot_folder=f"{data.name}/{data.subset_row_name}/linear_regression/",
             plot_file_name=f"{data.subset_column_name}_forecast",
             color="green",
+            in_sample_prediction=in_sample_prediction.set_axis(data.values.index[:len(x_insample)+2]),
         ),
     )
 

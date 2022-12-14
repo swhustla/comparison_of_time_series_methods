@@ -94,7 +94,6 @@ def predict_measure_plot(data: Dataset, method_name: str) -> Report:
         : int(len(data.values.index) * (1 - __testset_size))
     ]
     comparison_plot(data.values.loc[training_index, :], prediction)
-
     return Report(start_time, method_name, data, prediction, metrics)
 
 
@@ -153,26 +152,26 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 
 __datasets = [
-     "india_pollution",
+    # "india_pollution",
     # "stock_prices",
-    #"airline_passengers",
-    # "list_of_tuples",
-    #"sun_spots",
-    # "csv",
+    # "airline_passengers",
+     "list_of_tuples",
+    # "sun_spots",
+    #"csv",
 ]
 
 
 __methods = [
-    # "MA",
-    "AR",
-    # "linear_regression",
-    # "ARIMA",
-    # "Prophet",
+     "MA",
+     "AR",
+     "linear_regression",
+     "ARIMA",
+     "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    "SES",
-    "HoltWinters",
-    "SARIMA",
+      "SES",
+      "HoltWinters",
+      "SARIMA",
     # "TsetlinMachine",
 ]
 

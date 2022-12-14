@@ -202,6 +202,19 @@ def __calculate_next_trend_values(
     )
     return pd.DataFrame(m * x + c, index=x, columns=["trend"])
 
+def __calculate_next_trend_values_in_sample(
+    train_trend_component: pd.DataFrame, number_of_steps: int
+) -> pd.DataFrame:
+    """Calculates the next trend values for the forecast"""
+    logging.info(f"Calculating the next {number_of_steps} trend values")
+    m, c = __extract_trend_equation_parameters(train_trend_component)
+    x = np.arange(
+        0,
+        number_of_steps,
+    )
+    return pd.DataFrame(m * x + c, index=x, columns=["trend"])
+
+
 
 def __get_seasonal_period(data: Dataset) -> int:
     """Returns the seasonal period"""
@@ -228,6 +241,7 @@ def __calculate_next_additive_seasonal_values(
     seasonal_values_test = []
     for i in range(number_of_steps):
         seasonal_values_test.append(seasonal_values_one_season[i % seasonal_period])
+    print(f"len seasonal_values_test\n{len(seasonal_values_test)}")
 
     logging.info(
         f"Sample of the next {number_of_steps} seasonal values: {seasonal_values_test[:5]}"
@@ -240,9 +254,9 @@ def __calculate_next_additive_seasonal_values(
             len(train_seasonal_component) + number_of_steps,
         ),
         name="seasonal",
-    )
+    )    
 
-
+    
 def __calculate_next_multiplicative_seasonal_values(
     train_seasonal_component: pd.DataFrame,
     number_of_steps: int,
@@ -257,7 +271,7 @@ def __calculate_next_multiplicative_seasonal_values(
         seasonal_values_test.append(
             multiplicative_factor * seasonal_values_one_season[i % seasonal_period]
         )
-
+    print(f"len seasonal_values_test\n{len(seasonal_values_test)}")
     logging.info(
         f"Sample of the next {number_of_steps} seasonal values: {seasonal_values_test[:5]}"
     )
@@ -435,16 +449,20 @@ def __predict(
     """Predicts the next values in the time series"""
     title = f"{decomposed_dataset.subset_column_name} forecast for {decomposed_dataset.subset_row_name} with SES"
     forecasted_resid = model.forecast(__number_of_steps(data))  # out of sample prediction
-
+    forecasted_resid = model.predict(len(__get_training_set(data).values),len(__get_training_set(data).values)+__number_of_steps(data)-1)  # out of sample prediction
+    forecasted_resid_in_sample = model.predict(0,len(__get_training_set(data).values)-1) #in sample prediction
     # add seasonal and trend components back to the forecast for the correct number of steps
     # if __determine_if_trend_with_acf(decomposed_dataset):
     logging.debug(f"Trend component present for {decomposed_dataset.name} with SES")
     trend_component = __calculate_next_trend_values(
         decomposed_dataset.values.trend, __number_of_steps(data)
     )
+    trend_component_in_sample = decomposed_dataset.values.trend
+    
     logging.debug(f"Calculating residual values for {decomposed_dataset.name}")
     forecasted_resid = __sum_of_two_series(forecasted_resid, trend_component["trend"])
-
+    forecasted_resid_in_sample = __sum_of_two_series(forecasted_resid_in_sample, trend_component_in_sample)
+    
     if __determine_if_seasonal_with_acf(decomposed_dataset):
         logging.debug(
             f"Seasonal component present for {decomposed_dataset.name} with SES... calculating seasonal values"
@@ -471,11 +489,10 @@ def __predict(
                 __number_of_steps(data),
                 __get_seasonal_period(data),
             )
-
         logging.debug(f"Sample of seasonal values: {seasonal_component[::20]}")
-
+        seasonal_component_in_sample = decomposed_dataset.values.seasonal
         forecasted_resid = __sum_of_two_series(forecasted_resid, seasonal_component)
-
+        forecasted_resid_in_sample = __sum_of_two_series(forecasted_resid_in_sample, seasonal_component_in_sample)
     return PredictionData(
         method_name="SES",
         values=forecasted_resid,
@@ -488,7 +505,7 @@ def __predict(
         confidence_on_mean=False,
         confidence_method=None,
         color="darkorange",
+        in_sample_prediction=forecasted_resid_in_sample
     )
-
 
 ses = method(__seasonal_decompose_data, __fit_model, __predict)

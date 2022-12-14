@@ -239,6 +239,8 @@ def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
     title = f"{data.subset_column_name} for {data.subset_row_name} forecast using Auto Regressive model"
 
     prediction = model.forecast(__number_of_steps(data))
+    length_in_sample = len(__get_training_set(data).values)
+    prediction_in_sample = model.get_prediction(0,length_in_sample).summary_frame()
     prediction_summary = model.model_result.get_forecast(
         __number_of_steps(data)
     ).summary_frame()
@@ -258,6 +260,7 @@ def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
         confidence_on_mean=True,
         confidence_method="95% confidence interval",
         color="red",
+        in_sample_prediction=prediction_in_sample.iloc[:, 0],
     )
 
 # TODO: add grid search for AR model

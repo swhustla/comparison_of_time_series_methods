@@ -100,7 +100,7 @@ def __plot(
     prediction_series.plot(ax=ax, label="Forecast")
 
 
-    # add confidence interval around the prediction, not the mean
+    #add confidence interval around the prediction, not the mean
 
     ax.fill_between(
         x=prediction_series.index,
