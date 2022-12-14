@@ -31,10 +31,13 @@ Downsides of Prophet:
 
 from typing import TypeVar, List, Dict, Generator, Tuple
 from prophet import Prophet
+from sklearn.metrics import mean_absolute_percentage_error, mean_squared_error, mean_absolute_error
 import pandas as pd
 import numpy as np
 
 import logging
+# set up logging
+logging.basicConfig(level=logging.DEBUG)
 
 from methods.prophet import prophet as method
 
@@ -60,26 +63,13 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
     return __get_dataframe_with_date_column(data.values[-__number_of_steps(data) :])
 
 
-def __get_training_and_test_set(data: Dataset) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Get the training and test set"""
-    training_set = __get_training_set(data)
-    test_set = __get_test_set(data)
-    return training_set, test_set
-
-def __get_training_test_and_validation_set(data: Dataset) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Get the training, test and validation set"""
-    training_set, test_set = __get_training_and_test_set(data)
-    validation_set = training_set[-__number_of_steps(data) :]
-    training_set = training_set[: -__number_of_steps(data)]
-    return training_set, validation_set, test_set
-
 #TODO: Add support for multiple time series
 
 def __get_configs() -> Generator:
     """Get the configs for a grid search on Prophet"""
-    for changepoint_range in [0.01, 0.1, 1.0]:
-        for seasonality_prior_scale in [0.1, 1.0, 10]:
-            for changepoint_prior_scale in [0.01, 0.1, 1.0]:
+    for changepoint_range in [0.1, 0.9]:#[0.01, 0.1, 0.9, 0.99]:
+        for seasonality_prior_scale in [0.1, 0.9]: #[0.1, 0.9, 0.99, 1.0]:
+            for changepoint_prior_scale in [0.001, 0.05, 0.5, 0.95, 0.99]:
                 for seasonality_mode in ["additive", "multiplicative"]:
                     yield {
                         "changepoint_range": changepoint_range,
@@ -90,22 +80,21 @@ def __get_configs() -> Generator:
 
 
 
-def __measure_mape(data: Dataset, actual: pd.DataFrame, predicted: np.array) -> float:
-    """Measure the Mean Absolute Percentage Error"""
+def __measure_error_metric(data: Dataset, actual: pd.DataFrame, predicted: np.array) -> float:
+    """Measure the error"""
     # change actual to a numpy array
-    actual = actual.loc[:, data.subset_column_name].values
-    return np.mean(np.abs((actual - predicted) / actual)) * 100
+    actual_this = actual.loc[:, data.subset_column_name].values
+    print(f"Actual: {actual_this[:10]}")
+    print(f"Predicted: {predicted[:10]}")
+    result = mean_absolute_percentage_error(y_true=actual_this, y_pred=predicted)
+    print(f"Error: {result}")
+    return result
+    
 
-
-def __score_model(model: Model, data: Dataset, use_validation: bool=False) -> float:
+def __score_model(model: Model, data: Dataset) -> float:
     """Score the model on a validation set or test set"""
-    if use_validation:
-        _, validation_set, _ = __get_training_test_and_validation_set(data)
-    else:
-        validation_set = __get_test_set(data)
-    future_dates = __get_future_dates(data, use_validation=use_validation)
-    forecast = model.predict(future_dates)
-    return __measure_mape(data, validation_set, forecast["yhat"].values)
+    forecast = model.predict()
+    return __measure_error_metric(data, __get_training_set(data), forecast["yhat"].values)
 
 
 def __get_best_model(data: Dataset) -> Tuple[Model, int]:
@@ -113,66 +102,76 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
     best_score = float("inf")
     best_model = None
     configs = __get_configs()
+    
+    training_df = __get_training_set(data)
+    renamed_training_df = training_df.rename(columns={"Date": "ds", data.subset_column_name: "y"})
+
     for config in configs:
-        logging.info(f"Trying config: {str(config)} for dataset {data.name} - {data.subset_row_name}")
+        model = None
+        print(f"Trying config: \n{str(config)} \nfor dataset {data.name} - {data.subset_row_name}")
         try:
-            model = __fit_prophet_model(data, config)
+            model = __fit_prophet_model(renamed_training_df, config)
         except Exception as e:
             logging.error(f"Error: {e}")
-            continue
-        score = __score_model(model, data, use_validation=True)
+            raise e
+            
+            
+        score = __score_model(model, data)
+
+        # print score if not nan
+        if not np.isnan(score):
+            logging.info(f"\n\nScore: {score}")
+
         if score < best_score:
-            logging.info(f"New best score: {score}")
+            print(f"New best score: {score}")
             best_score = score
             best_model = model
-    logging.info(f"Best config: {config} -> {best_score}")
+            best_config = config
+        
+        del model
+    # log the best config formatted nicely
+    formatted_config = ", ".join([f"{key}={value}" for key, value in best_config.items()])
+    print(f"\n\nBest config: {formatted_config} -> {best_score}")
     # get length of the configs geenrator
     return best_model, len(list(configs))
 
 
+def __get_seasonality_settings(data: Dataset) -> Dict:
+    """Get the seasonality settings for the model"""
+    settings = {}
+    for time_unit in ["hours", "days", "weeks", "months", "years"]:
+        if __check_if_data_is_seasonal_this_time_unit(data, time_unit):
+            settings[time_unit] = True
+        else:
+            settings[time_unit] = False
+
+    if not settings["years"] and settings["months"]:
+        settings["years"] = True
+
+    return settings
+
 
 # TODO: Add settings for the model to include seasonality, holidays, etc.
-def __fit_prophet_model(data: Dataset, config:dict) -> Model:
+def __fit_prophet_model(training_data: pd.DataFrame, config:dict) -> Model:
     """Fit a Prophet model to the first 80% of the data"""
-    train_df = __get_training_set(data)
-    daily_seasonality = __check_if_data_is_seasonal_this_time_unit(data, "hours")
-    weekly_seasonality = __check_if_data_is_seasonal_this_time_unit(data, "days")
-    yearly_seasonality = __check_if_data_is_seasonal_this_time_unit(data, "months")
-
-    monthly_seasonality = __check_if_data_is_seasonal_this_time_unit(data, "weeks")
-
-    if not yearly_seasonality and  monthly_seasonality:
-        logging.info("Monthly seasonality detected")
-        yearly_seasonality = True
 
     model = Prophet(
-        daily_seasonality=daily_seasonality,
-        weekly_seasonality=weekly_seasonality,
-        yearly_seasonality=yearly_seasonality,
         seasonality_prior_scale=config["seasonality_prior_scale"],
         changepoint_range=config["changepoint_range"],
         changepoint_prior_scale=config["changepoint_prior_scale"],
         seasonality_mode=config["seasonality_mode"],
     )
 
-    # in the case of weekly data, with monthly and yearly seasonalty then we add the seasonality manually
-    if monthly_seasonality and yearly_seasonality:
-        model.add_seasonality(name="monthly", period=30.5, fourier_order=5)
-
-    renamed_df = train_df.rename(columns={"Date": "ds", data.subset_column_name: "y"})
-    model.fit(renamed_df)
+    model.fit(df=training_data)
     return model
 
 
-def __get_future_dates(data: Dataset, use_validation: bool = False) -> pd.DataFrame:
+def __get_future_dates(data: Dataset) -> pd.DataFrame:
     """# construct a dataframe with the future dates"""
     # TODO: Ensure that the frequency is correct (e.g. daily, weekly, monthly, etc.)
-    if use_validation:
-        _, validation_set, _ = __get_training_test_and_validation_set(data)
-        future_dates = validation_set["Date"]
-    else:
-        test_set = __get_test_set(data)
-        future_dates = test_set["Date"]
+
+    test_set = __get_test_set(data)
+    future_dates = test_set["Date"]
     datetime_version = pd.to_datetime(future_dates)
     return pd.DataFrame({"ds": datetime_version})
 
@@ -205,6 +204,7 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
     future = __get_future_dates(data, use_validation=False)
     in_sample = __get_training_dates(data, use_validation=False)
     future_in_sample = pd.concat([in_sample,future])
+
     # TODO: Add settings for the model to include holidays, etc.
 
     forecast_in_sample_plus_future = model.predict(future_in_sample)

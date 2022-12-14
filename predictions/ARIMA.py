@@ -66,23 +66,6 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
     return data.values[-__number_of_steps(data) :][data.subset_column_name]
 
 
-def __get_train_and_test_sets(data: Dataset) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Prepare the data for the ARIMA model"""
-    training_set = __get_training_set(data)
-    test_set = __get_test_set(data)
-    return training_set, test_set
-
-
-def __get_train_validation_and_test_sets(
-    data: Dataset,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Prepare the data for the ARIMA model"""
-    training_set, test_set = __get_train_and_test_sets(data)
-    validation_set = training_set[-__number_of_steps(data) :]
-    training_set = training_set[: -__number_of_steps(data)]
-    return training_set, validation_set, test_set
-
-
 def __get_period_of_seasonality(data: Dataset) -> int:
     """
     Returns the period of seasonality.
@@ -124,33 +107,21 @@ def __get_differencing_term(data: Dataset) -> int:
 
 
 def __evaluate_arima_model(
-    data: Dataset, arima_order: tuple, use_validation: bool, trend: str
+    data: Dataset, arima_order: tuple, trend: str
 ) -> Result:
     """Evaluate an ARIMA model for a given order (p,d,q) and return RMSE"""
-    # prepare training and test datasets
-    if use_validation:
-        training_set, validation_set, test_set = __get_train_validation_and_test_sets(
-            data
-        )
-    else:
-        training_set, test_set = __get_train_and_test_sets(data)
-    # make predictions
+    
+    # set up the model and fit it
     model = STLForecast(
-        training_set,
+        endog=__get_training_set(data),
         period=__get_period_of_seasonality(data),
         model=sm.tsa.ARIMA,
         model_kwargs={"order": arima_order, "trend": trend},
     )
     model_fit = model.fit()
-    if use_validation:
-        predictions = model_fit.forecast(len(validation_set))
-        error = mean_squared_error(validation_set, predictions)
-    else:
-        predictions = model_fit.forecast(len(test_set))
-        error = mean_squared_error(test_set, predictions)
 
-    # return out of sample error
-    return error
+    # return in sample bayesian information criterion
+    return model_fit.model_result.bic
 
 
 def __evaluate_models(
@@ -164,16 +135,16 @@ def __evaluate_models(
                 for t in trend_values:
                     order = (p, d, q)
                     try:
-                        mse = __evaluate_arima_model(
-                            data, arima_order=order, use_validation=True, trend=t
+                        evaluation_metric = __evaluate_arima_model(
+                            data, arima_order=order, trend=t
                         )
-                        if mse < best_score:
-                            best_score, best_cfg, best_trend = mse, order, t
-                        logging.info(f"ARIMA{order} Trend={t} MSE={mse}")
+                        if evaluation_metric < best_score:
+                            best_score, best_cfg, best_trend = evaluation_metric, order, t
+                        logging.info(f"ARIMA{order} Trend={t} BIC={evaluation_metric}")
                     except Exception as e:
                         logging.error(f"ARIMA{order} Trend={t} failed with error: {e}")
                         continue
-    logging.info(f"Best ARIMA: {best_cfg} Best trend: {best_trend} MSE={best_score}")
+    logging.info(f"Best ARIMA: {best_cfg} Best trend: {best_trend} BIC={best_score}")
     return best_cfg, best_trend
 
 

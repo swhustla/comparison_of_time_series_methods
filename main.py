@@ -27,8 +27,10 @@ from measurements.get_metrics import get_metrics
 from measurements.store_metrics import store_metrics
 from plots.comparison_plot import comparison_plot
 from plots.comparison_plot_multi import comparison_plot_multi
+from plots.plot_results_in_heatmap import plot_results_in_heatmap
 
 import time
+import logging
 
 
 __dataset_loaders: dict[str, Load[Dataset]] = {
@@ -43,7 +45,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 __dataset_row_items: dict[str, list[str]] = {
     # from city Guhwati onwards
-    "india_pollution": ['Delhi'], #get_list_of_city_names(),
+    "india_pollution": get_list_of_city_names()[:4],
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -127,6 +129,7 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
     for dataset_name in datasets:
         
         data_list = load_dataset(dataset_name)
+        results_store = []
         for dataset in data_list:
             predictions_per_dataset = []
             reports_per_dataset = []
@@ -144,34 +147,41 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
                 predictions_per_dataset.append(report.prediction)
                 reports_per_dataset.append(report)
 
-            #TODO: figure out index mismatch for comparison plot (due to linear regression)
-            print(f"dataset.values.index[-1]: {dataset.values.index[-1]}")
-            print(f"training_index[-1]: {training_index[-1]}")
-            comparison_plot_multi(dataset.values.loc[training_index, :], predictions_per_dataset)
+            if len(predictions_per_dataset) > 0:
+                comparison_plot_multi(dataset.values.loc[training_index, :], predictions_per_dataset)
+
+            results_store.append(reports_per_dataset)
             yield reports_per_dataset
+        
+        if len(results_store) > 1 and len(data_list) > 1:
+            logging.info(f"Plotting results for all {len(data_list)} datasets in {dataset_name} for all methods...")
+            plot_results_in_heatmap(results_store)
+            logging.info(f"Plotting results for all {len(data_list)} datasets in {dataset_name} - done")
+
+
 
 
 __datasets = [
-    # "india_pollution",
+    #  "india_pollution",
     # "stock_prices",
-    # "airline_passengers",
-     "list_of_tuples",
-    # "sun_spots",
-    #"csv",
+    "airline_passengers",
+    # "list_of_tuples",
+    #"sun_spots",
+    # "csv",
 ]
 
 
 __methods = [
-     "MA",
-     "AR",
-     "linear_regression",
-     "ARIMA",
-     "Prophet",
+    # "AR",
+    # "linear_regression",
+    # "ARIMA",
+    # "HoltWinters",
+    # "MA",
+    # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-      "SES",
-      "HoltWinters",
-      "SARIMA",
+    # "SARIMA",
+    "SES",
     # "TsetlinMachine",
 ]
 
