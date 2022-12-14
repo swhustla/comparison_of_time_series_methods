@@ -119,7 +119,7 @@ def __full_data_plus_prediction_plot(
         y1=lower_limit,
         y2=upper_limit,
         alpha=0.2,
-        color="orange",
+        color=prediction.color,
         label=confidence_interval_label,
     )
     axis.set_title(title)
@@ -171,7 +171,7 @@ def __plot(
         ground_truth_series = ground_truth_series.iloc[:, 0]
 
     ax.set_xlabel("Date")
-    ax.set_ylabel(f"{prediction_series.columns[0].capitalize()}")
+    ax.set_ylabel(f"{ground_truth_series.name.capitalize()}")
 
     ax.set_ylim(
         bottom=0, top=1.1 * max(ground_truth_series.max(), prediction_series.max())
