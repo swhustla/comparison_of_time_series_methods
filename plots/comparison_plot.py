@@ -65,7 +65,7 @@ def __full_data_plus_prediction_plot(
 
     training_data_series = training_data.iloc[:, 0]
 
-    training_data_series.plot(ax=axes, label="Training data", style=".", c="black")
+    training_data_series.plot(ax=axes, label="Training data", style=".", c="blue")
 
     ground_truth_series = prediction.ground_truth_values
     ground_truth_series.plot(
