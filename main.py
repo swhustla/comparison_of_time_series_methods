@@ -45,7 +45,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 __dataset_row_items: dict[str, list[str]] = {
     # from city Guhwati onwards
-    "india_pollution": get_list_of_city_names()[:2],
+    "india_pollution": get_list_of_city_names()[:4],
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -125,16 +125,20 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
     """
     Generate a report for each method and dataset combination.
     """
+    number_of_methods = len(list(methods))
     
     for dataset_name in datasets:
         
         data_list = load_dataset(dataset_name)
         results_store = []
+
+        print(f"types: {type(results_store)} {type(data_list)}")
         for dataset in data_list:
             predictions_per_dataset = []
             reports_per_dataset = []
             training_index = dataset.values.index[: int(len(dataset.values.index) * (1 - __testset_size))]
             for method_name in methods:
+                
 
                 minimum_length = __get_minimum_length_for_dataset(dataset, method_name)
                 if len(dataset.values) < int(minimum_length) and method_name in [ "SES", "HoltWinters", "SARIMA", "MA", "AR", "ARIMA"]:
@@ -153,35 +157,37 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
             results_store.append(reports_per_dataset)
             yield reports_per_dataset
         
-        if len([results_store]) > 1 and len(data_list) > 1:
-            logging.info(f"Plotting results for all {len(data_list)} datasets in {dataset_name} for all methods...")
+        print(f"types: {type(results_store)} {type(list(methods))}")
+        print(f"lengths: {len(results_store)} {len(list(methods))}")
+        if len(results_store) > 1 and number_of_methods > 1:
+            logging.info(f"Plotting results for all {len(results_store)} datasets in {dataset_name} for {number_of_methods} methods...")
             plot_results_in_heatmap(results_store)
-            logging.info(f"Plotting results for all {len(data_list)} datasets in {dataset_name} - done")
+            logging.info(f"Plotting results for all {len(results_store)} datasets in {dataset_name} - done")
 
 
 
 
 __datasets = [
-    #  "india_pollution",
+      "india_pollution",
     # "stock_prices",
     # "airline_passengers",
     # "list_of_tuples",
-      "sun_spots",
+    #  "sun_spots",
     # "csv",
 ]
 
 
 __methods = [
     # "AR",
-    # "linear_regression",
+     "linear_regression",
     # "ARIMA",
-     "HoltWinters",
+    # "HoltWinters",
     # "MA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
     # "SARIMA",
-    # "SES",
+     "SES",
     # "TsetlinMachine",
 ]
 
