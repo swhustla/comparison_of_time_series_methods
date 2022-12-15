@@ -136,6 +136,8 @@ def __evaluate_exp_smoothing_model(data: Dataset, config: dict) -> np.array:
     # define model
     training_dataset = __get_training_set(data)
     training_data = np.array(training_dataset.values)
+    # change negative and zero values to 0.001
+    training_data[training_data <= 0] = 0.1
 
     model = ExponentialSmoothing(
         training_data,
@@ -286,9 +288,12 @@ def __get_best_model(
     print(f"Best boxcox: {best_cfg[4]}")
     print(f"Best remove bias: {best_cfg[5]}")
 
+    training_data = __get_training_set(data).values
+    training_data[training_data <= 0] = 0.1
+
     # fit model to training data
     model = ExponentialSmoothing(
-        __get_training_set(data).values,
+        endog=training_data,
         trend=best_cfg[0],
         damped_trend=best_cfg[1],
         seasonal=best_cfg[2],
