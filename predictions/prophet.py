@@ -92,7 +92,7 @@ def __measure_error_metric(data: Dataset, actual: pd.DataFrame, predicted: np.ar
     
 
 def __score_model(model: Model, data: Dataset) -> float:
-    """Score the model on a validation set or test set"""
+    """Score the model on a test set"""
     forecast = model.predict()
     return __measure_error_metric(data, __get_training_set(data), forecast["yhat"].values)
 
@@ -175,15 +175,12 @@ def __get_future_dates(data: Dataset) -> pd.DataFrame:
     datetime_version = pd.to_datetime(future_dates)
     return pd.DataFrame({"ds": datetime_version})
 
-def __get_training_dates(data: Dataset, use_validation: bool = False) -> pd.DataFrame:
+def __get_training_dates(data: Dataset) -> pd.DataFrame:
     """# construct a dataframe with the future dates"""
     # TODO: Ensure that the frequency is correct (e.g. daily, weekly, monthly, etc.)
-    if use_validation:
-        _, validation_set, _ = __get_training_test_and_validation_set(data)
-        training_dates = validation_set["Date"]
-    else:
-        training_set = __get_training_set(data)
-        training_dates = training_set["Date"]
+
+    training_set = __get_training_set(data)
+    training_dates = training_set["Date"]
     datetime_version = pd.to_datetime(training_dates)
     return pd.DataFrame({"ds": datetime_version})
 
@@ -201,8 +198,8 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
     title = (
         f"{data.subset_column_name} forecast for {data.subset_row_name} with Prophet"
     )
-    future = __get_future_dates(data, use_validation=False)
-    in_sample = __get_training_dates(data, use_validation=False)
+    future = __get_future_dates(data)
+    in_sample = __get_training_dates(data)
     future_in_sample = pd.concat([in_sample,future])
 
     # TODO: Add settings for the model to include holidays, etc.
