@@ -1,9 +1,10 @@
 install:
 	poetry shell
 	pip install pip --upgrade
+	pip install git+https://github.com/stan-dev/pystan2.git@master
 	pip install prophet==1.0      
-	pip install pystan==2.19.1.1
-	pip install torch==1.12.1
+	pip install GDAL
+	pip install torch==1.13.1
 	poetry install
 lint:
 	poetry run pylint -d duplicate-code ./**/*.py
