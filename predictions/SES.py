@@ -202,6 +202,18 @@ def __calculate_next_trend_values(
     )
     return pd.DataFrame(m * x + c, index=x, columns=["trend"])
 
+def __calculate_next_trend_values_in_sample(
+    train_trend_component: pd.DataFrame, number_of_steps: int
+) -> pd.DataFrame:
+    """Calculates the next trend values for the forecast"""
+    logging.info(f"Calculating the next {number_of_steps} trend values")
+    m, c = __extract_trend_equation_parameters(train_trend_component)
+    x = np.arange(
+        0,
+        number_of_steps,
+    )
+    return pd.DataFrame(m * x + c, index=x, columns=["trend"])
+
 
 
 def __get_seasonal_period(data: Dataset) -> int:
@@ -437,7 +449,7 @@ def __predict(
     """Predicts the next values in the time series"""
     title = f"{decomposed_dataset.subset_column_name} forecast for {decomposed_dataset.subset_row_name} with SES"
     forecasted_resid = model.forecast(__number_of_steps(data))  # out of sample prediction
-    # forecasted_resid = model.predict(len(__get_training_set(data).values),len(__get_training_set(data).values)+__number_of_steps(data)-1)  # out of sample prediction
+    forecasted_resid = model.predict(len(__get_training_set(data).values),len(__get_training_set(data).values)+__number_of_steps(data)-1)  # out of sample prediction
     forecasted_resid_in_sample = model.predict(0,len(__get_training_set(data).values)-1) #in sample prediction
     # add seasonal and trend components back to the forecast for the correct number of steps
     # if __determine_if_trend_with_acf(decomposed_dataset):
