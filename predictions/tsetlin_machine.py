@@ -134,8 +134,8 @@ from typing import Callable, Tuple, TypeVar, List, Dict, Any
 import pandas as pd
 import numpy as np
 
-import tsfresh
-from tsfresh.feature_extraction import EfficientFCParameters
+# import tsfresh
+# from tsfresh.feature_extraction import EfficientFCParameters
 
 from pyTsetlinMachine.tm import RegressionTsetlinMachine
 from pyTsetlinMachine.tools import Binarizer
@@ -178,23 +178,23 @@ def _add_month_and_year_columns(data: Dataset) -> pd.DataFrame:
     return df
 
 
-def __add_ts_fresh_features_to_data(data: Dataset) -> pd.DataFrame:
-    """
-    Add features to the data using the tsfresh library.
-    This is a library for automated extraction of relevant features from time series.
-    Output is a pandas DataFrame.
-    """
-    logging.info("Adding tsfresh features to data")
-    tsf_settings = EfficientFCParameters()
-    tsf_settings.disable_progressbar = False
-    tsf_settings.n_jobs = 1
-    data_with_features = tsfresh.extract_features(
-        data.values.reset_index(drop=False),
-        column_value=data.subset_column_name,
-        column_sort=data.values.index.name,
-        column_id=data.subset_column_name,
-        default_fc_parameters=tsf_settings,
-    )
+# def __add_ts_fresh_features_to_data(data: Dataset) -> pd.DataFrame:
+#     """
+#     Add features to the data using the tsfresh library.
+#     This is a library for automated extraction of relevant features from time series.
+#     Output is a pandas DataFrame.
+#     """
+#     logging.info("Adding tsfresh features to data")
+#     tsf_settings = EfficientFCParameters()
+#     tsf_settings.disable_progressbar = False
+#     tsf_settings.n_jobs = 1
+#     data_with_features = tsfresh.extract_features(
+#         data.values.reset_index(drop=False),
+#         column_value=data.subset_column_name,
+#         column_sort=data.values.index.name,
+#         column_id=data.subset_column_name,
+#         default_fc_parameters=tsf_settings,
+#     )
 
     logging.info(f"Data with features: {data_with_features.head()}")
     return data_with_features
