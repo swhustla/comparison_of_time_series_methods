@@ -1396,8 +1396,8 @@ test = ["pytest", "pytest-console-scripts", "pytest-tornasync"]
 
 [[package]]
 name = "numpy"
-version = "1.24.0"
-description = "Fundamental package for array computing in Python"
+version = "1.23.5"
+description = "NumPy is the fundamental package for array computing with Python."
 category = "main"
 optional = false
 python-versions = ">=3.8"
@@ -2530,7 +2530,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "1949d15934ebd7b52fdb081c822693fd225efbe3785ce685586c3a05919a8414"
+content-hash = "10a1eef175e4d10f51fb7253ae14020978aeb8136de430efeaa4ac29669bc1c3"
 
 [metadata.files]
 absl-py = []
