@@ -3,9 +3,10 @@
 This is a dataset of stock prices for the company JPMorgan Chase & Co. (JPM).
 """
 
-from datetime import datetime
+import datetime
 from typing import TypeVar, Generic, Callable, List, Dict, Any, Generator
-from pandas_datareader.data import DataReader
+
+import yfinance as yf
 
 import pandas as pd
 
@@ -22,14 +23,16 @@ __stock_choice = "JPM"
 def __load_data(stock_choice=__stock_choice) -> Data:
     """Load in the data."""
     try:
-        yahoo_data = DataReader(
-            stock_choice, "yahoo", datetime(2001, 6, 1), datetime(2020, 2, 20)
-        )
+        # use yfinance to download the data
+        ticker = yf.Ticker(stock_choice)
+        start = datetime.datetime(2014, 12, 1)
+        end = datetime.datetime(2022, 12, 1)
+        yahoo_data = ticker.history(start=start, end=end)
+
     except ConnectionError as e:
         print("Connection failed")
         raise e
-
-    df = yahoo_data["Adj Close"].to_frame().reset_index("Date")
+    df = yahoo_data["Close"].to_frame().reset_index("Date")
     df.set_index("Date", inplace=True)
     return df
 
@@ -47,12 +50,20 @@ def __add_inferred_freq_to_index(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe
 
 
-def stock_prices(stock_choice_list: list = __stock_choice) -> Generator[Dataset, None, None]:
+def stock_prices(
+    stock_choice_list: list = __stock_choice,
+) -> Generator[Dataset, None, None]:
     """Load in the stock prices data."""
     for stock_choice in stock_choice_list:
         path = __load_data(stock_choice)
         data = __resample(path)
         data = __add_inferred_freq_to_index(data)
         yield Dataset(
-            "Stock price", data, "days", ["Adj Close"], stock_choice, "Adj Close", False
+            name="Stock price",
+            values=data,
+            time_unit="days",
+            number_columns=["Close"],
+            subset_row_name=stock_choice,
+            subset_column_name="Close",
+            seasonality=True,
         )
