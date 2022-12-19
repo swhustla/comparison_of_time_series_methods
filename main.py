@@ -157,8 +157,6 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
             results_store.append(reports_per_dataset)
             yield reports_per_dataset
         
-        print(f"types: {type(results_store)} {type(list(methods))}")
-        print(f"lengths: {len(results_store)} {len(list(methods))}")
         if len(results_store) > 1 and number_of_methods > 1:
             logging.info(f"Plotting results for all {len(results_store)} datasets in {dataset_name} for {number_of_methods} methods...")
             plot_results_in_heatmap(results_store)
@@ -169,8 +167,8 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 __datasets = [
     #   "india_pollution",
-    "stock_prices",
-    # "airline_passengers",
+    # "stock_prices",
+    "airline_passengers",
     # "list_of_tuples",
     #  "sun_spots",
     # "csv",
@@ -178,9 +176,9 @@ __datasets = [
 
 
 __methods = [
-    "AR",
+    # "AR",
     #  "linear_regression",
-    # "ARIMA",
+    "ARIMA",
     # "HoltWinters",
     # "MA",
     # "Prophet",
