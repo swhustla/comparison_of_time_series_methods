@@ -36,7 +36,6 @@ import pandas as pd
 import logging
 
 from arch.unitroot import ADF
-from pmdarima.arima.utils import ndiffs
 from statsmodels.tsa.forecasting.stl import STLForecast
 import statsmodels.api as sm
 
@@ -100,10 +99,6 @@ def __stationarity(data: Dataset) -> bool:
     data_to_check = data.values[data.subset_column_name]
     return ADF(data_to_check).pvalue < 0.05
 
-
-def __get_differencing_term(data: Dataset) -> int:
-    """Get the differencing term for the ARIMA model"""
-    return ndiffs(data.values[data.subset_column_name], test="adf")
 
 
 def __evaluate_arima_model(

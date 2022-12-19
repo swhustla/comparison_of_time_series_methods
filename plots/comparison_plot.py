@@ -1,9 +1,10 @@
 import os
-import pandas as pd
+
 import numpy as np
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List, Dict, Any, Union
 
 from matplotlib import pyplot as plt
+import pandas as pd
 
 from methods.plot import Figure
 from predictions.Prediction import PredictionData
@@ -24,7 +25,7 @@ def __get_prediction_series(prediction: PredictionData) -> pd.Series:
 
 def __figure_out_confidence_interval_plot(
     prediction: PredictionData, prediction_series: pd.Series
-) -> Tuple[float, float, str]:
+) -> Tuple[pd.Series, pd.Series, str]:
     if prediction.confidence_columns is None:
         print(
             f"\n\nPlotting {prediction.title} without pre-defined confidence intervals\n\n"
@@ -53,7 +54,7 @@ def __figure_out_confidence_interval_plot(
                 - prediction.values["mean"]
             )
             confidence_interval_label = prediction.confidence_method
-    return upper_limit, lower_limit, confidence_interval_label
+    return upper_limit, lower_limit, confidence_interval_label 
 
 
 def __full_data_plus_prediction_plot(
@@ -114,12 +115,16 @@ def __full_data_plus_prediction_plot(
         lower_limit,
         confidence_interval_label,
     ) = __figure_out_confidence_interval_plot(prediction, prediction_series)
+
+    # make index compatible with matplotlib
+    dates_for_index = prediction_series.index.values
+
     axis.fill_between(
-        x=prediction.values.index,
+        x=dates_for_index,
         y1=lower_limit,
         y2=upper_limit,
         alpha=0.2,
-        color="orange",
+        color=prediction.color,
         label=confidence_interval_label,
     )
     axis.set_title(title)
@@ -153,17 +158,17 @@ def __plot(
 
     figure, ax = plt.subplots(figsize=(12, 6))
 
-    ground_truth_series.plot(ax=ax, label="Ground truth")
-    prediction_series.plot(ax=ax, label="Forecast")
+    ground_truth_series.plot(ax=ax, label="Ground truth", style="x", color="blue", alpha=0.5)
+    prediction_series.plot(ax=ax, label="Forecast", color=prediction.color)
 
-    # TODO: add confidence interval around the prediction, not the mean
+    dates_for_index = prediction_series.index.values
 
     ax.fill_between(
-        x=prediction_series.index,
+        x=dates_for_index,
         y1=lower_limit,
         y2=upper_limit,
         alpha=0.2,
-        color="orange",
+        color=prediction.color,
         label=confidence_interval_label,
     )
     ax.set_title(prediction.title)

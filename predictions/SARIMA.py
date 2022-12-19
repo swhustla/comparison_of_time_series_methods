@@ -59,7 +59,6 @@ from warnings import catch_warnings, filterwarnings
 import logging
 
 from arch.unitroot import ADF
-from pmdarima.arima.utils import ndiffs
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 from sklearn.metrics import mean_squared_error
@@ -91,13 +90,6 @@ def __stationarity(data: Dataset) -> bool:
     return ADF(data_to_check).pvalue < 0.05
 
 
-def __get_differencing_term(data: Dataset) -> int:
-    """Get the differencing term for the SARIMA model"""
-    logging.info(
-        f"differencing term d for {data.name} is {ndiffs(data.values[data.subset_column_name], test='adf')}"
-    )
-    return ndiffs(data.values[data.subset_column_name], test="adf")
-
 
 def __get_seasonal_period(data: Dataset) -> int:
     """Get the seasonal period for the SARIMA model"""
@@ -112,18 +104,6 @@ def __get_seasonal_period(data: Dataset) -> int:
     else:
         raise ValueError("Invalid time unit")
 
-
-def __get_seasonal_differencing_term(data: Dataset) -> int:
-    """Get the seasonal differencing term for the SARIMA model"""
-    maximum_differencing_term = 2
-    logging.info(
-        f"differencing term D for {data.name} is {ndiffs(data.values[data.subset_column_name], test='adf', max_d=maximum_differencing_term)}"
-    )
-    return ndiffs(
-        data.values[data.subset_column_name],
-        test="adf",
-        max_d=maximum_differencing_term,
-    )
 
 
 def __get_trend_given_data(data: Dataset) -> str:
@@ -229,7 +209,7 @@ def __grid_search_configs(
 
 def __get_sarima_configs(
     p_params: list = [1],#[0, 1, 2], # AR order
-    d_params: list = [0],#[0, 1], # differencing order
+    d_params: list = [0, 1, 2],#[0, 1], # differencing order
     q_params: list = [1],#[0, 1, 2], # MA order
     t_params: list = ["t", "c"],#["n", "c", "t", "ct"], # trend
     large_p_params: list = [1],#[0, 1, 2], # seasonal AR order
@@ -259,16 +239,18 @@ def __get_sarima_configs(
 def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
     """Get the best SARIMA model"""
     logging.info("Finding the best SARIMA model")
+    seasonal = __get_seasonal_period(data)
     if __stationarity(data):
         logging.info(f"Data {data.name} is stationary; no differencing required")
         d = 0
+        configs = __get_sarima_configs(m_params=[seasonal], d_params=[d])
     else:
         logging.info(f"Data {data.name} is not stationary")
-        d = __get_differencing_term(data)
-        logging.info(f"Using differencing term {d}")
+        logging.info(f"Using differencing term from grid search")
+        configs = __get_sarima_configs(m_params=[seasonal])
     
-    seasonal = __get_seasonal_period(data)
-    configs = __get_sarima_configs(m_params=[seasonal], d_params=[d])
+    
+    
     
     # grid search
     scores = __grid_search_configs(data, configs)
