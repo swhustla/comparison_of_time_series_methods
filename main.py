@@ -178,7 +178,7 @@ __datasets = [
 
 
 __methods = [
-    # "AR",
+    "AR",
     #  "linear_regression",
     # "ARIMA",
     # "HoltWinters",
@@ -187,7 +187,7 @@ __methods = [
     # "FCNN",
     # "FCNN_embedding",
     # "SARIMA",
-     "SES",
+    #  "SES",
     # "TsetlinMachine",
 ]
 
