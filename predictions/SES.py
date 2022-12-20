@@ -232,7 +232,7 @@ def __calculate_next_additive_seasonal_values(
     print(f"len seasonal_values_test\n{len(seasonal_values_test)}")
 
     logging.info(
-        f"Sample of the next {number_of_steps} seasonal values: {seasonal_values_test[:5]}"
+        f"Sample of the next {number_of_steps} seasonal values, assuming an additive model: \n{seasonal_values_test[:5]}"
     )
 
     return pd.Series(
@@ -261,7 +261,7 @@ def __calculate_next_multiplicative_seasonal_values(
         )
     print(f"len seasonal_values_test\n{len(seasonal_values_test)}")
     logging.info(
-        f"Sample of the next {number_of_steps} seasonal values: {seasonal_values_test[:5]}"
+        f"Sample of the next {number_of_steps} seasonal values, assuming a multiplicative model: \n{seasonal_values_test[:5]}"
     )
 
     return pd.Series(
@@ -437,8 +437,7 @@ def __predict(
     """Predicts the next values in the time series"""
     title = f"{decomposed_dataset.subset_column_name} forecast for {decomposed_dataset.subset_row_name} with SES"
     forecasted_resid = model.forecast(__number_of_steps(data))  # out of sample prediction
-    # forecasted_resid = model.predict(len(__get_training_set(data).values),len(__get_training_set(data).values)+__number_of_steps(data)-1)  # out of sample prediction
-    forecasted_resid_in_sample = model.predict(0,len(__get_training_set(data).values)-1) #in sample prediction
+    forecasted_resid_in_sample = model.predict(start=1, end=len(decomposed_dataset.values.resid))  # in sample prediction
     # add seasonal and trend components back to the forecast for the correct number of steps
     # if __determine_if_trend_with_acf(decomposed_dataset):
     logging.debug(f"Trend component present for {decomposed_dataset.name} with SES")
@@ -477,10 +476,16 @@ def __predict(
                 __number_of_steps(data),
                 __get_seasonal_period(data),
             )
-        logging.debug(f"Sample of seasonal values: {seasonal_component[::20]}")
+        
         seasonal_component_in_sample = decomposed_dataset.values.seasonal
+        #TODO: remove this once have solved the gap in the plot between the in sample and out of sample
+        print(f"\n\nseasonal_component_in_sample tail: {seasonal_component_in_sample.tail()}")
+        print(f"\n\nnext seasonal_component head: {seasonal_component.head()}")
         forecasted_resid = __sum_of_two_series(forecasted_resid, seasonal_component)
         forecasted_resid_in_sample = __sum_of_two_series(forecasted_resid_in_sample, seasonal_component_in_sample)
+        #TODO: remove this once have solved the gap in the plot between the in sample and out of sample
+        print (f"\n\nforecasted_resid_in_sample tail: {forecasted_resid_in_sample.tail()}")
+        print (f"forecasted_resid head: {forecasted_resid.head()}")
     return PredictionData(
         method_name="SES",
         values=forecasted_resid,
@@ -493,7 +498,7 @@ def __predict(
         confidence_on_mean=False,
         confidence_method=None,
         color="darkorange",
-        in_sample_prediction=forecasted_resid_in_sample
+        in_sample_prediction=forecasted_resid_in_sample,
     )
 
 ses = method(__seasonal_decompose_data, __fit_model, __predict)
