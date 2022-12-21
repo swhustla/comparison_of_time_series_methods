@@ -31,7 +31,7 @@ Downsides of Prophet:
 
 from typing import TypeVar, List, Dict, Generator, Tuple
 from prophet import Prophet
-from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.metrics import mean_squared_error
 import pandas as pd
 import numpy as np
 
@@ -65,11 +65,11 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
 
 #TODO: Add support for multiple time series
 
-def __get_configs() -> Generator:
+def __get_configs(seasonality_prior_scale_list: List[int] =[10] ) -> Generator:
     """Get the configs for a grid search on Prophet"""
-    for changepoint_range in [0.1, 0.9]:#[0.01, 0.1, 0.9, 0.99]:
-        for seasonality_prior_scale in [0.1, 0.9]: #[0.1, 0.9, 0.99, 1.0]:
-            for changepoint_prior_scale in [0.001, 0.05, 0.5, 0.95, 0.99]:
+    for changepoint_range in [0.5, 0.8]:#[0.01, 0.1, 0.9, 0.99]:
+        for seasonality_prior_scale in seasonality_prior_scale_list: 
+            for changepoint_prior_scale in [0.01, 0.05]:
                 for seasonality_mode in ["additive", "multiplicative"]:
                     yield {
                         "changepoint_range": changepoint_range,
@@ -84,16 +84,14 @@ def __measure_error_metric(data: Dataset, actual: pd.DataFrame, predicted: np.ar
     """Measure the error"""
     # change actual to a numpy array
     actual_this = actual.loc[:, data.subset_column_name].values
-    print(f"Actual: {actual_this[:10]}")
-    print(f"Predicted: {predicted[:10]}")
-    result = mean_absolute_percentage_error(y_true=actual_this, y_pred=predicted)
-    print(f"Error: {result}")
+    result = np.sqrt(mean_squared_error(y_true=actual_this, y_pred=predicted))
     return result
     
 
 def __score_model(model: Model, data: Dataset) -> float:
     """Score the model on a test set"""
-    forecast = model.predict()
+    in_sample_dates = __get_training_dates(data)
+    forecast = model.predict(in_sample_dates)
     return __measure_error_metric(data, __get_training_set(data), forecast["yhat"].values)
 
 
@@ -101,7 +99,9 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
     """Get the best model based on the configs"""
     best_score = float("inf")
     best_model = None
-    configs = __get_configs()
+    seasonality_settings = __get_seasonality_settings(data)
+    seasonality_range = __convert_settings_to_seasonality_range(seasonality_settings)
+    configs = __get_configs(seasonality_prior_scale_list=seasonality_range)
     
     training_df = __get_training_set(data)
     renamed_training_df = training_df.rename(columns={"Date": "ds", data.subset_column_name: "y"})
@@ -113,7 +113,7 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
         model = None
         print(f"Trying config: \n{str(config)} \nfor dataset {data.name} - {data.subset_row_name}")
         try:
-            model = __fit_prophet_model(renamed_training_df, config)
+            model = __fit_prophet_model(data, renamed_training_df, config)
         except Exception as e:
             logging.error(f"Error: {e}")
             raise e
@@ -121,12 +121,12 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
             
         score = __score_model(model, data)
 
-        # print score if not nan
+        # log score if not nan
         if not np.isnan(score):
             logging.info(f"\n\nScore: {score}")
 
         if score < best_score:
-            print(f"New best score: {score}")
+            logging.info(f"New best score: {score}")
             best_score = score
             best_model = model
             best_config = config
@@ -134,7 +134,7 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
         del model
     # log the best config formatted nicely
     formatted_config = ", ".join([f"{key}={value}" for key, value in best_config.items()])
-    print(f"\n\nBest config: {formatted_config} -> {best_score}")
+    logging.info(f"\n\nBest config: {formatted_config} -> {best_score}")
     # get length of the configs geenrator
     return best_model, len(list(configs))
 
@@ -154,8 +154,39 @@ def __get_seasonality_settings(data: Dataset) -> Dict:
     return settings
 
 
+def __convert_settings_to_seasonality_range(settings: Dict) -> List:
+    """Convert the settings to a list of seasonality ranges"""
+    seasonality_range = []
+    for time_unit, value in settings.items():
+        if value:
+            if time_unit == "hours":
+                seasonality_range.append(24)
+            elif time_unit == "days":
+                seasonality_range.append(7)
+            elif time_unit == "weeks":
+                seasonality_range.append(52)
+            elif time_unit == "months":
+                seasonality_range.append(12)
+            elif time_unit == "years":
+                seasonality_range.append(10)
+
+    # add -1 and +1 to the seasonality range
+    seasonality_minus_one = [x - 1 for x in seasonality_range]
+    seasonality_plus_one = [x + 1 for x in seasonality_range]
+    seasonality_range.extend(seasonality_minus_one)
+    seasonality_range.extend(seasonality_plus_one)
+
+    return seasonality_range
+
+def __check_if_special_seasonality_is_needed(data: Dataset) -> bool:
+    """Check if the data has a special seasonality"""
+    if data.name == "Sun spots":
+        return True
+    return False
+
+
 # TODO: Add settings for the model to include seasonality, holidays, etc.
-def __fit_prophet_model(training_data: pd.DataFrame, config:dict) -> Model:
+def __fit_prophet_model(data: Dataset, training_data: pd.DataFrame, config:dict) -> Model:
     """Fit a Prophet model to the first 80% of the data"""
 
     model = Prophet(
@@ -164,6 +195,15 @@ def __fit_prophet_model(training_data: pd.DataFrame, config:dict) -> Model:
         changepoint_prior_scale=config["changepoint_prior_scale"],
         seasonality_mode=config["seasonality_mode"],
     )
+    
+    if __check_if_special_seasonality_is_needed(data):
+        model.add_seasonality(
+            name="cycle_11years",
+            period=11,
+            fourier_order=5,
+            prior_scale=0.1,
+            mode="multiplicative",
+        )
 
     model.fit(df=training_data)
     return model
@@ -201,25 +241,20 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
     title = (
         f"{data.subset_column_name} forecast for {data.subset_row_name} with Prophet"
     )
-    future = __get_future_dates(data)
-    """Removes the time from datetime"""
-    future = future['ds'].dt.tz_localize(None)
-    in_sample = __get_training_dates(data)
-    """Removes the time from datetime"""
-    in_sample = in_sample['ds'].dt.tz_localize(None)
-    future_in_sample = pd.concat([in_sample,future])
-    future_in_sample = pd.to_datetime(future_in_sample)
-    future_in_sample = pd.DataFrame({"ds": future_in_sample})
     
+    future_dates = __get_future_dates(data)
+    """Removes the time from datetime"""
+    future_dates_local = future_dates['ds'].dt.tz_localize(None)
+    in_sample_dates = __get_training_dates(data)
+    """Removes the time from datetime"""
+    in_sample_dates_local = in_sample_dates['ds'].dt.tz_localize(None)
 
     # TODO: Add settings for the model to include holidays, etc.
+    in_sample_only_prediction = model.predict(in_sample_dates_local)
+    forecast = model.predict(future_dates_local)
 
-    forecast_in_sample_plus_future = model.predict(df=future_in_sample)
-    print(f" forecast_in_sample_plus_future\n{ forecast_in_sample_plus_future}")
-    forecast = forecast_in_sample_plus_future[-__number_of_steps(data):]
-    predict_in_sample = forecast_in_sample_plus_future[:len(__get_training_set(data).values)+2]
     forecast_df = forecast.set_index(keys=["ds"])
-    predict_in_sample_df = predict_in_sample.set_index(keys=["ds"])
+    predict_in_sample_df = in_sample_only_prediction.set_index(keys=["ds"])
     ground_truth_df = (
         __get_test_set(data)
         .rename(columns={"Date": "ds", data.subset_column_name: "y"})
