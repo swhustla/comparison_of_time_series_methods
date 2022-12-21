@@ -91,6 +91,9 @@ def __measure_error_metric(data: Dataset, actual: pd.DataFrame, predicted: np.ar
 def __score_model(model: Model, data: Dataset) -> float:
     """Score the model on a test set"""
     in_sample_dates = __get_training_dates(data)
+    """Removes the time from datetime"""
+    in_sample_dates_notimezone = pd.to_datetime(in_sample_dates['ds']).dt.tz_localize(None)
+    in_sample_dates = pd.DataFrame({"ds": in_sample_dates_notimezone})
     forecast = model.predict(in_sample_dates)
     return __measure_error_metric(data, __get_training_set(data), forecast["yhat"].values)
 

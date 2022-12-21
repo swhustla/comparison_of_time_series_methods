@@ -167,10 +167,10 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 __datasets = [
     #   "india_pollution",
-    # "stock_prices",
+     "stock_prices",
     # "airline_passengers",
     # "list_of_tuples",
-     "sun_spots",
+    # "sun_spots",
     # "csv",
 ]
 
