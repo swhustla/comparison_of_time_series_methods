@@ -176,7 +176,7 @@ __datasets = [
 
 
 __methods = [
-    # "AR",
+    #  "AR",
     #  "linear_regression",
     # "ARIMA",
     # "HoltWinters",
