@@ -90,8 +90,9 @@ def __measure_error_metric(data: Dataset, actual: pd.DataFrame, predicted: np.ar
 
 def __remove_timezone_from_dates(dates_df: pd.DataFrame) -> pd.DataFrame:
     """Remove the timezone from the dates and return a dataframe with a column named ds"""
-    dates_df["Date"] = dates_df["Date"].dt.tz_localize(None)
-    return pd.DataFrame({"ds": dates_df})
+    dates_no_time_zone = pd.to_datetime(dates_df["ds"]).dt.tz_localize(None)
+    
+    return pd.DataFrame({"ds": dates_no_time_zone})
     
 
 def __score_model(model: Model, data: Dataset) -> float:
