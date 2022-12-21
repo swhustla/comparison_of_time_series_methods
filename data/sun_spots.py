@@ -28,6 +28,9 @@ def sun_spots() -> Data:
     del data["YEAR"]
     data = __add_inferred_freq_to_index(data)
 
+    # delete data up to 1720 to prevent an overflow error
+    data = data.loc["1720":]
+
     return Dataset(
         name="Sun spots",
         values=data,
