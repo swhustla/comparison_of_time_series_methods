@@ -245,13 +245,16 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
     future_dates = __get_future_dates(data)
     """Removes the time from datetime"""
     future_dates_local = future_dates['ds'].dt.tz_localize(None)
+    future_dates_local_df = pd.DataFrame({"ds": future_dates_local})
+
     in_sample_dates = __get_training_dates(data)
     """Removes the time from datetime"""
     in_sample_dates_local = in_sample_dates['ds'].dt.tz_localize(None)
+    in_sample_dates_local_df = pd.DataFrame({"ds": in_sample_dates_local})
 
     # TODO: Add settings for the model to include holidays, etc.
-    in_sample_only_prediction = model.predict(in_sample_dates_local)
-    forecast = model.predict(future_dates_local)
+    in_sample_only_prediction = model.predict(in_sample_dates_local_df)
+    forecast = model.predict(future_dates_local_df)
 
     forecast_df = forecast.set_index(keys=["ds"])
     predict_in_sample_df = in_sample_only_prediction.set_index(keys=["ds"])
