@@ -105,6 +105,9 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
     
     training_df = __get_training_set(data)
     renamed_training_df = training_df.rename(columns={"Date": "ds", data.subset_column_name: "y"})
+    """Removes the time from datetime"""
+    renamed_training_df_notimezone = pd.to_datetime(renamed_training_df['ds']).dt.tz_localize(None)
+    renamed_training_df = pd.concat([renamed_training_df_notimezone, renamed_training_df['y']], axis=1)
 
     for config in configs:
         model = None
@@ -199,12 +202,20 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
         f"{data.subset_column_name} forecast for {data.subset_row_name} with Prophet"
     )
     future = __get_future_dates(data)
+    """Removes the time from datetime"""
+    future = future['ds'].dt.tz_localize(None)
     in_sample = __get_training_dates(data)
+    """Removes the time from datetime"""
+    in_sample = in_sample['ds'].dt.tz_localize(None)
     future_in_sample = pd.concat([in_sample,future])
+    future_in_sample = pd.to_datetime(future_in_sample)
+    future_in_sample = pd.DataFrame({"ds": future_in_sample})
+    
 
     # TODO: Add settings for the model to include holidays, etc.
 
-    forecast_in_sample_plus_future = model.predict(future_in_sample)
+    forecast_in_sample_plus_future = model.predict(df=future_in_sample)
+    print(f" forecast_in_sample_plus_future\n{ forecast_in_sample_plus_future}")
     forecast = forecast_in_sample_plus_future[-__number_of_steps(data):]
     predict_in_sample = forecast_in_sample_plus_future[:len(__get_training_set(data).values)+2]
     forecast_df = forecast.set_index(keys=["ds"])
