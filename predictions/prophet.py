@@ -86,15 +86,20 @@ def __measure_error_metric(data: Dataset, actual: pd.DataFrame, predicted: np.ar
     actual_this = actual.loc[:, data.subset_column_name].values
     result = np.sqrt(mean_squared_error(y_true=actual_this, y_pred=predicted))
     return result
+
+
+def __remove_timezone_from_dates(dates_df: pd.DataFrame) -> pd.DataFrame:
+    """Remove the timezone from the dates and return a dataframe with a column named ds"""
+    dates_df["Date"] = dates_df["Date"].dt.tz_localize(None)
+    return pd.DataFrame({"ds": dates_df})
     
 
 def __score_model(model: Model, data: Dataset) -> float:
     """Score the model on a test set"""
     in_sample_dates = __get_training_dates(data)
     """Removes the time from datetime"""
-    in_sample_dates_notimezone = pd.to_datetime(in_sample_dates['ds']).dt.tz_localize(None)
-    in_sample_dates = pd.DataFrame({"ds": in_sample_dates_notimezone})
-    forecast = model.predict(in_sample_dates)
+    in_sample_dates_no_timezone = __remove_timezone_from_dates(in_sample_dates)
+    forecast = model.predict(in_sample_dates_no_timezone)
     return __measure_error_metric(data, __get_training_set(data), forecast["yhat"].values)
 
 
@@ -245,21 +250,15 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
         f"{data.subset_column_name} forecast for {data.subset_row_name} with Prophet"
     )
     
-    future_dates = __get_future_dates(data)
-    """Removes the time from datetime"""
-    future_dates_local = future_dates['ds'].dt.tz_localize(None)
-    future_dates_local_df = pd.DataFrame({"ds": future_dates_local})
+    future_dates_local_df = __remove_timezone_from_dates(__get_future_dates(data))
 
-    in_sample_dates = __get_training_dates(data)
-    """Removes the time from datetime"""
-    in_sample_dates_local = in_sample_dates['ds'].dt.tz_localize(None)
-    in_sample_dates_local_df = pd.DataFrame({"ds": in_sample_dates_local})
+    in_sample_dates_local_df = __remove_timezone_from_dates(__get_training_dates(data))
 
     # TODO: Add settings for the model to include holidays, etc.
     in_sample_only_prediction = model.predict(in_sample_dates_local_df)
-    forecast = model.predict(future_dates_local_df)
+    out_of_sample_forecast = model.predict(future_dates_local_df)
 
-    forecast_df = forecast.set_index(keys=["ds"])
+    forecast_df = out_of_sample_forecast.set_index(keys=["ds"])
     predict_in_sample_df = in_sample_only_prediction.set_index(keys=["ds"])
     ground_truth_df = (
         __get_test_set(data)
