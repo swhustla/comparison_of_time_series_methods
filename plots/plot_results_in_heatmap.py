@@ -53,6 +53,7 @@ def __plot_heatmap(
 ) -> Figure:
     """Plot the results in a heatmap"""
     logging.info(f"Plotting {chosen_metric} heatmap")
+
     title = __get_title(results_dataframe, chosen_metric)
     figure, axis = plt.subplots(figsize=(20, 10))
     axis.set_title(title)
@@ -60,6 +61,17 @@ def __plot_heatmap(
     axis.set_ylabel("Dataset")
     # chose sns colormap that goes from red (high error) to green (low error) without white in the middle
     colormap = sns.diverging_palette(220, 20, as_cmap=True)
+
+    #reversing the colorbar for R2 case
+    if chosen_metric == 'R2':
+        axis = sns.heatmap(
+            results_dataframe.pivot(columns="method", index="subset_row", values=chosen_metric),
+            annot=True,
+            fmt=".2f",
+            cmap=colormap.reversed(),
+            ax=axis,
+        )
+        return figure   
 
     axis = sns.heatmap(
         results_dataframe.pivot(columns="method", index="subset_row", values=chosen_metric),
