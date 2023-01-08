@@ -154,6 +154,7 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
                 predictions_per_dataset.append(report.prediction)
                 reports_per_dataset.append(report)
+                yield reports_per_dataset
 
                 #to store R2
                 prediction = __predictors[method_name](dataset)
@@ -167,7 +168,7 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
             #appends only the cities where R2 > 10
             if (np.array(metrics_stat)>-10).all():
                 results_store.append(reports_per_dataset)
-                yield reports_per_dataset
+                
 
         if len(results_store) > 1 and number_of_methods > 1:
             logging.info(f"Plotting results for all {len(results_store)} datasets in {dataset_name} for {number_of_methods} methods...")
