@@ -98,7 +98,7 @@ python-dateutil = ">=2.7.0"
 
 [[package]]
 name = "astroid"
-version = "2.12.13"
+version = "2.13.2"
 description = "An abstract syntax tree for Python with inference support."
 category = "dev"
 optional = false
@@ -106,6 +106,7 @@ python-versions = ">=3.7.2"
 
 [package.dependencies]
 lazy-object-proxy = ">=1.4.0"
+typing-extensions = ">=4.0.0"
 wrapt = {version = ">=1.11,<2", markers = "python_version < \"3.11\""}
 
 [[package]]
@@ -388,7 +389,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "cython"
-version = "0.29.32"
+version = "0.29.33"
 description = "The Cython compiler for writing C extensions for the Python language."
 category = "main"
 optional = false
@@ -396,7 +397,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "debugpy"
-version = "1.6.4"
+version = "1.6.5"
 description = "An implementation of the Debug Adapter Protocol for Python"
 category = "main"
 optional = false
@@ -477,7 +478,7 @@ devel = ["colorama", "jsonschema", "json-spec", "pylint", "pytest", "pytest-benc
 
 [[package]]
 name = "flatbuffers"
-version = "22.12.6"
+version = "23.1.4"
 description = "The FlatBuffers serialization format for Python"
 category = "main"
 optional = false
@@ -540,7 +541,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "gdal"
-version = "3.6.1"
+version = "3.6.2"
 description = "GDAL: Geospatial Data Abstraction Library"
 category = "main"
 optional = false
@@ -707,7 +708,7 @@ test = ["flaky", "ipyparallel", "pre-commit", "pytest-asyncio", "pytest-cov", "p
 
 [[package]]
 name = "ipython"
-version = "8.7.0"
+version = "8.8.0"
 description = "IPython: Productive Interactive Computing"
 category = "main"
 optional = false
@@ -813,7 +814,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "json5"
-version = "0.9.10"
+version = "0.9.11"
 description = "A Python implementation of the JSON5 data format."
 category = "main"
 optional = false
@@ -877,7 +878,7 @@ test = ["codecov", "coverage", "ipykernel (>=6.12)", "ipython", "mypy", "pre-com
 
 [[package]]
 name = "jupyter-core"
-version = "5.1.1"
+version = "5.1.2"
 description = "Jupyter core package. A base package on which Jupyter projects rely."
 category = "main"
 optional = false
@@ -889,7 +890,7 @@ pywin32 = {version = ">=1.0", markers = "sys_platform == \"win32\" and platform_
 traitlets = ">=5.3"
 
 [package.extras]
-docs = ["myst-parser", "sphinxcontrib-github-alt", "traitlets"]
+docs = ["myst-parser", "sphinx-autodoc-typehints", "sphinxcontrib-github-alt", "sphinxcontrib-spelling", "traitlets"]
 test = ["ipykernel", "pre-commit", "pytest", "pytest-cov", "pytest-timeout"]
 
 [[package]]
@@ -991,7 +992,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "jupyterlab-server"
-version = "2.17.0"
+version = "2.18.0"
 description = "A set of server components for JupyterLab and JupyterLab like applications."
 category = "main"
 optional = false
@@ -1009,7 +1010,7 @@ requests = ">=2.28"
 [package.extras]
 docs = ["autodoc-traits", "docutils (<0.20)", "jinja2 (<3.2.0)", "mistune (<3)", "myst-parser", "pydata-sphinx-theme", "sphinx", "sphinx-copybutton", "sphinxcontrib-openapi"]
 openapi = ["openapi-core (>=0.16.1)", "ruamel-yaml"]
-test = ["codecov", "ipykernel", "jupyterlab-server", "openapi-spec-validator (>=0.5.1)", "pytest-console-scripts", "pytest-cov", "pytest-jupyter[server] (>=0.6)", "pytest-timeout", "pytest (>=7.0)", "requests-mock", "sphinxcontrib-spelling", "strict-rfc3339", "werkzeug"]
+test = ["codecov", "ipykernel", "jupyterlab-server", "openapi-spec-validator (>=0.5.1)", "pytest-console-scripts", "pytest-cov", "pytest-jupyter[server] (>=0.6.2)", "pytest-timeout", "pytest (>=7.0)", "requests-mock", "sphinxcontrib-spelling", "strict-rfc3339", "werkzeug"]
 
 [[package]]
 name = "kaggle"
@@ -1054,7 +1055,7 @@ python-versions = "*"
 
 [[package]]
 name = "lazy-object-proxy"
-version = "1.8.0"
+version = "1.9.0"
 description = "A fast and thorough lazy object proxy."
 category = "dev"
 optional = false
@@ -1070,7 +1071,7 @@ python-versions = "*"
 
 [[package]]
 name = "lightgbm"
-version = "3.3.3"
+version = "3.3.4"
 description = "LightGBM Python Package"
 category = "main"
 optional = false
@@ -1438,7 +1439,7 @@ tests = ["pytest", "pytest-cov", "pytest-pep8"]
 
 [[package]]
 name = "packaging"
-version = "22.0"
+version = "23.0"
 description = "Core utilities for Python packages"
 category = "main"
 optional = false
@@ -1824,7 +1825,7 @@ python-versions = "*"
 
 [[package]]
 name = "pywinpty"
-version = "2.0.9"
+version = "2.0.10"
 description = "Pseudo terminal support for Windows from Python."
 category = "main"
 optional = false
@@ -1935,19 +1936,19 @@ tests = ["matplotlib (>=3.1.3)", "scikit-image (>=0.16.2)", "pandas (>=1.0.5)", 
 
 [[package]]
 name = "scipy"
-version = "1.9.3"
+version = "1.10.0"
 description = "Fundamental algorithms for scientific computing in Python"
 category = "main"
 optional = false
-python-versions = ">=3.8"
+python-versions = "<3.12,>=3.8"
 
 [package.dependencies]
-numpy = ">=1.18.5,<1.26.0"
+numpy = ">=1.19.5,<1.27.0"
 
 [package.extras]
-test = ["pytest", "pytest-cov", "pytest-xdist", "asv", "mpmath", "gmpy2", "threadpoolctl", "scikit-umfpack"]
-doc = ["sphinx (!=4.1.0)", "pydata-sphinx-theme (==0.9.0)", "sphinx-panels (>=0.5.2)", "matplotlib (>2)", "numpydoc", "sphinx-tabs"]
-dev = ["mypy", "typing-extensions", "pycodestyle", "flake8"]
+test = ["pytest", "pytest-cov", "pytest-timeout", "pytest-xdist", "asv", "mpmath", "gmpy2", "threadpoolctl", "scikit-umfpack", "pooch"]
+doc = ["sphinx (!=4.1.0)", "pydata-sphinx-theme (==0.9.0)", "sphinx-design (>=0.2.0)", "matplotlib (>2)", "numpydoc"]
+dev = ["mypy", "typing-extensions", "pycodestyle", "flake8", "rich-click", "click", "doit (>=0.36.0)", "pydevtool"]
 
 [[package]]
 name = "seaborn"
@@ -2168,7 +2169,7 @@ wrapt = ">=1.11.0"
 
 [[package]]
 name = "termcolor"
-version = "2.1.1"
+version = "2.2.0"
 description = "ANSI color formatting for output in terminal"
 category = "main"
 optional = false
@@ -2306,7 +2307,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "ujson"
-version = "5.6.0"
+version = "5.7.0"
 description = "Ultra fast JSON encoder and decoder for Python"
 category = "main"
 optional = false

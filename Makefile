@@ -1,6 +1,7 @@
 install:
 	poetry shell
 	pip install pip --upgrade
+	pip install tensorflow-macos
 	pip install git+https://github.com/stan-dev/pystan2.git@master
 	pip install prophet==1.0      
 	pip install GDAL
