@@ -31,6 +31,7 @@ def __compile_results(list_of_list_of_reports: List[List[Report]]) -> Tuple[pd.D
                     "MAE": report.metrics["mean_absolute_error"],
                     "RMSE": report.metrics["root_mean_squared_error"],
                     "R2": report.metrics["r_squared"],
+                    "MAPE": report.metrics["mean_absolute_percentage_error"],
                 }
             )
     results = pd.DataFrame(results)
