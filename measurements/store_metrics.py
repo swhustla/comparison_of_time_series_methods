@@ -30,6 +30,7 @@ def __write_summary_report(report) -> None:
             "RMSE": report.metrics["root_mean_squared_error"],
             "R Squared": report.metrics["r_squared"],
             "MAE": report.metrics["mean_absolute_error"],
+            "MAPE": report.metrics["mean_absolute_percentage_error"],
             "Elapsed (s)": np.round(time_taken, 4),
         },
         index=[0],
