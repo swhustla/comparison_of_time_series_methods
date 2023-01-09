@@ -36,6 +36,7 @@ import pandas as pd
 import numpy as np
 
 import logging
+
 # set up logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -63,12 +64,22 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
     return __get_dataframe_with_date_column(data.values[-__number_of_steps(data) :])
 
 
-#TODO: Add support for multiple time series
+# TODO: Add support for multiple time series
 
-def __get_configs(seasonality_prior_scale_list: List[int] =[10] ) -> Generator:
+
+def __get_configs(seasonality_prior_scale_list: List[int] = [10]) -> Generator:
     """Get the configs for a grid search on Prophet"""
-    for changepoint_range in [0.5, 0.8]:#[0.01, 0.1, 0.9, 0.99]:
-        for seasonality_prior_scale in seasonality_prior_scale_list: 
+
+    if len(seasonality_prior_scale_list) is 0:
+        for changepoint_range in [0.5, 0.8]:
+            for changepoint_prior_scale in [0.01, 0.05]:
+                yield {
+                    "changepoint_range": changepoint_range,
+                    "changepoint_prior_scale": changepoint_prior_scale,
+                }
+
+    for changepoint_range in [0.5, 0.8]:  # [0.01, 0.1, 0.9, 0.99]:
+        for seasonality_prior_scale in seasonality_prior_scale_list:
             for changepoint_prior_scale in [0.01, 0.05]:
                 for seasonality_mode in ["additive", "multiplicative"]:
                     yield {
@@ -79,8 +90,9 @@ def __get_configs(seasonality_prior_scale_list: List[int] =[10] ) -> Generator:
                     }
 
 
-
-def __measure_error_metric(data: Dataset, actual: pd.DataFrame, predicted: np.array) -> float:
+def __measure_error_metric(
+    data: Dataset, actual: pd.DataFrame, predicted: np.array
+) -> float:
     """Measure the error"""
     # change actual to a numpy array
     actual_this = actual.loc[:, data.subset_column_name].values
@@ -91,9 +103,9 @@ def __measure_error_metric(data: Dataset, actual: pd.DataFrame, predicted: np.ar
 def __remove_timezone_from_dates(dates_df: pd.DataFrame) -> pd.DataFrame:
     """Remove the timezone from the dates and return a dataframe with a column named ds"""
     dates_no_time_zone = pd.to_datetime(dates_df["ds"]).dt.tz_localize(None)
-    
+
     return pd.DataFrame({"ds": dates_no_time_zone})
-    
+
 
 def __score_model(model: Model, data: Dataset) -> float:
     """Score the model on a test set"""
@@ -101,7 +113,9 @@ def __score_model(model: Model, data: Dataset) -> float:
     """Removes the time from datetime"""
     in_sample_dates_no_timezone = __remove_timezone_from_dates(in_sample_dates)
     forecast = model.predict(in_sample_dates_no_timezone)
-    return __measure_error_metric(data, __get_training_set(data), forecast["yhat"].values)
+    return __measure_error_metric(
+        data, __get_training_set(data), forecast["yhat"].values
+    )
 
 
 def __get_best_model(data: Dataset) -> Tuple[Model, int]:
@@ -110,24 +124,42 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
     best_model = None
     seasonality_settings = __get_seasonality_settings(data)
     seasonality_range = __convert_settings_to_seasonality_range(seasonality_settings)
-    configs = __get_configs(seasonality_prior_scale_list=seasonality_range)
-    
-    training_df = __get_training_set(data)
-    renamed_training_df = training_df.rename(columns={"Date": "ds", data.subset_column_name: "y"})
-    """Removes the time from datetime"""
-    renamed_training_df_notimezone = pd.to_datetime(renamed_training_df['ds']).dt.tz_localize(None)
-    renamed_training_df = pd.concat([renamed_training_df_notimezone, renamed_training_df['y']], axis=1)
 
-    for config in configs:
+    logging.info(f"Seasonality range: {seasonality_range}")
+
+    configs = __get_configs(seasonality_prior_scale_list=seasonality_range)
+
+    training_df = __get_training_set(data)
+    renamed_training_df = training_df.rename(
+        columns={"Date": "ds", data.subset_column_name: "y"}
+    )
+    """Removes the time from datetime"""
+    renamed_training_df_notimezone = pd.to_datetime(
+        renamed_training_df["ds"]
+    ).dt.tz_localize(None)
+    renamed_training_df = pd.concat(
+        [renamed_training_df_notimezone, renamed_training_df["y"]], axis=1
+    )
+
+    best_config = dict()
+
+    for config in list(configs):
         model = None
-        print(f"Trying config: \n{str(config)} \nfor dataset {data.name} - {data.subset_row_name}")
+
+        logging.info(
+            f"Trying config: \n{str(config)} \nfor dataset {data.name} - {data.subset_row_name}"
+        )
         try:
-            model = __fit_prophet_model(data, renamed_training_df, config)
+            model = __fit_prophet_model(
+                data=data, training_data=renamed_training_df, config=config
+            )
         except Exception as e:
             logging.error(f"Error: {e}")
             raise e
-            
-            
+
+        if model is None:
+            continue
+
         score = __score_model(model, data)
 
         # log score if not nan
@@ -139,10 +171,12 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
             best_score = score
             best_model = model
             best_config = config
-        
+
         del model
     # log the best config formatted nicely
-    formatted_config = ", ".join([f"{key}={value}" for key, value in best_config.items()])
+    formatted_config = ", ".join(
+        [f"{key}={value}" for key, value in best_config.items()]
+    )
     logging.info(f"\n\nBest config: {formatted_config} -> {best_score}")
     # get length of the configs geenrator
     return best_model, len(list(configs))
@@ -178,6 +212,8 @@ def __convert_settings_to_seasonality_range(settings: Dict) -> List:
                 seasonality_range.append(12)
             elif time_unit == "years":
                 seasonality_range.append(10)
+            else:
+                raise ValueError(f"Time unit {time_unit} not recognized")
 
     # add -1 and +1 to the seasonality range
     seasonality_minus_one = [x - 1 for x in seasonality_range]
@@ -187,6 +223,7 @@ def __convert_settings_to_seasonality_range(settings: Dict) -> List:
 
     return seasonality_range
 
+
 def __check_if_special_seasonality_is_needed(data: Dataset) -> bool:
     """Check if the data has a special seasonality"""
     if data.name == "Sun spots":
@@ -195,24 +232,39 @@ def __check_if_special_seasonality_is_needed(data: Dataset) -> bool:
 
 
 # TODO: Add settings for the model to include seasonality, holidays, etc.
-def __fit_prophet_model(data: Dataset, training_data: pd.DataFrame, config:dict) -> Model:
+def __fit_prophet_model(
+    data: Dataset, training_data: pd.DataFrame, config: dict
+) -> Model:
     """Fit a Prophet model to the first 80% of the data"""
 
-    model = Prophet(
-        seasonality_prior_scale=config["seasonality_prior_scale"],
-        changepoint_range=config["changepoint_range"],
-        changepoint_prior_scale=config["changepoint_prior_scale"],
-        seasonality_mode=config["seasonality_mode"],
-    )
-    
-    if __check_if_special_seasonality_is_needed(data):
-        model.add_seasonality(
-            name="cycle_11years",
-            period=11,
-            fourier_order=5,
-            prior_scale=0.1,
-            mode="multiplicative",
+    logging.info(f"config being used : {config}")
+
+    # check for seasonality item keys and skip if not needed
+    if ("seasonality_prior_scale" not in config.keys()) or (
+        "seasonality_mode" not in config.keys()
+    ):
+        model = Prophet(
+            changepoint_range=config["changepoint_range"],
+            changepoint_prior_scale=config["changepoint_prior_scale"],
         )
+
+    else:
+
+        model = Prophet(
+            seasonality_prior_scale=config["seasonality_prior_scale"],
+            changepoint_range=config["changepoint_range"],
+            changepoint_prior_scale=config["changepoint_prior_scale"],
+            seasonality_mode=config["seasonality_mode"],
+        )
+
+        if __check_if_special_seasonality_is_needed(data):
+            model.add_seasonality(
+                name="cycle_11years",
+                period=11,
+                fourier_order=5,
+                prior_scale=0.1,
+                mode="multiplicative",
+            )
 
     model.fit(df=training_data)
     return model
@@ -226,6 +278,7 @@ def __get_future_dates(data: Dataset) -> pd.DataFrame:
     future_dates = test_set["Date"]
     datetime_version = pd.to_datetime(future_dates)
     return pd.DataFrame({"ds": datetime_version})
+
 
 def __get_training_dates(data: Dataset) -> pd.DataFrame:
     """# construct a dataframe with the future dates"""
@@ -250,12 +303,13 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
     title = (
         f"{data.subset_column_name} forecast for {data.subset_row_name} with Prophet"
     )
-    
+
     future_dates_local_df = __remove_timezone_from_dates(__get_future_dates(data))
 
     in_sample_dates_local_df = __remove_timezone_from_dates(__get_training_dates(data))
 
     # TODO: Add settings for the model to include holidays, etc.
+
     in_sample_only_prediction = model.predict(in_sample_dates_local_df)
     out_of_sample_forecast = model.predict(future_dates_local_df)
 
