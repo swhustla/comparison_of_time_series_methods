@@ -46,7 +46,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 __dataset_row_items: dict[str, list[str]] = {
     # from city Guhwati onwards
-    "india_pollution": ["Kolkata"],#get_list_of_city_names()[0:3],
+    "india_pollution": get_list_of_city_names()[0:3],
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -194,9 +194,9 @@ __datasets = [
 
 
 __methods = [
-    #  "AR",
-    #  "linear_regression",
-    # "ARIMA",
+     "AR",
+     "linear_regression",
+    "ARIMA",
     "HoltWinters",
     # "MA",
     # "Prophet",
