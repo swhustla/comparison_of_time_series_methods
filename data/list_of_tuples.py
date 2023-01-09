@@ -47,9 +47,7 @@ def __build_data(count: int) -> Data:
     return __add_inferred_freq_to_index(
         __convert_index_to_datetime(
             __set_index_name(
-                pd.DataFrame(
-                    {"y": __increasing_value_with_random_noise(count)}
-                )
+                pd.DataFrame({"y": __increasing_value_with_random_noise(count)})
             )
         )
     )
@@ -59,11 +57,11 @@ def list_of_tuples(count: int = __chosen_length) -> Dataset:
     """Generate a list of tuples for a simple linear regression."""
 
     return Dataset(
-        "Straight line",
-        __build_data(count),
-        "days",
-        ["y"],
-        "random",
-        "y",
-        False,
+        name="Straight line",
+        values=__build_data(count),
+        time_unit="days",
+        number_columns=["y"],
+        subset_row_name="random",
+        subset_column_name="y",
+        seasonality=False,
     )
