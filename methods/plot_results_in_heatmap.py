@@ -15,7 +15,7 @@ Title = TypeVar("Title", covariant=True)
 from .plot import Figure, Plot
 
 
-__chosen_metrics = ["MAE", "RMSE", "R2"]
+__chosen_metrics = ["MAE", "RMSE", "R2", "MAPE"]
 
 def plot_results_in_heatmap(
     compile_results: Callable[[List[List[Report]]],Tuple[Data, str]],
