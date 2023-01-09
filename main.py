@@ -46,7 +46,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 __dataset_row_items: dict[str, list[str]] = {
     # from city Guhwati onwards
-    "india_pollution": get_list_of_city_names()[0:3],
+    "india_pollution": ["Kolkata"],#get_list_of_city_names()[0:3],
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -100,17 +100,22 @@ def predict_measure_plot(data: Dataset, method_name: str) -> Report:
     return Report(start_time, method_name, data, prediction, metrics)
 
 
+def __calculate_minimum_length_given_periodicity(periodicity: int) -> int:
+    """ Calculate the minimum length of the dataset given the periodicity. """
+    return int(periodicity * 2 * 1.25)
+
+
 def __get_minimum_length_for_dataset(dataset: Dataset, method_name: str) -> int:
     """ Get the minimum length of the given dataset. """
     minimum_length = 0
     if dataset.time_unit == "days":
-        minimum_length = 365*2.2
+        minimum_length = __calculate_minimum_length_given_periodicity(365)
     elif dataset.time_unit == "weeks":
-        minimum_length = 52*2.2
+        minimum_length = __calculate_minimum_length_given_periodicity(52)
     elif dataset.time_unit == "months":
-        minimum_length = 12*2.2
+        minimum_length = __calculate_minimum_length_given_periodicity(12)
     elif dataset.time_unit == "years":
-        minimum_length = 12*2.2
+        minimum_length = __calculate_minimum_length_given_periodicity(11)
     if method_name == "SES":
         minimum_length = 20
 
@@ -146,7 +151,7 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
                 
                 minimum_length = __get_minimum_length_for_dataset(dataset, method_name)
                 if len(dataset.values) < int(minimum_length) and method_name in [ "SES", "HoltWinters", "SARIMA", "MA", "AR", "ARIMA"]:
-                    print(f"Skipping {dataset.name} - {dataset.subset_row_name} for method {method_name} as at {len(dataset.values)} {dataset.time_unit} length it is too small.")
+                    print(f"Skipping {dataset.name} - {dataset.subset_row_name} for method {method_name} as at {len(dataset.values)} {dataset.time_unit} length it is too small. \n Minimum length is {minimum_length} {dataset.time_unit}")
                     continue
                 
                 report = predict_measure_plot(dataset, method_name)
@@ -189,16 +194,16 @@ __datasets = [
 
 
 __methods = [
-     "AR",
-     "linear_regression",
+    #  "AR",
+    #  "linear_regression",
     # "ARIMA",
-    # "HoltWinters",
+    "HoltWinters",
     # "MA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    "SARIMA",
-     "SES",
+    # "SARIMA",
+    #  "SES",
     # "TsetlinMachine",
 ]
 
