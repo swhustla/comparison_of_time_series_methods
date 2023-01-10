@@ -5,7 +5,7 @@
     It is a wrapper around the Prophet library.
 """
 
-from typing import TypeVar, Callable
+from typing import TypeVar, Callable, Any, Dict, List, Optional, Tuple, Type, Union, Generator
 from data.dataset import Dataset
 from predictions.Prediction import PredictionData
 
@@ -17,13 +17,13 @@ from .predict import Predict
 
 
 def prophet(
-    fit_prophet_model: Callable[[Dataset], Model],
+    get_best_model: Callable[[Dataset], Tuple[Model, int]],
     forecast: Callable[[Model, Dataset], PredictionData],
 ) -> Predict[Dataset, PredictionData]:
     def predict(
         data: Dataset,
     ) -> Prediction:
-        trained_model, number_of_configs = fit_prophet_model(data)
+        trained_model, number_of_configs = get_best_model(data)
         return forecast(trained_model, data, number_of_configs)
 
     return predict
