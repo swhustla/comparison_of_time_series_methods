@@ -29,6 +29,8 @@ seaborn = "^0.12.1"
 yfinance = "^0.1.93"
 setuptools = "^65.6.3"
 numpy = "1.23.5"
+holidays = "^0.18"
+pycountry = "^22.3.5"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^22.6.0", allow-prereleases = true}

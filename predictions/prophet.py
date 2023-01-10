@@ -29,11 +29,14 @@ Downsides of Prophet:
 """
 
 
-from typing import TypeVar, List, Dict, Generator, Tuple
+from typing import TypeVar, List, Dict, Generator, Tuple, Union, Optional
 from prophet import Prophet
 from sklearn.metrics import mean_squared_error
 import pandas as pd
 import numpy as np
+
+import holidays
+import pycountry
 
 import logging
 
@@ -70,7 +73,7 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
 def __get_configs(seasonality_prior_scale_list: List[int] = [10]) -> Generator:
     """Get the configs for a grid search on Prophet"""
 
-    if len(seasonality_prior_scale_list) is 0:
+    if len(seasonality_prior_scale_list) == 0:
         for changepoint_range in [0.5, 0.8]:
             for changepoint_prior_scale in [0.01, 0.05]:
                 yield {
@@ -143,6 +146,19 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
 
     best_config = dict()
 
+    # add holidays if needed
+    if data.name in ["Indian city pollution"]:
+        holiday_df = __add_holidays_for_a_given_country(
+            country="India",
+            city=data.subset_row_name,
+            date_range=[data.values.index.values.min(), data.values.index.values.max()],
+        )
+        logging.info(
+            f"holiday_df for {data.name} subset {data.subset_row_name} : {holiday_df}"
+        )
+    else:
+        holiday_df = None
+
     for config in list(configs):
         model = None
 
@@ -151,7 +167,10 @@ def __get_best_model(data: Dataset) -> Tuple[Model, int]:
         )
         try:
             model = __fit_prophet_model(
-                data=data, training_data=renamed_training_df, config=config
+                data=data,
+                training_data=renamed_training_df,
+                config=config,
+                holiday_df=holiday_df,
             )
         except Exception as e:
             logging.error(f"Error: {e}")
@@ -231,9 +250,92 @@ def __check_if_special_seasonality_is_needed(data: Dataset) -> bool:
     return False
 
 
+def __add_holidays_for_a_given_country(
+    country: str,
+    date_range: List,
+    city: Optional[str] = None,
+) -> pd.DataFrame:
+    """Add holidays for a given country"""
+    country_code = __get_two_letter_country_code(country)
+    if city is not None:
+        state = __get_state_given_indian_city(city)
+        holidays_object = holidays.country_holidays(country_code, subdiv=state)
+    else:
+        holidays_object = holidays.country_holidays(country_code)
+    print(f"Holidays for {country} ({country_code}) - {state}: {holidays_object}")
+
+    holidays_df = pd.DataFrame(columns=["ds", "holiday"])
+
+    # beef up date range to include every day
+    date_range_full = pd.date_range(start=date_range[0], end=date_range[-1])
+    # add holidays to the date range
+
+    for date in date_range_full:
+        if holidays_object.get(date) is not None:
+            holidays_df = holidays_df.append(
+                {"ds": date, "holiday": holidays_object.get(date)}, ignore_index=True
+            )
+
+    print(f"Holidays df: {holidays_df.head()}")
+    # drop na any rows with na
+    holidays_df = holidays_df.dropna(axis=0, how="any")
+    print(f"Holidays df after dropping na: {holidays_df.head()}")
+    # drop duplicates
+    holidays_df = holidays_df.drop_duplicates(subset=["ds", "holiday"])
+    print(f"Holidays df after dropping duplicates: {holidays_df.head()}")
+
+    return holidays_df
+
+
+def __get_two_letter_country_code(country_full_name: str) -> str:
+    """Get the two letter country code"""
+    country_code = pycountry.countries.search_fuzzy(country_full_name)[0].alpha_2
+    return country_code
+
+
+def __get_state_given_indian_city(city: str) -> str:
+    """Get the state given an Indian city"""
+    city_state_abbrev_dict = {
+        "Ahmedabad": "GJ",
+        "Aizawl": "MZ",
+        "Amaravati": "AP",
+        "Amritsar": "PB",
+        "Bengaluru": "KA",
+        "Bhopal": "MP",
+        "Brajrajnagar": "OR",
+        "Chandigarh": "CH",
+        "Chennai": "TN",
+        "Coimbatore": "TN",
+        "Delhi": "DL",
+        "Ernakulam": "KL",
+        "Gurugram": "HR",
+        "Guwahati": "AS",
+        "Hyderabad": "TG",
+        "Jaipur": "RJ",
+        "Jorapokhar": "JH",
+        "Kochi": "KL",
+        "Kolkata": "WB",
+        "Lucknow": "UP",
+        "Mumbai": "MH",
+        "Patna": "BR",
+        "Shillong": "ML",
+        "Talcher": "OR",
+        "Thiruvananthapuram": "KL",
+        "Visakhapatnam": "AP",
+    }
+    # handle special cases of missing state abbreviations
+    if city not in city_state_abbrev_dict.keys():
+        raise ValueError(f"\n\nCity {city} not found in city_state_abbrev_dict - please add it in the function __get_state_given_indian_city")
+
+    return city_state_abbrev_dict[city]
+
+
 # TODO: Add settings for the model to include seasonality, holidays, etc.
 def __fit_prophet_model(
-    data: Dataset, training_data: pd.DataFrame, config: dict
+    data: Dataset,
+    training_data: pd.DataFrame,
+    config: dict,
+    holiday_df: pd.DataFrame = None,
 ) -> Model:
     """Fit a Prophet model to the first 80% of the data"""
 
@@ -246,6 +348,7 @@ def __fit_prophet_model(
         model = Prophet(
             changepoint_range=config["changepoint_range"],
             changepoint_prior_scale=config["changepoint_prior_scale"],
+            holidays=holiday_df,
         )
 
     else:
@@ -255,6 +358,7 @@ def __fit_prophet_model(
             changepoint_range=config["changepoint_range"],
             changepoint_prior_scale=config["changepoint_prior_scale"],
             seasonality_mode=config["seasonality_mode"],
+            holidays=holiday_df,
         )
 
         if __check_if_special_seasonality_is_needed(data):

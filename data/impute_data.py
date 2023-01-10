@@ -1,4 +1,14 @@
-"""Impute data using a given method."""
+"""Impute data using a given method.
+
+Imputation is the process of filling in missing data. This is necessary because many of the methods we use to predict the data require a complete dataset.
+
+Pandas interpolate has been used as the default imputation method. We experimented with a more advanced imputation method, miceforest, but it was not as effective as pandas interpolate.
+
+MICEForest is a package that uses multiple imputation to impute missing values. It is based on the mice package, but uses random forests to impute the data. It is more effective than pandas interpolate, but it is also much slower. It is therefore only used when the data has more than 2 columns and more than 5% of the data is missing.
+
+The multiple imputation method is based on the following paper: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3074241/
+It leverages the fact that with pollution data, there are multiple variables that are correlated. For example, the PM2.5 and PM10 levels are correlated. This means that if we impute the PM2.5 levels, we can use the PM10 levels to impute the missing PM2.5 levels. This is done by using the miceforest package to impute the data multiple times, and then averaging the results.
+"""
 
 import pandas as pd
 import logging
