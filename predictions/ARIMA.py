@@ -27,6 +27,19 @@ models are then used to predict the next values in the time series.
 The training data is the first 80% of the dataset, and the model is then used to predict the 
 next 20% of the data.
 
+In order to find the best parameters for the model, we use grid search on the various parameters of the model. The advantage of this is that we can find the best parameters for the model, and we can also find the best parameters for the model on the given dataset. The disadvantage is that it is computationally expensive, and it can take a long time to find the best parameters.
+The definition of grid search in Data Science is as follows:
+Grid search is an approach to hyperparameter tuning that will methodically build and evaluate a model for each combination of algorithm parameters specified in a grid.
+
+The use of Bayesian Information Criterion (BIC) is used to find the best parameters for the model. The BIC is a measure of the quality of a statistical model for a given set of data. It is used to compare different models, and it is used to find the best model for the given data. The BIC is calculated as follows:
+BIC = -2 * log(L) + p * log(n)
+Where:
+- L is the likelihood of the fitted model
+- p is the number of parameters in the model
+- n is the number of observations
+
+The benefit of using BIC over RMSE is that it takes into account the number of parameters in the model. The more parameters in the model, the more likely it is that the model will overfit the data. The BIC takes this into account, and it will penalise models with more parameters.
+
 """
 
 from typing import TypeVar, Generic, List, Tuple, Dict, Any, Optional, Union

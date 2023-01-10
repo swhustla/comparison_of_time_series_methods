@@ -110,9 +110,8 @@ The Tsetlin Machine is useful because it is able to learn from data that is:
 
 It is superior to other machine learning models in these respects.
 
-The best Python implementation of the Tsetlin Machine is the one that is
-included in the Tsetlin Machine Python library. The Tsetlin Machine Python
-library is available at: 
+The best Python implementation of the Tsetlin Machine I found is the one that is
+included in the Tsetlin Machine Python library: 
 https://github.com/cair/pyTsetlinMachine
 
 The T parameter is the number of states that the Tsetlin Machine has. In a regression
@@ -125,6 +124,17 @@ though a rule of thumb is to use a value of s that is equal to the number of
 states that the Tsetlin Machine has.
 
 The grid search is used to find the best parameters for the Tsetlin Machine.
+
+The RegressionTsetlinMachine model in Python has a number of settings as follows:
+* number_of_clauses: The number of clauses in the Tsetlin Machine.
+* s: The number of states per unit of the output. 
+* number_of_features: The number of features in the input pattern. 
+* number_of_states: The number of states that the Tsetlin Machine has. 
+* weighted_clauses: Whether the clauses are weighted or not. 
+* boost_true_positive_feedback: Whether the clauses are boosted or not.
+* number_of_epochs: The number of epochs that the Tsetlin Machine is trained for.
+
+
 
 """
 

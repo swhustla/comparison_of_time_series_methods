@@ -18,6 +18,17 @@ The exponential smoothing technique can be applied to both univariate and multiv
 SES assumes that the data has be detrended and seasonaility has been removed, so we will use the 
 seasonal_decompose to remove these from our data.
 
+The process of seasonal decomposition involves thinking of a series as a combination of level, trend,
+seasonality, and noise components. It is a statistical procedure that explicitly models the
+decomposition of a time series into these components.
+
+STL (Seasonal and Trend decomposition using Loess) is a generalization of the classical method of
+seasonal decomposition. It is a robust method that works well with noisy data and is able to
+handle missing values.
+
+The benefit of using the STL method for prediction is that it is able to handle missing values
+and noisy data.
+
 Additive or multiplicative?
 ===========================
 - Additive: If the seasonal variations are roughly constant through the 

@@ -1,4 +1,12 @@
-"""Load in ECWMF weather data."""
+"""Load in ECWMF weather data.
+
+
+ECMWF is the European Centre for Medium-Range Weather Forecasts.
+This data is accessed via the ECMWF API, and is freely available.
+A key, email and url are required to access the data.
+Example data types are boundary layer height, radiation data, cloud cover data and more.
+
+"""
 
 import logging
 import os
