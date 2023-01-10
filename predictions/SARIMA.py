@@ -83,16 +83,18 @@ def __get_test_set(data: Dataset) -> pd.DataFrame:
     return data.values[-__number_of_steps(data) :][data.subset_column_name]
 
 
-
 def __stationarity(data: Dataset) -> bool:
     """Determines if the data is stationary"""
     data_to_check = data.values[data.subset_column_name]
     return ADF(data_to_check).pvalue < 0.05
 
 
-
 def __get_seasonal_period(data: Dataset) -> int:
     """Get the seasonal period for the SARIMA model"""
+
+    if not data.seasonality:
+        return 0
+
     if data.time_unit == "days":
         return 365
     elif data.time_unit == "weeks":
@@ -103,7 +105,6 @@ def __get_seasonal_period(data: Dataset) -> int:
         return 11
     else:
         raise ValueError("Invalid time unit")
-
 
 
 def __get_trend_given_data(data: Dataset) -> str:
@@ -143,7 +144,6 @@ def __evaluate_sarima_model(training_data: Dataset, config: dict) -> pd.Series:
     return model_fit.bic
 
 
-
 def __validation(training_data: Dataset, config: dict) -> float:
     """Get the BIC of the fitted SARIMA model"""
     return __evaluate_sarima_model(training_data, config)
@@ -154,20 +154,22 @@ def __score_model(
 ) -> Tuple[str, float]:
     """Score the SARIMA model"""
 
+    logging.info(f"Scoring SARIMA model: {config}")
     result = None
 
     # convert config to a key
     key = str(config)
+
     # show all warnings and fail on exception if debugging
     if debug:
-        result = __validation(training_data, config)
+        result = __validation(training_data=training_data, config=config)
     else:
         # one failure during model validation suggests an unstable config
         try:
             # never show warnings when grid searching, too noisy
             with catch_warnings():
                 filterwarnings("ignore")
-                result = __validation(training_data, config)
+                result = __validation(training_data=training_data, config=config)
         except Exception as error:
             logging.error(f"Error: {error}")
             result = None
@@ -192,14 +194,22 @@ def __grid_search_configs(
     """Grid search the SARIMA model"""
 
     training_set = __get_training_set(data)
+
     scores = None
+
     if parallel:
         # execute configs in parallel
         executor = Parallel(n_jobs=cpu_count(), backend="multiprocessing")
-        tasks = (delayed(__score_model)(training_set, cfg, True) for cfg in cfg_list)
+        tasks = (
+            delayed(__score_model)(training_data=training_set, config=cfg, debug=True)
+            for cfg in cfg_list
+        )
         scores = executor(tasks)
     else:
-        scores = [__score_model(training_set, cfg, True) for cfg in cfg_list]
+        scores = [
+            __score_model(training_data=training_set, config=cfg, debug=True)
+            for cfg in cfg_list
+        ]
     # remove empty results
     scores = [r for r in scores if r[1] != None]
     # sort configs by error, asc
@@ -208,17 +218,27 @@ def __grid_search_configs(
 
 
 def __get_sarima_configs(
-    p_params: list = [1],#[0, 1, 2], # AR order
-    d_params: list = [0, 1, 2],#[0, 1], # differencing order
-    q_params: list = [1],#[0, 1, 2], # MA order
-    t_params: list = ["t", "c"],#["n", "c", "t", "ct"], # trend
-    large_p_params: list = [1],#[0, 1, 2], # seasonal AR order
-    large_d_params: list = [0],#[0, 1], # seasonal differencing order
-    large_q_params: list = [1],#[0, 1, 2], # seasonal MA order
-    m_params: list = [0], # seasonal period
+    p_params: list = [0, 1, 2],  # [0, 1, 2], # AR order
+    d_params: list = [0, 1],  # [0, 1], # differencing order
+    q_params: list = [0, 1, 2],  # [0, 1, 2], # MA order
+    t_params: list = ["n", "c", "t", "ct"],  # ["n", "c", "t", "ct"], # trend
+    large_p_params: list = [0, 1, 2],  # [0, 1, 2], # seasonal AR order
+    large_d_params: list = [0, 1],  # [0, 1], # seasonal differencing order
+    large_q_params: list = [0, 1, 2],  # [0, 1, 2], # seasonal MA order
+    m_params: list = [0],  # seasonal period
 ) -> List:
     """Get the SARIMA configurations"""
     model_configs = list()
+
+    if m_params == [0]:
+        for p in p_params:
+            for d in d_params:
+                for q in q_params:
+                    for t in t_params:
+                        # create and store config
+                        cfg = [(p, d, q), (0, 0, 0, 0), t]
+                        model_configs.append(cfg)
+        return model_configs
 
     # create config instances
     for p in p_params:
@@ -235,7 +255,6 @@ def __get_sarima_configs(
     return model_configs
 
 
-
 def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
     """Get the best SARIMA model"""
     logging.info("Finding the best SARIMA model")
@@ -248,13 +267,10 @@ def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
         logging.info(f"Data {data.name} is not stationary")
         logging.info(f"Using differencing term from grid search")
         configs = __get_sarima_configs(m_params=[seasonal])
-    
-    
-    
-    
+
     # grid search
     scores = __grid_search_configs(data, configs)
-    logging.debug("done")
+    logging.info("Grid search done")
     # list top 3 configs
     for cfg, error in scores[:3]:
         logging.info(f"Config: {cfg}, BIC: {error}")
@@ -284,7 +300,6 @@ def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
     return model_fit, len(configs)
 
 
-
 def __get_model_order_snake_case(model: Model) -> str:
     """Get the SARIMAXResults model order in snake case"""
     dict_of_model_orders = model.model_orders
@@ -298,7 +313,7 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> pd.DataFr
     """Forecast the next 20% of the data"""
     title = f"{data.subset_column_name} forecast for {data.subset_row_name} for the next {__number_of_steps(data)} {data.time_unit} with SARIMA"
     length_in_sample = len(__get_training_set(data).values)
-    prediction_in_sample = model.get_prediction(0,length_in_sample).summary_frame()
+    prediction_in_sample = model.get_prediction(0, length_in_sample).summary_frame()
     logging.info(f"Forecasting {title}")
     return PredictionData(
         method_name="SARIMA",
