@@ -47,8 +47,8 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 __dataset_row_items: dict[str, list[str]] = {
     # take first 3 from list of cities
-    "india_pollution": get_list_of_city_names(),
-    "stock_prices": ["JPM", "AAPL"],
+    "india_pollution": get_list_of_city_names()[3:6],
+    "stock_prices": ["JPM", "AAPL", "MSFT"],
 }
 
 
@@ -182,8 +182,8 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
             if len(predictions_per_dataset) > 0:
                 comparison_plot_multi(dataset.values.loc[training_index, :], predictions_per_dataset)
 
-            #appends only the cities where R2 > 10
-            if (np.array(metrics_stat)>-10).all():
+            #appends only the cities/stocks where R2 > 10
+            if (np.array(metrics_stat)>-10).all() or (dataset_name == "stock_prices"):
                 results_store.append(reports_per_dataset)
             yield reports_per_dataset
 
@@ -207,14 +207,14 @@ __datasets = [
 
 __methods = [
      "AR",
-     "linear_regression",
-    "ARIMA",
-    "HoltWinters",
+    #  "linear_regression",
+    # "ARIMA",
+    # "HoltWinters",
     "MA",
     "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    "SARIMA",
+    # "SARIMA",
     # "auto_arima"
      "SES",
     # "TsetlinMachine",
