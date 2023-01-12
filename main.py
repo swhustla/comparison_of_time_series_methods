@@ -17,6 +17,7 @@ from predictions.MA import ma
 from predictions.HoltWinters import holt_winters
 from predictions.ARIMA import arima
 from predictions.SARIMA import sarima
+from predictions.auto_arima import auto_arima
 from predictions.linear_regression import linear_regression
 from predictions.prophet import prophet
 from predictions.FCNN import fcnn
@@ -60,6 +61,7 @@ __predictors: dict[str, Predict[Dataset, Result]] = {
     "FCNN_embedding": fcnn_embedding,
     "SES": ses,
     "SARIMA": sarima,
+    "auto_arima": auto_arima,
     "MA": ma,
     "HoltWinters": holt_winters,
     "TsetlinMachine": tsetlin_machine,
@@ -125,6 +127,13 @@ def __get_minimum_length_for_dataset(dataset: Dataset, method_name: str) -> int:
     return int(minimum_length)
 
 
+def __check_to_convert_to_weekly_data(data: Dataset) -> Dataset:
+    """Convert the data to weekly data"""
+    if data.time_unit == "days":
+        data.values = data.values.resample("W").mean()
+        data.time_unit = "weeks"
+        
+    return data
 
 
 def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[Report, None, None]:
@@ -148,6 +157,9 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
             training_index = dataset.values.index[: int(len(dataset.values.index) * (1 - __testset_size))]
             for method_name in methods:
                 
+                if method_name in ["SARIMA"] and dataset.time_unit == "days":
+                    dataset = __check_to_convert_to_weekly_data(dataset)  # convert to weekly data if SARIMA is used
+                    training_index = dataset.values.index[: int(len(dataset.values.index) * (1 - __testset_size))]  # update training index accordingly
                 
                 minimum_length = __get_minimum_length_for_dataset(dataset, method_name)
                 if len(dataset.values) < int(minimum_length) and method_name in [ "SES", "HoltWinters", "SARIMA", "MA", "AR", "ARIMA"]:
@@ -184,8 +196,8 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 
 __datasets = [
-      "india_pollution",
-    #  "stock_prices",
+    #   "india_pollution",
+     "stock_prices",
     # "airline_passengers",
     # "list_of_tuples",
     # "sun_spots",
@@ -199,10 +211,11 @@ __methods = [
     # "ARIMA",
     # "HoltWinters",
     # "MA",
-    "Prophet",
+    # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    # "SARIMA",
+    "SARIMA",
+    # "auto_arima"
     #  "SES",
     # "TsetlinMachine",
 ]
