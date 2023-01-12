@@ -63,6 +63,19 @@ def __plot_heatmap(
     # chose sns colormap that goes from red (high error) to green (low error) without white in the middle
     colormap = sns.diverging_palette(220, 20, as_cmap=True)
 
+
+    #colorbar for MAPE case
+    if chosen_metric == 'MAPE':
+        cluster_grid = sns.clustermap(
+            results_dataframe.pivot(columns="method", index="subset_row", 		    values=chosen_metric),
+            annot=True,
+            fmt=".2f",
+            cmap="rainbow",
+            vmin=10,
+            vmax=60,
+        )
+        return cluster_grid  
+
     #reversing the colorbar for R2 case
     if chosen_metric == 'R2':
         cluster_grid = sns.clustermap(
@@ -70,7 +83,8 @@ def __plot_heatmap(
             annot=True,
             fmt=".2f",
             cmap=colormap.reversed(),
-            #ax=axis,
+            vmin=-1,
+            vmax=1,
         )
         return cluster_grid   
 
@@ -79,7 +93,8 @@ def __plot_heatmap(
         annot=True,
         fmt=".2f",
         cmap=colormap,
-        #ax=axis,
+        vmin=0,
+        vmax=100,
     )
     return cluster_grid
 

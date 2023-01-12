@@ -310,7 +310,7 @@ def __get_state_given_indian_city(city: str) -> str:
         "Ernakulam": "KL",
         "Gurugram": "HR",
         "Guwahati": "AS",
-        "Hyderabad": "AD",
+        "Hyderabad": "TS",
         "Jaipur": "RJ",
         "Jorapokhar": "JH",
         "Kochi": "KL",
