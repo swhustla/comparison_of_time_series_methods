@@ -4,6 +4,8 @@ import os
 import logging
 import datetime
 
+import numpy as np
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 from typing import List, Tuple, Optional
@@ -63,6 +65,8 @@ def __plot_heatmap(
     # chose sns colormap that goes from red (high error) to green (low error) without white in the middle
     colormap = sns.diverging_palette(220, 20, as_cmap=True)
 
+    # condensed distance matrix must contain only finite values
+    results_dataframe[chosen_metric] = results_dataframe[chosen_metric].replace([np.inf, -np.inf], np.nan)
 
     #colorbar for MAPE case
     if chosen_metric == 'MAPE':
