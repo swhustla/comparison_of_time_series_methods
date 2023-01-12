@@ -66,40 +66,37 @@ def __plot_heatmap(
 
     #colorbar for MAPE case
     if chosen_metric == 'MAPE':
-        axis = sns.heatmap(
+        cluster_grid = sns.clustermap(
             results_dataframe.pivot(columns="method", index="subset_row", 		    values=chosen_metric),
             annot=True,
             fmt=".2f",
             cmap="rainbow",
             vmin=10,
             vmax=60,
-            ax=axis,
         )
-        return figure  
+        return cluster_grid  
 
     #reversing the colorbar for R2 case
     if chosen_metric == 'R2':
-        axis = sns.heatmap(
+        cluster_grid = sns.clustermap(
             results_dataframe.pivot(columns="method", index="subset_row", values=chosen_metric),
             annot=True,
             fmt=".2f",
             cmap=colormap.reversed(),
-            ax=axis,
             vmin=-1,
             vmax=1,
         )
-        return figure   
+        return cluster_grid   
 
-    axis = sns.heatmap(
+    cluster_grid = sns.clustermap(
         results_dataframe.pivot(columns="method", index="subset_row", values=chosen_metric),
         annot=True,
         fmt=".2f",
         cmap=colormap,
-        ax=axis,
         vmin=0,
         vmax=100,
     )
-    return figure
+    return cluster_grid
 
 
 def __get_time_stamp_for_file_name() -> str:

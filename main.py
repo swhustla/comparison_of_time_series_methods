@@ -47,7 +47,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 __dataset_row_items: dict[str, list[str]] = {
     # take first 3 from list of cities
-    "india_pollution": get_list_of_city_names()[:3],
+    "india_pollution": get_list_of_city_names()[3:6],
     "stock_prices": ["JPM", "AAPL"],
 }
 
@@ -206,11 +206,11 @@ __datasets = [
 
 
 __methods = [
-    #  "AR",
+     "AR",
     #  "linear_regression",
-    # "ARIMA",
+    "ARIMA",
     # "HoltWinters",
-    # "MA",
+    "MA",
     # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
