@@ -5,6 +5,7 @@ from typing import TypeVar, Callable, Dict, Tuple, List, Generator, Optional, Un
 import pandas as pd
 
 import logging
+
 # set logging level
 logging.basicConfig(level=logging.INFO)
 
@@ -29,11 +30,9 @@ import zipfile
 
 # TODO - add electricity consumption data / electricitymap.org
 # TODO - add coal / renewable energy data breakdown
-# https://app.electricitymaps.com/zone/IN-DL?utm_source=electricitymaps.com&utm_medium=website&utm_campaign=banner 
+# https://app.electricitymaps.com/zone/IN-DL?utm_source=electricitymaps.com&utm_medium=website&utm_campaign=banner
 # https://www.electricitymaps.com/
 # https://github.com/electricitymaps/electricitymaps-contrib#data-sources/blob/master/DATA_SOURCES.md#real-time-electricity-data-sources
-
-
 
 
 def __download_if_needed():
@@ -124,12 +123,18 @@ def india_pollution(
     path = __download_if_needed()
     data = __load_data(path)
 
+    list_of_city_names = get_list_of_city_names()
+
     if get_lat_long:
         dataframe_all_cities = pd.DataFrame()
 
         lat_long_dict = get_lat_long_for_city(city_list)
         logging.debug(f"Lat long dict: {lat_long_dict}")
         for city_this in city_list:
+            if city_this not in list_of_city_names:
+                raise ValueError(
+                    f"City {city_this} not in list of city names: {list_of_city_names}"
+                )
             lat_long_dataframe = data[data.City == city_this][pollution_columns]
             lat_long_dataframe = __resample(lat_long_dataframe)
             lat_long_dataframe = __add_inferred_freq_to_index(lat_long_dataframe)
@@ -145,16 +150,20 @@ def india_pollution(
         dataframe_all_cities.to_csv("data/india_pollution.csv")
 
     for city in city_list:
+        if city not in list_of_city_names:
+            raise ValueError(
+                f"City {city} not in list of city names: {list_of_city_names}"
+            )
         data_this_city = data[data["City"].isin([city])][pollution_columns]
         data_this_city = __preprocess(data_this_city)
         data_this_city = __resample(data_this_city)
         data_this_city = __add_inferred_freq_to_index(data_this_city)
         yield Dataset(
             name="Indian city pollution",
-            values= data_this_city,
-            time_unit= "weeks",
-            number_columns= pollution_columns,
-            subset_row_name= city,
-            subset_column_name= pollution_columns[0],
-            seasonality= True,
+            values=data_this_city,
+            time_unit="weeks",
+            number_columns=pollution_columns,
+            subset_row_name=city,
+            subset_column_name=pollution_columns[0],
+            seasonality=True,
         )
