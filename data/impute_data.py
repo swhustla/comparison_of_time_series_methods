@@ -50,16 +50,23 @@ def impute(dataframe: pd.DataFrame, target_columns = list) -> pd.DataFrame:
     """Impute the data using the given method."""
     logging.info(f"Imputing data for columns {target_columns}")
     dataframe = dataframe.copy()
-
+    logging.info(f"columns present: {dataframe.columns}")
+    logging.info(f"Shape of dataframe before imputation: {dataframe.shape}")
     need_to_impute = False
     for column in target_columns:
-        if dataframe[column].isna().sum() / len(dataframe[column]) > 0.05:
-            need_to_impute = True
+        number_of_missing_values = dataframe[column].isna().sum()
+        if number_of_missing_values > 0:
+            logging.info(f"Column {column} has {number_of_missing_values} missing values")
+            if number_of_missing_values / len(dataframe[column]) > 0.05:
+                logging.info(f"Column {column} has more than 5% missing values, imputation is necessary")
+                need_to_impute = True
 
 
     if len(target_columns)> 2 and need_to_impute: # advanced imputation
         dataframe[target_columns] = __impute_with_miceforest(dataframe[target_columns])
     else: # simple imputation
         dataframe[target_columns] = __impute_with_pandas_interpolate(dataframe[target_columns])
+
+    logging.info(f"Shape of dataframe after imputation: {dataframe.shape}")
 
     return dataframe
