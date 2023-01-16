@@ -134,15 +134,16 @@ def __evaluate_exp_smoothing_model(data: Dataset, config: dict) -> np.array:
     # multi-step Holt-Winters Exponential Smoothing forecast
     t, d, s, p, b, r = config
     # define model
-    print(f"Length of data: {len(data.values)}")
+    logging.debug(f"Length of whole dataset: {len(data.values)}")
     training_dataset = __get_training_set(data)
-    training_data = np.array(training_dataset.values)
-    # change negative and zero values to 0.001
+    training_data = np.array(training_dataset.values, dtype=np.float64)
+    logging.debug(f"Sample of training data: {training_data[:10]}")
+    # change negative and zero values to 0.1
     training_data[training_data <= 0] = 0.1
-
-    print(f"Length of training data: {len(training_data)}")
-    print(f"Seasonal periods setting: {p}")
-    print(f"Number of cycles present: {len(training_data) // p}")
+    logging.debug(f"Sample of training data after clean up: {training_data[:10]}")
+    
+    logging.debug(f"Seasonal periods setting: {p}")
+    logging.debug(f"Number of cycles present: {len(training_data) // p}")
 
     model = ExponentialSmoothing(
         training_data,
