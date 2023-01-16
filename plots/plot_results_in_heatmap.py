@@ -68,37 +68,50 @@ def __plot_heatmap(
     # condensed distance matrix must contain only finite values
     results_dataframe[chosen_metric] = results_dataframe[chosen_metric].replace([np.inf, -np.inf], np.nan)
 
+    pivoted_dataframe = results_dataframe.pivot(columns="method", index="subset_row", values=chosen_metric)
+    # condensed distance matrix must contain only finite values
+    pivoted_dataframe = pivoted_dataframe.replace([np.inf, -np.inf], np.nan)
+
+    #deal with the case where there are no results for a method
+    pivoted_dataframe = pivoted_dataframe.fillna(0)
+    mask_for_missing_values = pivoted_dataframe == 0
+
     #colorbar for MAPE case
     if chosen_metric == 'MAPE':
         cluster_grid = sns.clustermap(
-            results_dataframe.pivot(columns="method", index="subset_row", 		    values=chosen_metric),
+            pivoted_dataframe,
             annot=True,
             fmt=".2f",
             cmap="rainbow",
             vmin=10,
             vmax=60,
+            mask=mask_for_missing_values
         )
         return cluster_grid  
 
     #reversing the colorbar for R2 case
     if chosen_metric == 'R2':
         cluster_grid = sns.clustermap(
-            results_dataframe.pivot(columns="method", index="subset_row", values=chosen_metric),
+            pivoted_dataframe,
             annot=True,
             fmt=".2f",
             cmap=colormap.reversed(),
             vmin=-1,
             vmax=1,
+            mask=mask_for_missing_values
         )
         return cluster_grid   
 
+    print(f"pivoted dataframe: {pivoted_dataframe}")
+
     cluster_grid = sns.clustermap(
-        results_dataframe.pivot(columns="method", index="subset_row", values=chosen_metric),
+        pivoted_dataframe,
         annot=True,
         fmt=".2f",
         cmap=colormap,
         vmin=0,
         vmax=100,
+        mask=mask_for_missing_values
     )
     return cluster_grid
 
