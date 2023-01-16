@@ -196,27 +196,27 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 
 __datasets = [
-    #   "india_pollution",
+       "india_pollution",
     #  "stock_prices",
     # "airline_passengers",
-    "list_of_tuples",
+    #"list_of_tuples",
     # "sun_spots",
     # "csv",
 ]
 
 
 __methods = [
-    #  "AR",
-    #  "linear_regression",
-    # "ARIMA",
+     "AR",
+     "linear_regression",
+    "ARIMA",
     "HoltWinters",
-    # "MA",
-    # "Prophet",
+    "MA",
+    "Prophet",
     # "FCNN",
     # "FCNN_embedding",
-    # "SARIMA",
+    "SARIMA",
     # "auto_arima"
-    #  "SES",
+     "SES",
     # "TsetlinMachine",
 ]
 
