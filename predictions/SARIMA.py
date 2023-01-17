@@ -154,7 +154,6 @@ def __score_model(
 ) -> Tuple[str, float]:
     """Score the SARIMA model"""
 
-    logging.info(f"Scoring SARIMA model: {config}")
     result = None
 
     # convert config to a key
