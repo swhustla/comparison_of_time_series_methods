@@ -91,7 +91,7 @@ def predict_measure_plot(data: Dataset, method_name: str) -> Report:
     """Generate a report for the given data and method."""
 
     start_time = time.time()
-    print(f"Predicting {data.name}, specifically {data.subset_row_name} using {method_name}...")
+    logging.info(f"Predicting for {data.name}, specifically {data.subset_row_name} using {method_name}...")
     prediction = __predictors[method_name](data)
     metrics = calculate_metrics(prediction)
 
@@ -99,7 +99,10 @@ def predict_measure_plot(data: Dataset, method_name: str) -> Report:
         : int(len(data.values.index) * (1 - __testset_size))
     ]
     comparison_plot(data.values.loc[training_index, :], prediction)
-    return Report(start_time, method_name, data, prediction, metrics)
+    datestring_today = time.strftime("%Y-%m-%d")
+    filepath = f"reports/full_data/{data.name}_{data.subset_row_name}_{method_name}_{datestring_today}.json"
+    logging.info(f"Saving report to {filepath}...")
+    return Report(tstart=start_time, method=method_name, dataset=data, prediction=prediction, metrics=metrics, filepath=filepath)
 
 
 def __calculate_minimum_length_given_periodicity(periodicity: int) -> int:
@@ -199,8 +202,8 @@ __datasets = [
     #   "india_pollution",
     #  "stock_prices",
     # "airline_passengers",
-    "list_of_tuples",
-    # "sun_spots",
+    # "list_of_tuples",
+    "sun_spots",
     # "csv",
 ]
 
