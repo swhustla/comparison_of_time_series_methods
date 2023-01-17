@@ -9,6 +9,7 @@ import numpy as np
 import logging
 
 import json
+import gzip
 
 from data.report import Report
 
@@ -90,7 +91,8 @@ def __store_report_to_file(report: Report) -> None:
         print(f"Type of [{key}]={value} is {type(dict_for_json[key])}")
         
     json_string = json.dumps(dict_for_json, indent=4)
-    with open(report.filepath, "w") as file:
+    # compress the file when saving to disk
+    with gzip.open(report.filepath, "wt") as file:
         file.write(json_string)
         
 

@@ -100,7 +100,7 @@ def predict_measure_plot(data: Dataset, method_name: str) -> Report:
     ]
     comparison_plot(data.values.loc[training_index, :], prediction)
     datestring_today = time.strftime("%Y-%m-%d")
-    filepath = f"reports/full_data/{data.name}_{data.subset_row_name}_{method_name}_{datestring_today}.json"
+    filepath = f"reports/full_data/{data.name}_{data.subset_row_name}_{method_name}_{datestring_today}.json.gz"
     logging.info(f"Saving report to {filepath}...")
     return Report(tstart=start_time, method=method_name, dataset=data, prediction=prediction, metrics=metrics, filepath=filepath)
 
