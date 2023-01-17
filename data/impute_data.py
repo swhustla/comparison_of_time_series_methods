@@ -46,27 +46,32 @@ def __impute_with_miceforest(data: pd.DataFrame) -> pd.DataFrame:
         return __impute_with_pandas_interpolate(data)
 
 
-def impute(dataframe: pd.DataFrame, target_columns = list) -> pd.DataFrame:
+def impute(dataframe: pd.DataFrame, target_columns:list) -> pd.DataFrame:
     """Impute the data using the given method."""
     logging.info(f"Imputing data for columns {target_columns}")
     dataframe = dataframe.copy()
     logging.info(f"columns present: {dataframe.columns}")
     logging.info(f"Shape of dataframe before imputation: {dataframe.shape}")
     need_to_impute = False
+    advanced_imputation = False
     for column in target_columns:
         number_of_missing_values = dataframe[column].isna().sum()
         if number_of_missing_values > 0:
-            logging.info(f"Column {column} has {number_of_missing_values} missing values")
-            if number_of_missing_values / len(dataframe[column]) > 0.05:
-                logging.info(f"Column {column} has more than 5% missing values, imputation is necessary")
-                need_to_impute = True
+            need_to_impute = True
+            proportion_missing = number_of_missing_values / len(dataframe[column])
+            if proportion_missing > 0.05 and proportion_missing < 0.50 and (len(target_columns) > 2):
+                logging.info(f"Column {column} has {number_of_missing_values}; more than 5% missing values, less than 50%, so advanced imputation is necessary")
+                advanced_imputation = True
+            else:
+                logging.info(f"Column {column} has {number_of_missing_values}; less than 5% missing values, so only simple imputation is necessary")
 
+    if need_to_impute:
+        logging.info("Imputation is necessary")
+        if advanced_imputation: # advanced imputation if data is not seasonal
+            dataframe[target_columns] = __impute_with_miceforest(dataframe[target_columns])
+        else: # simple imputation
+            dataframe[target_columns] = __impute_with_pandas_interpolate(dataframe[target_columns])
 
-    if len(target_columns)> 2 and need_to_impute: # advanced imputation
-        dataframe[target_columns] = __impute_with_miceforest(dataframe[target_columns])
-    else: # simple imputation
-        dataframe[target_columns] = __impute_with_pandas_interpolate(dataframe[target_columns])
-
-    logging.info(f"Shape of dataframe after imputation: {dataframe.shape}")
+        logging.info(f"Shape of dataframe after imputation: {dataframe.shape}")
 
     return dataframe
