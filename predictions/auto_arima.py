@@ -112,8 +112,14 @@ def __fit_pmdarima_model(
     See here: https://alkaline-ml.com/pmdarima/modules/generated/pmdarima.arima.auto_arima.html?highlight=pmdarima
     """
     training_data = __get_training_set(data)
-    logging.info(f"Defining pmdarima model with seasonal={data.seasonality} and seasonal_period={__get_seasonal_period(data)}, maxiter=50")
+    logging.info(f"Defining pmdarima model with seasonal={data.seasonality} and seasonal_period={__get_seasonal_period(data)}, maxiter=100")
     # define model
+    # if seasonal, force D=1
+    capital_d = 1 if data.seasonality else 0
+
+    # show frequency of data
+    logging.info(f"Frequency of training_data: {training_data.index.inferred_freq}")
+
     model = pm.auto_arima(
         y=training_data,
         stationary=__stationarity(data),
@@ -127,11 +133,12 @@ def __fit_pmdarima_model(
         seasonal=data.seasonality,
         start_P=0,
         start_Q=0,
-        D=0, # let the model determine the D parameter
+        D=capital_d,
         trace=True,
         error_action="ignore",
         suppress_warnings=True,
         # information_criterion="aic",
+        maxiter=100,
     )
 
     print(model.summary())
