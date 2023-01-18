@@ -123,7 +123,7 @@ def __get_number_of_lags_or_trend_autoregression_order(data: Dataset) -> int:
         return 1
 
 
-def __evaluate_sarima_model(training_data: Dataset, config: dict) -> pd.Series:
+def __evaluate_sarima_model(training_data: Dataset, config: dict) -> Model:
     """Evaluate the SARIMA forecast on the training set"""
 
     order, seasonal_order, trend = config
@@ -141,12 +141,19 @@ def __evaluate_sarima_model(training_data: Dataset, config: dict) -> pd.Series:
     # fit model
     model_fit = model.fit(disp=False)
 
-    return model_fit.bic
+    return model_fit
+
+
+def __calculate_rmse(test_data: Dataset, predictions: pd.Series) -> float:
+    """Calculate the RMSE of the SARIMA model"""
+    return np.sqrt(mean_squared_error(test_data, predictions))
 
 
 def __validation(training_data: Dataset, config: dict) -> float:
-    """Get the BIC of the fitted SARIMA model"""
-    return __evaluate_sarima_model(training_data, config)
+    """Get the RMSE of the fitted SARIMA model"""
+    trained_model = __evaluate_sarima_model(training_data, config)
+    predictions = trained_model.predict()
+    return __calculate_rmse(training_data, predictions)
 
 
 def __score_model(
