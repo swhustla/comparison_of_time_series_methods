@@ -123,22 +123,29 @@ def __fit_pmdarima_model(
     model = pm.auto_arima(
         y=training_data,
         stationary=__stationarity(data),
-        start_p=1,
-        start_q=1,
+        start_p=0,
+        d=1,
+        start_q=0,
         test="adf",
         max_p=5,
+        max_d=5,
         max_q=5,
         m=__get_seasonal_period(data), # seasonal period, or frequency of the data
-        d=0, # let the model determine the d parameter 
         seasonal=data.seasonality,
         start_P=0,
-        start_Q=0,
         D=capital_d,
+        start_Q=0,
+        max_P=5,
+        max_D=5,
+        max_Q=5,
         trace=True,
         error_action="ignore",
         suppress_warnings=True,
         # information_criterion="aic",
-        maxiter=100,
+        stepwise=False,
+        n_jobs=cpu_count(),
+        n_fits=50,
+        # maxiter=100,
     )
 
     print(model.summary())
