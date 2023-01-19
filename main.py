@@ -135,9 +135,11 @@ if __name__ == "__main__":
 
         return int(minimum_length)
 
+
     def __check_to_convert_to_weekly_data(data: Dataset) -> Dataset:
-        """Convert the data to weekly data"""
-        if data.time_unit == "days":
+        """Convert the data to weekly data if it is in daily data, and if there are enough data points.
+        Ideally we need at least 2 years of data to make a weekly prediction."""
+        if data.time_unit == "days" and len(data.values.index) > 365 * 2:
             data.values = data.values.resample("W").mean()
             data.time_unit = "weeks"
 
