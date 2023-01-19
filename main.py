@@ -225,9 +225,9 @@ if __name__ == "__main__":
                 )
 
     __datasets = [
-        # "india_pollution",
+        "india_pollution",
         #  "stock_prices",
-        "airline_passengers",
+        #"airline_passengers",
         # "list_of_tuples",
         #  "sun_spots",
         # "csv",
