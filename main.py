@@ -142,7 +142,7 @@ if __name__ == "__main__":
         if data.time_unit == "days" and len(data.values.index) > 365 * 2:
             data.values = data.values.resample("W").mean()
             data.time_unit = "weeks"
-            
+
         return data
 
     def generate_predictions(
