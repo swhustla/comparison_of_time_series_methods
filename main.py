@@ -83,9 +83,7 @@ if __name__ == "__main__":
         if dataset_name not in __dataset_row_items:
             return [__dataset_loaders[dataset_name]()]
         else:
-            return __dataset_loaders[dataset_name](
-                __dataset_row_items[dataset_name]
-            )
+            return __dataset_loaders[dataset_name](__dataset_row_items[dataset_name])
 
     def calculate_metrics(prediction: PredictionData):
         """
@@ -97,7 +95,7 @@ if __name__ == "__main__":
         """Generate a report for the given data and method."""
 
         start_time = time.time()
-        print(
+        logging.info(
             f"Predicting {data.name}, specifically {data.subset_row_name} using {method_name}..."
         )
         prediction = __predictors[method_name](data)
@@ -110,15 +108,15 @@ if __name__ == "__main__":
         datestring_today = time.strftime("%Y-%m-%d")
         filepath = f"reports/full_data/{data.name}_{data.subset_row_name}_{method_name}_{datestring_today}.json.gz"
         logging.info(f"Saving report to {filepath}...")
-        return Report(tstart=start_time, method=method_name, dataset=data, prediction=prediction, metrics=metrics, filepath=filepath)
+        return Report(
+            start_time, method_name, data, prediction, metrics, filepath=filepath
+        )
 
     def __calculate_minimum_length_given_periodicity(periodicity: int) -> int:
         """Calculate the minimum length of the dataset given the periodicity."""
         return int(periodicity * 2 * 1.25)
 
-    def __get_minimum_length_for_dataset(
-        dataset: Dataset, method_name: str
-    ) -> int:
+    def __get_minimum_length_for_dataset(dataset: Dataset, method_name: str) -> int:
         """Get the minimum length of the given dataset."""
         minimum_length = 0
         if dataset.time_unit == "days":
@@ -170,26 +168,18 @@ if __name__ == "__main__":
                 ]
                 for method_name in methods:
 
-                    if (
-                        method_name in ["SARIMA"]
-                        and dataset.time_unit == "days"
-                    ):
+                    if method_name in ["SARIMA"] and dataset.time_unit == "days":
                         dataset = __check_to_convert_to_weekly_data(
                             dataset
                         )  # convert to weekly data if SARIMA is used
                         training_index = dataset.values.index[
-                            : int(
-                                len(dataset.values.index)
-                                * (1 - __testset_size)
-                            )
+                            : int(len(dataset.values.index) * (1 - __testset_size))
                         ]  # update training index accordingly
 
                     minimum_length = __get_minimum_length_for_dataset(
                         dataset, method_name
                     )
-                    if len(dataset.values) < int(
-                        minimum_length
-                    ) and method_name in [
+                    if len(dataset.values) < int(minimum_length) and method_name in [
                         "SES",
                         "HoltWinters",
                         "SARIMA",
@@ -235,16 +225,16 @@ if __name__ == "__main__":
                 )
 
     __datasets = [
-        "india_pollution",
+        # "india_pollution",
         #  "stock_prices",
-        # "airline_passengers",
+        "airline_passengers",
         # "list_of_tuples",
         #  "sun_spots",
         # "csv",
     ]
 
     __methods = [
-         "AR",
+        "AR",
         #  "linear_regression",
         # "ARIMA",
         "HoltWinters",
@@ -260,4 +250,3 @@ if __name__ == "__main__":
 
     for list_of_reports in generate_predictions(__methods, __datasets):
         print(list_of_reports)
-
