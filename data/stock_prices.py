@@ -31,10 +31,15 @@ def __load_data(stock_choice=__stock_choice) -> Data:
         start = datetime.datetime(2014, 12, 1)
         end = datetime.datetime(2022, 12, 1)
         yahoo_data = ticker.history(start=start, end=end)
-
+    # handle case where ticker is not found
+    except ValueError as e:
+        print("Ticker not found")
+        raise e
     except ConnectionError as e:
         print("Connection failed")
         raise e
+
+    
     df = yahoo_data["Close"].to_frame().reset_index("Date")
     df.set_index("Date", inplace=True)
     return df
@@ -75,7 +80,7 @@ def get_a_list_of_growth_stock_tickers() -> List[str]:
     - Apple Inc. (AAPL)
     - Microsoft Corporation (MSFT)
     - Amazon.com, Inc. (AMZN)
-    - Facebook, Inc. (FB)
+    - Facebook, Inc. Now Meta (META)
     - Alphabet Inc. (GOOG)
     """
 
