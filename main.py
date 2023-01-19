@@ -17,7 +17,7 @@ if __name__ == "__main__":
     from data.load import Load
     from data.report import Report
     from data.india_pollution import india_pollution, get_list_of_city_names
-    from data.stock_prices import stock_prices
+    from data.stock_prices import stock_prices, get_a_list_of_value_stock_tickers, get_a_list_of_growth_stock_tickers
     from data.list_of_tuples import list_of_tuples
     from data.airline_passengers import airline_passengers
     from data.sun_spots import sun_spots
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     __dataset_row_items: dict[str, list[str]] = {
         # take first 3 from list of cities
         "india_pollution": get_list_of_city_names()[:3],  # ["Gurugram"]
-        "stock_prices": ["JPM", "AAPL", "MSFT"],
+        "stock_prices": get_a_list_of_growth_stock_tickers(),#get_a_list_of_value_stock_tickers(),
     }
 
     __predictors: dict[str, Predict[Dataset, Result]] = {
