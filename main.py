@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     __dataset_row_items: dict[str, list[str]] = {
         # take first 3 from list of cities
-        "india_pollution": ["Gurugram"],  # get_list_of_city_names(),
+        "india_pollution": get_list_of_city_names()[:3],  # ["Gurugram"]
         "stock_prices": ["JPM", "AAPL", "MSFT"],
     }
 
@@ -107,7 +107,10 @@ if __name__ == "__main__":
             : int(len(data.values.index) * (1 - __testset_size))
         ]
         comparison_plot(data.values.loc[training_index, :], prediction)
-        return Report(start_time, method_name, data, prediction, metrics)
+        datestring_today = time.strftime("%Y-%m-%d")
+        filepath = f"reports/full_data/{data.name}_{data.subset_row_name}_{method_name}_{datestring_today}.json.gz"
+        logging.info(f"Saving report to {filepath}...")
+        return Report(tstart=start_time, method=method_name, dataset=data, prediction=prediction, metrics=metrics, filepath=filepath)
 
     def __calculate_minimum_length_given_periodicity(periodicity: int) -> int:
         """Calculate the minimum length of the dataset given the periodicity."""
@@ -236,21 +239,21 @@ if __name__ == "__main__":
         #  "stock_prices",
         # "airline_passengers",
         # "list_of_tuples",
-        # "sun_spots",
+        #  "sun_spots",
         # "csv",
     ]
 
     __methods = [
-        #  "AR",
+         "AR",
         #  "linear_regression",
         # "ARIMA",
-        # "HoltWinters",
+        "HoltWinters",
         # "MA",
         # "Prophet",
         # "FCNN",
         # "FCNN_embedding",
-        "SARIMA",
-        "auto_arima"
+        # "SARIMA",
+        # "auto_arima"
         #  "SES",
         # "TsetlinMachine",
     ]
