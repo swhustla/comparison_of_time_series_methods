@@ -141,19 +141,12 @@ def __evaluate_sarima_model(training_data: Dataset, config: dict) -> Model:
     # fit model
     model_fit = model.fit(disp=False)
 
-    return model_fit
-
-
-def __calculate_rmse(test_data: Dataset, predictions: pd.Series) -> float:
-    """Calculate the RMSE of the SARIMA model"""
-    return np.sqrt(mean_squared_error(test_data, predictions))
+    return model_fit.bic
 
 
 def __validation(training_data: Dataset, config: dict) -> float:
-    """Get the RMSE of the fitted SARIMA model"""
-    trained_model = __evaluate_sarima_model(training_data, config)
-    predictions = trained_model.predict()
-    return __calculate_rmse(training_data, predictions)
+    """Get the BIC of the fitted SARIMA model"""
+    return __evaluate_sarima_model(training_data, config)
 
 
 def __score_model(
@@ -207,13 +200,13 @@ def __grid_search_configs(
         # execute configs in parallel
         executor = Parallel(n_jobs=cpu_count(), backend="multiprocessing")
         tasks = (
-            delayed(__score_model)(training_data=training_set, config=cfg, debug=True)
+            delayed(__score_model)(training_data=training_set, config=cfg, debug=False)
             for cfg in cfg_list
         )
         scores = executor(tasks)
     else:
         scores = [
-            __score_model(training_data=training_set, config=cfg, debug=True)
+            __score_model(training_data=training_set, config=cfg, debug=False)
             for cfg in cfg_list
         ]
     # remove empty results
@@ -275,7 +268,7 @@ def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
         configs = __get_sarima_configs(m_params=[seasonal])
 
     # grid search
-    scores = __grid_search_configs(data, configs)
+    scores = __grid_search_configs(data, configs, parallel=True)
     logging.info("Grid search done")
     # list top 3 configs
     for cfg, error in scores[:3]:
@@ -337,3 +330,4 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> pd.DataFr
 
 
 sarima = method(__get_best_sarima_model, __forecast)
+
