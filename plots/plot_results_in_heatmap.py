@@ -87,6 +87,7 @@ def __plot_heatmap(
             vmax=60,
             mask=mask_for_missing_values
         )
+        cluster_grid.ax_col_dendrogram.set_title(title)
         return cluster_grid  
 
     #reversing the colorbar for R2 case
@@ -100,6 +101,7 @@ def __plot_heatmap(
             vmax=1,
             mask=mask_for_missing_values
         )
+        cluster_grid.ax_col_dendrogram.set_title(title)
         return cluster_grid   
 
     print(f"pivoted dataframe: {pivoted_dataframe}")
@@ -113,6 +115,7 @@ def __plot_heatmap(
         vmax=100,
         mask=mask_for_missing_values
     )
+    cluster_grid.ax_col_dendrogram.set_title(title)
     return cluster_grid
 
 

@@ -52,9 +52,13 @@ from methods.SARIMA import sarima as method
 import pandas as pd
 import numpy as np
 
+import contextlib
 from multiprocessing import cpu_count
 from joblib import Parallel, delayed
+import joblib
 from warnings import catch_warnings, filterwarnings
+
+from tqdm import tqdm
 
 import logging
 
@@ -123,7 +127,7 @@ def __get_number_of_lags_or_trend_autoregression_order(data: Dataset) -> int:
         return 1
 
 
-def __evaluate_sarima_model(training_data: Dataset, config: dict) -> pd.Series:
+def __evaluate_sarima_model(training_data: Dataset, config: dict) -> Model:
     """Evaluate the SARIMA forecast on the training set"""
 
     order, seasonal_order, trend = config
@@ -154,7 +158,6 @@ def __score_model(
 ) -> Tuple[str, float]:
     """Score the SARIMA model"""
 
-    logging.info(f"Scoring SARIMA model: {config}")
     result = None
 
     # convert config to a key
@@ -187,6 +190,24 @@ def __score_model(
 
     return (config, result)
 
+@contextlib.contextmanager
+def tqdm_joblib(tqdm_object):
+    """Context manager to patch joblib to report into tqdm progress bar given as argument
+    This allows you to use joblib with a progress bar instead of getting one line per job.
+    """
+    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
+        def __call__(self, *args, **kwargs):
+            tqdm_object.update(n=self.batch_size)
+            return super(TqdmBatchCompletionCallback, self).__call__(*args, **kwargs)
+
+    old_batch_callback = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
+    try:
+        yield tqdm_object
+    finally:
+        joblib.parallel.BatchCompletionCallBack = old_batch_callback
+        tqdm_object.close()
+
 
 def __grid_search_configs(
     data: Dataset, cfg_list: list, parallel: bool = False
@@ -199,15 +220,19 @@ def __grid_search_configs(
 
     if parallel:
         # execute configs in parallel
-        executor = Parallel(n_jobs=cpu_count(), backend="multiprocessing")
-        tasks = (
-            delayed(__score_model)(training_data=training_set, config=cfg, debug=True)
-            for cfg in cfg_list
-        )
-        scores = executor(tasks)
+        with tqdm_joblib(tqdm(desc="Grid search", total=len(cfg_list))) as progress_bar:
+            executor = Parallel(n_jobs=cpu_count(), backend="multiprocessing")
+            tasks = (
+                delayed(__score_model)(training_data=training_set, config=cfg, debug=False)
+                for cfg in cfg_list
+            )
+            scores = executor(tasks)
+
+        progress_bar.close()
+
     else:
         scores = [
-            __score_model(training_data=training_set, config=cfg, debug=True)
+            __score_model(training_data=training_set, config=cfg, debug=False)
             for cfg in cfg_list
         ]
     # remove empty results
@@ -269,7 +294,7 @@ def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
         configs = __get_sarima_configs(m_params=[seasonal])
 
     # grid search
-    scores = __grid_search_configs(data, configs)
+    scores = __grid_search_configs(data, configs, parallel=True)
     logging.info("Grid search done")
     # list top 3 configs
     for cfg, error in scores[:3]:
@@ -331,3 +356,4 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> pd.DataFr
 
 
 sarima = method(__get_best_sarima_model, __forecast)
+
