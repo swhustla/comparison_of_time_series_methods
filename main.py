@@ -174,8 +174,7 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
                 
 
                 #to store R2
-                prediction = __predictors[method_name](dataset)
-                metrics = calculate_metrics(prediction)['r_squared']
+                metrics = calculate_metrics(report.prediction)['r_squared']
                 metrics_stat.append(metrics)
 
 
@@ -196,9 +195,9 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 
 __datasets = [
-      "india_pollution",
+    #   "india_pollution",
     #  "stock_prices",
-    # "airline_passengers",
+    "airline_passengers",
     # "list_of_tuples",
     # "sun_spots",
     # "csv",
@@ -206,17 +205,17 @@ __datasets = [
 
 
 __methods = [
-     "AR",
-     "linear_regression",
-    "ARIMA",
-    "HoltWinters",
-    "MA",
-    "Prophet",
+    #  "AR",
+    #  "linear_regression",
+    # "ARIMA",
+    # "HoltWinters",
+    # "MA",
+    # "Prophet",
     # "FCNN",
     # "FCNN_embedding",
     # "SARIMA",
-    # "auto_arima"
-     "SES",
+    "auto_arima"
+    #  "SES",
     # "TsetlinMachine",
 ]
 
