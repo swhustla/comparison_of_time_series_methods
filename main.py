@@ -7,7 +7,7 @@ from predictions.Prediction import PredictionData
 from data.load import Load
 from data.report import Report
 from data.india_pollution import india_pollution, get_list_of_city_names
-from data.stock_prices import stock_prices
+from data.stock_prices import stock_prices, get_a_list_of_value_stock_tickers, get_a_list_of_growth_stock_tickers
 from data.list_of_tuples import list_of_tuples
 from data.airline_passengers import airline_passengers
 from data.sun_spots import sun_spots
@@ -48,7 +48,7 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 __dataset_row_items: dict[str, list[str]] = {
     # take first 3 from list of cities
     "india_pollution": get_list_of_city_names()[3:6],
-    "stock_prices": ["JPM", "AAPL", "MSFT"],
+    "stock_prices": get_a_list_of_growth_stock_tickers(),#get_a_list_of_value_stock_tickers(),
 }
 
 
@@ -160,7 +160,7 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
             training_index = dataset.values.index[: int(len(dataset.values.index) * (1 - __testset_size))]
             for method_name in methods:
                 
-                if method_name in ["SARIMA"] and dataset.time_unit == "days":
+                if dataset.time_unit == "days":
                     dataset = __check_to_convert_to_weekly_data(dataset)  # convert to weekly data if SARIMA is used
                     training_index = dataset.values.index[: int(len(dataset.values.index) * (1 - __testset_size))]  # update training index accordingly
                 
@@ -177,8 +177,8 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
                 
 
                 #to store R2
-                prediction = __predictors[method_name](dataset)
-                metrics = calculate_metrics(prediction)['r_squared']
+                # prediction = __predictors[method_name](dataset)
+                metrics = calculate_metrics(report.prediction)['r_squared']
                 metrics_stat.append(metrics)
 
 
@@ -200,27 +200,27 @@ def generate_predictions(methods: list[str], datasets: list[str]) -> Generator[R
 
 __datasets = [
     #   "india_pollution",
-    #  "stock_prices",
+     "stock_prices",
     # "airline_passengers",
     # "list_of_tuples",
-    "sun_spots",
+    # "sun_spots",
     # "csv",
 ]
 
 
 __methods = [
-    #  "AR",
-    #  "linear_regression",
-    # "ARIMA",
+     "AR",
+     "linear_regression",
+    "ARIMA",
     "HoltWinters",
-    # "MA",
-    # "Prophet",
+    "MA",
+    "Prophet",
     # "FCNN",
     # "FCNN_embedding",
     # "SARIMA",
     # "auto_arima"
-    #  "SES",
-    # "TsetlinMachine",
+     "SES",
+    "TsetlinMachine",
 ]
 
 
