@@ -48,13 +48,11 @@ SARIMA model for the data.
 """
 
 from typing import TypeVar, Generic, List, Tuple, Callable, Dict, Any
-from methods.SARIMA import sarima as method
+from methods.auto_arima import auto_arima as method
 import pandas as pd
-import numpy as np
+
 
 from multiprocessing import cpu_count
-from joblib import Parallel, delayed
-from warnings import catch_warnings, filterwarnings
 
 import logging
 
@@ -114,29 +112,43 @@ def __fit_pmdarima_model(
     See here: https://alkaline-ml.com/pmdarima/modules/generated/pmdarima.arima.auto_arima.html?highlight=pmdarima
     """
     training_data = __get_training_set(data)
-    logging.info(f"Defining pmdarima model")
+    logging.info(f"Defining pmdarima model with seasonal={data.seasonality} and seasonal_period={__get_seasonal_period(data)}, maxiter=100")
     # define model
+    # if seasonal, force D=1
+    capital_d = 1 if data.seasonality else 0
+
+    # show frequency of data
+    logging.info(f"Frequency of training_data: {training_data.index.inferred_freq}")
+
     model = pm.auto_arima(
         y=training_data,
+        stationary=__stationarity(data),
+        start_p=0,
+        d=1,
+        start_q=0,
+        test="adf",
+        max_p=5,
+        max_d=5,
+        max_q=5,
+        m=__get_seasonal_period(data), # seasonal period, or frequency of the data
+        seasonal=data.seasonality,
+        start_P=0,
+        D=capital_d,
+        start_Q=0,
+        max_P=5,
+        max_D=5,
+        max_Q=5,
         trace=True,
         error_action="ignore",
         suppress_warnings=True,
-        seasonal=True,
-        m=__get_seasonal_period(data),
-        stationary=__stationarity(data),
+        # information_criterion="aic",
+        stepwise=False,
         n_jobs=cpu_count(),
-        information_criterion="bic",
-        max_p=5,
-        max_q=5,
-        max_P=5,
-        max_Q=5,
-        max_d=5,
-        max_D=5,
-        max_order=5,
-        max_seasonal_order=5,
-        maxiter=50,
-
+        n_fits=50,
+        # maxiter=100,
     )
+
+    print(model.summary())
 
     # fit model
     logging.info("Fitting pmdarima model:")
@@ -153,6 +165,8 @@ def __get_pmdarima_model_order_snake_case(model: Model) -> str:
     )
     logging.info(f"AR params are {model.arparams()}")
     logging.info(f"MA params are {model.maparams()}")
+
+    # TODO: get P, Q, D, s parameters from pmdarima model
 
     return f"ar_{dict_of_model_orders[0]}_trend_{dict_of_model_orders[1]}_ma_{dict_of_model_orders[2]}"
 

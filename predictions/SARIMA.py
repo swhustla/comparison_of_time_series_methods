@@ -123,7 +123,7 @@ def __get_number_of_lags_or_trend_autoregression_order(data: Dataset) -> int:
         return 1
 
 
-def __evaluate_sarima_model(training_data: Dataset, config: dict) -> pd.Series:
+def __evaluate_sarima_model(training_data: Dataset, config: dict) -> Model:
     """Evaluate the SARIMA forecast on the training set"""
 
     order, seasonal_order, trend = config
@@ -154,7 +154,6 @@ def __score_model(
 ) -> Tuple[str, float]:
     """Score the SARIMA model"""
 
-    logging.info(f"Scoring SARIMA model: {config}")
     result = None
 
     # convert config to a key
@@ -201,13 +200,13 @@ def __grid_search_configs(
         # execute configs in parallel
         executor = Parallel(n_jobs=cpu_count(), backend="multiprocessing")
         tasks = (
-            delayed(__score_model)(training_data=training_set, config=cfg, debug=True)
+            delayed(__score_model)(training_data=training_set, config=cfg, debug=False)
             for cfg in cfg_list
         )
         scores = executor(tasks)
     else:
         scores = [
-            __score_model(training_data=training_set, config=cfg, debug=True)
+            __score_model(training_data=training_set, config=cfg, debug=False)
             for cfg in cfg_list
         ]
     # remove empty results
@@ -269,7 +268,7 @@ def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
         configs = __get_sarima_configs(m_params=[seasonal])
 
     # grid search
-    scores = __grid_search_configs(data, configs)
+    scores = __grid_search_configs(data, configs, parallel=True)
     logging.info("Grid search done")
     # list top 3 configs
     for cfg, error in scores[:3]:
@@ -331,3 +330,4 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> pd.DataFr
 
 
 sarima = method(__get_best_sarima_model, __forecast)
+
