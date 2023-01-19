@@ -52,9 +52,13 @@ from methods.SARIMA import sarima as method
 import pandas as pd
 import numpy as np
 
+import contextlib
 from multiprocessing import cpu_count
 from joblib import Parallel, delayed
+import joblib
 from warnings import catch_warnings, filterwarnings
+
+from tqdm import tqdm
 
 import logging
 
@@ -186,6 +190,24 @@ def __score_model(
 
     return (config, result)
 
+@contextlib.contextmanager
+def tqdm_joblib(tqdm_object):
+    """Context manager to patch joblib to report into tqdm progress bar given as argument
+    This allows you to use joblib with a progress bar instead of getting one line per job.
+    """
+    class TqdmBatchCompletionCallback(joblib.parallel.BatchCompletionCallBack):
+        def __call__(self, *args, **kwargs):
+            tqdm_object.update(n=self.batch_size)
+            return super(TqdmBatchCompletionCallback, self).__call__(*args, **kwargs)
+
+    old_batch_callback = joblib.parallel.BatchCompletionCallBack
+    joblib.parallel.BatchCompletionCallBack = TqdmBatchCompletionCallback
+    try:
+        yield tqdm_object
+    finally:
+        joblib.parallel.BatchCompletionCallBack = old_batch_callback
+        tqdm_object.close()
+
 
 def __grid_search_configs(
     data: Dataset, cfg_list: list, parallel: bool = False
@@ -198,12 +220,16 @@ def __grid_search_configs(
 
     if parallel:
         # execute configs in parallel
-        executor = Parallel(n_jobs=cpu_count(), backend="multiprocessing")
-        tasks = (
-            delayed(__score_model)(training_data=training_set, config=cfg, debug=False)
-            for cfg in cfg_list
-        )
-        scores = executor(tasks)
+        with tqdm_joblib(tqdm(desc="Grid search", total=len(cfg_list))) as progress_bar:
+            executor = Parallel(n_jobs=cpu_count(), backend="multiprocessing")
+            tasks = (
+                delayed(__score_model)(training_data=training_set, config=cfg, debug=False)
+                for cfg in cfg_list
+            )
+            scores = executor(tasks)
+
+        progress_bar.close()
+
     else:
         scores = [
             __score_model(training_data=training_set, config=cfg, debug=False)
