@@ -52,9 +52,12 @@ from methods.SARIMA import sarima as method
 import pandas as pd
 import numpy as np
 
+import contextlib
 from multiprocessing import cpu_count
 from joblib import Parallel, delayed
 from warnings import catch_warnings, filterwarnings
+
+from tqdm import tqdm
 
 import logging
 
@@ -185,6 +188,21 @@ def __score_model(
             logging.info("New best score: %.3f" % (best_score))
 
     return (config, result)
+
+@contextlib.contextmanager
+def tqdm_joblib(tqdm_object):
+    """Context manager to patch joblib to report into tqdm progress bar given as argument"""
+    old_batch_callback = Parallel._backend.batch_completed
+
+    def batch_completed(batch_callback, size):
+        tqdm_object.update(size)
+        return old_batch_callback(batch_callback, size)
+
+    Parallel._backend.batch_completed = batch_completed
+    try:
+        yield
+    finally:
+        Parallel._backend.batch_completed = old_batch_callback
 
 
 def __grid_search_configs(
