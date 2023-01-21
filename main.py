@@ -227,8 +227,8 @@ if __name__ == "__main__":
                 )
 
     __datasets = [
-        "india_pollution",
-        #  "stock_prices",
+        # "india_pollution",
+         "stock_prices",
         #"airline_passengers",
         # "list_of_tuples",
         #  "sun_spots",
@@ -237,16 +237,16 @@ if __name__ == "__main__":
 
     __methods = [
         "AR",
-        #  "linear_regression",
-        # "ARIMA",
+         "linear_regression",
+        "ARIMA",
         "HoltWinters",
-        # "MA",
-        # "Prophet",
+        "MA",
+        "Prophet",
         # "FCNN",
         # "FCNN_embedding",
-        # "SARIMA",
+        "SARIMA",
         # "auto_arima"
-        #  "SES",
+         "SES",
         # "TsetlinMachine",
     ]
 
