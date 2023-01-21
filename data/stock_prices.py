@@ -84,7 +84,7 @@ def get_a_list_of_growth_stock_tickers() -> List[str]:
     - Alphabet Inc. (GOOG)
     """
 
-    return ["AAPL", "MSFT", "AMZN", "FB", "GOOG"]
+    return ["AAPL", "MSFT", "AMZN", "META", "GOOG"]
 
 
 
