@@ -57,7 +57,7 @@ if __name__ == "__main__":
     __dataset_row_items: dict[str, list[str]] = {
         # take first 3 from list of cities
         "india_pollution": get_list_of_city_names()[:3],  # ["Gurugram"]
-        "stock_prices": get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+        "stock_prices": ["DIS"],#get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
     }
 
     __dataset_group_titles: dict[str, str] = {
@@ -223,8 +223,8 @@ if __name__ == "__main__":
                 ):
                     results_store.append(reports_per_dataset)
 
-                # plot into a scatter plot
-                if dataset_name in ["india_pollution", "stock_prices"]:
+                # plot into a scatter plot if at least 3 methods are used
+                if len(methods) > 2:
                     plot_results_in_scatter_plot(reports_per_dataset)
 
                 yield reports_per_dataset
