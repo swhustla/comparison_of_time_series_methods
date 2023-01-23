@@ -36,6 +36,8 @@ import pandas as pd
 
 import logging
 
+from plots.color_map_by_method import get_color_map_by_method
+
 from arch.unitroot import ADF
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.tsa.forecasting.stl import STLForecast
@@ -230,7 +232,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         number_of_iterations=__calculate_number_of_configs(__p_values, __d_values, __q_values, __trend_values),
         confidence_on_mean=True,
         confidence_method="95% confidence interval",
-        color="indigo",
+        color=get_color_map_by_method("MA"),
         in_sample_prediction=prediction_in_sample.iloc[:, 0],
     )
 

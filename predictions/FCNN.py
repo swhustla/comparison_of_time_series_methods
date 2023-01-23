@@ -36,6 +36,8 @@ from typing import TypeVar
 from methods.FCNN import fcnn as method
 import pandas as pd
 
+from plots.color_map_by_method import get_color_map_by_method
+
 import tensorflow.keras as keras
 from tensorflow.keras.layers import Dense, Input, Dropout
 
@@ -158,6 +160,7 @@ def __get_predictions(
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/FCNN/",
         plot_file_name=f"{data.subset_column_name}_forecast",
+        color=get_color_map_by_method("FCNN"),
 
     )
 

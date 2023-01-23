@@ -30,6 +30,8 @@ from typing import TypeVar
 from methods.FCNN_embedding import fcnn_embedding as method
 import pandas as pd
 
+from plots.color_map_by_method import get_color_map_by_method
+
 import tensorflow as tf
 from keras.optimizers import Adam
 from keras.metrics import MeanAbsoluteError, RootMeanSquaredError
@@ -166,7 +168,7 @@ def __get_predictions(
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/FCNN_embedding/",
         plot_file_name=f"{data.subset_column_name}_forecast",
-
+        color=get_color_map_by_method("FCNN_embedding"),
     )
 
 
