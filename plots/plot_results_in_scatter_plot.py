@@ -27,7 +27,12 @@ from methods.plot_results_in_scatter_plot import plot_results_in_scatter_plot as
 def __compile_results_single_dataset(list_of_reports: List[Report]) -> Tuple[pd.DataFrame, str]:
     """Compile the results from a list of lists of reports into a dataframe"""
     results = []
+    
     for report in list_of_reports:
+        if report.prediction.number_of_iterations > 1:
+            time_elapsed = (report.end_time - report.tstart) / report.prediction.number_of_iterations
+        else:
+            time_elapsed = report.end_time - report.tstart
         results.append(
             {
                 "method": report.method,
@@ -37,12 +42,10 @@ def __compile_results_single_dataset(list_of_reports: List[Report]) -> Tuple[pd.
                 "RMSE": report.metrics["root_mean_squared_error"],
                 "R2": report.metrics["r_squared"],
                 "MAPE": report.metrics["mean_absolute_percentage_error"],
-                "Elapsed (s)": report["Elapsed (s)"],
+                "Elapsed (s)": np.round(time_elapsed, 2),
             }
         )
-    results = pd.DataFrame(results)
-    dataset_name = list_of_reports[0].dataset.name
-    return results, dataset_name
+    return pd.DataFrame(results)
 
 
 def __get_title(results_dataframe: pd.DataFrame, chosen_metric: str) -> str:
@@ -70,12 +73,17 @@ def __plot_scatterplot(
     ax.set_title(title)
     ax.set_xlabel("Elapsed (s)")
     ax.set_ylabel(chosen_metric)
-    return Figure(fig, title)
+    return fig
+
+
+def __get_subset_row(results_dataframe: pd.DataFrame) -> str:
+    """Get the subset row name"""
+    return results_dataframe["subset_row"].unique()[0]
 
 
 def __get_filename(results_dataframe: pd.DataFrame, chosen_metric: str) -> str:
     """Get the filename for the plot"""
-    return f"plots/{__get_dataset_name(results_dataframe)}/{__get_time_stamp_for_file_name(results_dataframe)}_{chosen_metric}_scatterplot.png"
+    return f"plots/{__get_dataset_name(results_dataframe)}/{__get_subset_row(results_dataframe)}/{__get_time_stamp_for_file_name()}_{chosen_metric}_scatterplot.png"
 
 
 def __save_plot(figure: Figure, results_dataframe: pd.DataFrame, chosen_metric: str):
@@ -83,9 +91,9 @@ def __save_plot(figure: Figure, results_dataframe: pd.DataFrame, chosen_metric: 
     filename = __get_filename(results_dataframe, chosen_metric)
     logging.info(f"Saving scatter plot to {filename}")
     os.makedirs(os.path.dirname(filename), exist_ok=True)
-    figure.save(filename)
+    figure.savefig(filename)
 
-    plt.close(figure.fig)
+    plt.close(figure.figure)
 
 
 plot_results_in_scatter_plot = method(__compile_results_single_dataset, __plot_scatterplot, __save_plot)
