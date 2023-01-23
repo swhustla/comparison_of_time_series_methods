@@ -16,7 +16,7 @@ if __name__ == "__main__":
     from predictions.Prediction import PredictionData
     from data.load import Load
     from data.report import Report
-    from data.india_pollution import india_pollution, get_list_of_city_names
+    from data.india_pollution import india_pollution, get_list_of_city_names, get_list_of_coastal_indian_cities
     from data.stock_prices import stock_prices, get_a_list_of_value_stock_tickers, get_a_list_of_growth_stock_tickers
     from data.list_of_tuples import list_of_tuples
     from data.airline_passengers import airline_passengers
@@ -113,9 +113,10 @@ if __name__ == "__main__":
         comparison_plot(data.values.loc[training_index, :], prediction)
         datestring_today = time.strftime("%Y-%m-%d")
         filepath = f"reports/full_data/{data.name}_{data.subset_row_name}_{method_name}_{datestring_today}.json.gz"
+        end_time = time.time()
         logging.info(f"Saving report to {filepath}...")
         return Report(
-            start_time, method_name, data, prediction, metrics, filepath=filepath
+            start_time, method_name, data, prediction, metrics, filepath=filepath, end_time=end_time
         )
 
     def __calculate_minimum_length_given_periodicity(periodicity: int) -> int:
@@ -248,10 +249,10 @@ if __name__ == "__main__":
 
     __methods = [
         "AR",
-        #  "linear_regression",
-        "ARIMA",
-        "HoltWinters",
-        # "MA",
+         "linear_regression",
+        # "ARIMA",
+        # "HoltWinters",
+        "MA",
         # "Prophet",
         # "FCNN",
         # "FCNN_embedding",
