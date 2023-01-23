@@ -157,6 +157,8 @@ from sklearn.model_selection import train_test_split
 from data.dataset import Dataset
 from predictions.Prediction import PredictionData
 
+from plots.color_map_by_method import get_color_map_by_method
+
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -491,7 +493,7 @@ def __get_forecast(
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/tsetlin_machine_regression_model/",
         plot_file_name=f"{data.subset_column_name}_forecast",
-        color="lightgray",
+        color=get_color_map_by_method("Tsetlin Machine Regression"),
     )
 
 

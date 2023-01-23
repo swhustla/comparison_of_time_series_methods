@@ -92,6 +92,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+from plots.color_map_by_method import get_color_map_by_method
+
 import logging
 
 # turn on logging
@@ -508,7 +510,7 @@ def __predict(
         plot_file_name=f"{data.subset_column_name}_forecast",
         confidence_on_mean=False,
         confidence_method=None,
-        color="darkorange",
+        color=get_color_map_by_method("SES"),
         in_sample_prediction=forecasted_resid_in_sample,
     )
 

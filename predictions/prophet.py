@@ -35,6 +35,8 @@ from sklearn.metrics import mean_squared_error
 import pandas as pd
 import numpy as np
 
+from plots.color_map_by_method import get_color_map_by_method
+
 import holidays
 import pycountry
 
@@ -437,7 +439,7 @@ def __forecast(model: Model, data: Dataset, number_of_configs: int) -> Predictio
         number_of_iterations=number_of_configs,
         confidence_on_mean=False,
         confidence_method="80% confidence interval by Monte Carlo sampling",
-        color="violet",
+        color=get_color_map_by_method("Prophet"),
         in_sample_prediction=predict_in_sample_df["yhat"],
     )
 

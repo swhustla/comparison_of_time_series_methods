@@ -107,6 +107,20 @@ def get_list_of_city_names() -> list:
     return list(data.City.unique())
 
 
+__list_of_coastal_cities = ["Mumbai", "Chennai", "Kolkata", "Visakhapatnam", "Goa", "Pondicherry"]
+
+__list_of_inland_cities = ["Bhopal", "Delhi", "Hyderabad", "Jaipur", "Lucknow", "Patna", "Ranchi", "Srinagar", "Thiruvananthapuram", "Bengaluru"]
+
+def get_list_of_coastal_indian_cities() -> list:
+    """Get a list of coastal cities in India, given the list of cities."""
+    list_of_cities = get_list_of_city_names()
+    coastal_cities = []
+    for city in list_of_cities:
+        if city in __list_of_coastal_cities or city not in __list_of_inland_cities:
+            coastal_cities.append(city)
+    return coastal_cities
+
+
 def india_pollution(
     city_list: list = __city_choice,
     pollution_columns: list = __column_choice,

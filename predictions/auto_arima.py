@@ -51,6 +51,7 @@ from typing import TypeVar, Generic, List, Tuple, Callable, Dict, Any
 from methods.auto_arima import auto_arima as method
 import pandas as pd
 
+from plots.color_map_by_method import get_color_map_by_method
 
 from multiprocessing import cpu_count
 
@@ -188,7 +189,7 @@ def __forecast_pmdarima(model: Model, data: Dataset) -> pd.DataFrame:
         plot_folder=f"{data.name}/{data.subset_row_name}/auto_arima/",
         plot_file_name=f"{data.subset_column_name}_forecast_{__get_pmdarima_model_order_snake_case(model)}",
         number_of_iterations=model.get_params()["maxiter"],
-        color="darkorange",
+        color=color_map_by_method["auto_arima"],
         in_sample_prediction=prediction_in_sample,
     )
 
