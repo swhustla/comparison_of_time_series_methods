@@ -9,6 +9,8 @@ import datetime
 
 import numpy as np
 
+from plots.color_map_by_method import __color_map_by_method_dict
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 from typing import List, Tuple, Optional
@@ -61,6 +63,11 @@ def __plot_scatterplot(
 
     title = __get_title(results_dataframe, chosen_metric)
 
+    # use colow map by method dictionary
+    color_map = __color_map_by_method_dict
+
+    # plot the results
+
     sns.set_theme(style="whitegrid")
     fig, ax = plt.subplots(figsize=(12, 8))
     sns.scatterplot(
@@ -69,7 +76,9 @@ def __plot_scatterplot(
         y=chosen_metric,
         hue="method",
         ax=ax,
+        palette=color_map,
     )
+
     ax.set_title(title)
     ax.set_xlabel("Elapsed (s)")
     ax.set_ylabel(chosen_metric)
@@ -83,7 +92,10 @@ def __get_subset_row(results_dataframe: pd.DataFrame) -> str:
 
 def __get_filename(results_dataframe: pd.DataFrame, chosen_metric: str) -> str:
     """Get the filename for the plot"""
-    return f"plots/{__get_dataset_name(results_dataframe)}/{__get_subset_row(results_dataframe)}/{__get_time_stamp_for_file_name()}_{chosen_metric}_scatterplot.png"
+    folder = f"plots/{__get_dataset_name(results_dataframe)}/{__get_subset_row(results_dataframe)}/scatter_plots"
+    if not os.path.exists(folder):
+        os.makedirs(folder, exist_ok=True)
+    return f"{folder}/{chosen_metric}_{__get_time_stamp_for_file_name()}.png"
 
 
 def __save_plot(figure: Figure, results_dataframe: pd.DataFrame, chosen_metric: str):
