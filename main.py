@@ -39,6 +39,7 @@ if __name__ == "__main__":
     from plots.comparison_plot import comparison_plot
     from plots.comparison_plot_multi import comparison_plot_multi
     from plots.plot_results_in_heatmap import plot_results_in_heatmap
+    from plots.plot_results_in_scatter_plot import plot_results_in_scatter_plot
 
     import time
     import logging
@@ -56,7 +57,12 @@ if __name__ == "__main__":
     __dataset_row_items: dict[str, list[str]] = {
         # take first 3 from list of cities
         "india_pollution": get_list_of_city_names()[:3],  # ["Gurugram"]
-        "stock_prices": get_a_list_of_growth_stock_tickers(),#get_a_list_of_value_stock_tickers(),
+        "stock_prices": get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+    }
+
+    __dataset_group_titles: dict[str, str] = {
+        "india_pollution": "Coastal cities in India",
+        "stock_prices": "Value stocks",
     }
 
     __predictors: dict[str, Predict[Dataset, Result]] = {
@@ -215,20 +221,25 @@ if __name__ == "__main__":
                     dataset_name == "stock_prices"
                 ):
                     results_store.append(reports_per_dataset)
+
+                # plot into a scatter plot
+                if dataset_name in ["india_pollution", "stock_prices"]:
+                    plot_results_in_scatter_plot(reports_per_dataset)
+
                 yield reports_per_dataset
 
             if len(results_store) > 1 and number_of_methods > 1:
                 logging.info(
                     f"Plotting results for all {len(results_store)} datasets in {dataset_name} for {number_of_methods} methods..."
                 )
-                plot_results_in_heatmap(results_store)
+                plot_results_in_heatmap(results_store, __dataset_group_titles[dataset_name])
                 logging.info(
                     f"Plotting results for all {len(results_store)} datasets in {dataset_name} - done"
                 )
 
     __datasets = [
-        "india_pollution",
-        #  "stock_prices",
+        # "india_pollution",
+         "stock_prices",
         #"airline_passengers",
         # "list_of_tuples",
         #  "sun_spots",
@@ -238,7 +249,7 @@ if __name__ == "__main__":
     __methods = [
         "AR",
         #  "linear_regression",
-        # "ARIMA",
+        "ARIMA",
         "HoltWinters",
         # "MA",
         # "Prophet",

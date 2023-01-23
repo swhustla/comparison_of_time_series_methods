@@ -46,22 +46,27 @@ def __get_dataset_name(results_dataframe: pd.DataFrame) -> str:
     return results_dataframe["dataset"].unique()[0]
 
 
-def __get_title(results_dataframe: pd.DataFrame, chosen_metric: str) -> str:
+def __get_title(results_dataframe: pd.DataFrame, chosen_metric: str, group_name: str) -> str:
     """Get the title of the plot"""
-    return f"{chosen_metric} results for {__get_dataset_name(results_dataframe)} for {results_dataframe['method'].unique().size} predictive methods on {results_dataframe['subset_row'].unique().size} datasets"
-
+    if group_name is None:
+        return f"{chosen_metric} results for {__get_dataset_name(results_dataframe)} for {results_dataframe['method'].unique().size} predictive methods on {results_dataframe['subset_row'].unique().size} datasets"
+    else:
+        return f"{chosen_metric} results for {group_name} with {results_dataframe['method'].unique().size} predictive methods"
 
 def __plot_heatmap(
-    results_dataframe: pd.DataFrame, chosen_metric: str = "MAE"
+    results_dataframe: pd.DataFrame, chosen_metric: str = "MAE", group_name: Optional[str] = None
 ) -> Figure:
     """Plot the results in a heatmap"""
     logging.info(f"Plotting {chosen_metric} heatmap")
 
-    title = __get_title(results_dataframe, chosen_metric)
+    title = __get_title(results_dataframe, chosen_metric, group_name)
     figure, axis = plt.subplots(figsize=(20, 10))
     axis.set_title(title)
     axis.set_xlabel("Method")
-    axis.set_ylabel("Dataset")
+    if group_name is None:
+        axis.set_ylabel("Dataset")
+    else:
+        axis.set_ylabel(f"Dataset ({group_name})")
     # chose sns colormap that goes from red (high error) to green (low error) without white in the middle
     colormap = sns.diverging_palette(220, 20, as_cmap=True)
 
