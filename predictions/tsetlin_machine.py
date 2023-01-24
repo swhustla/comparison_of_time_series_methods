@@ -157,6 +157,8 @@ from sklearn.model_selection import train_test_split
 from data.dataset import Dataset
 from predictions.Prediction import PredictionData
 
+from data.seasonal_decompose import seasonal_decompose
+
 from plots.color_map_by_method import get_color_map_by_method
 
 import logging
@@ -174,9 +176,23 @@ __s: float = 1.9  # s represents the number of states per unit of the output
 __number_of_state_bits: int = 2
 
 
+def __number_of_steps(data: Dataset) -> int:
+    return int(len(data.values) * __test_size)
+
+def __get_training_set(data: Dataset) -> Dataset:
+    return Dataset(
+        name=data.name,
+        values=data.values[: -__number_of_steps(data)],
+        number_columns=data.number_columns,
+        subset_column_name=data.subset_column_name,
+        time_unit=data.time_unit,
+        subset_row_name=data.subset_row_name,
+        seasonality=data.seasonality,
+    )
+
+
 def _add_month_and_year_columns(data: Dataset) -> pd.DataFrame:
-    """
-    Add normalised month and year (and potentially week) columns to a dataframe.
+    """ Add normalised month and year (and potentially week) columns to a dataframe.
     """
     df = data.values
     # Add month and year columns, normalising to start from 0
@@ -208,8 +224,8 @@ def _add_month_and_year_columns(data: Dataset) -> pd.DataFrame:
 #         default_fc_parameters=tsf_settings,
 #     )
 
-    logging.info(f"Data with features: {data_with_features.head()}")
-    return data_with_features
+    # logging.info(f"Data with features: {data_with_features.head()}")
+    # return data_with_features
 
 
 def __binarize_data(data: pd.DataFrame) -> pd.DataFrame:
@@ -262,15 +278,20 @@ def __prepare_and_split_data(
     data: Dataset,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Split data into training, validation and test sets."""
+    logging.info("Preparing data...")
+
     data_with_extra_features = _add_month_and_year_columns(data)
     x_data = data_with_extra_features.drop(columns=[data.subset_column_name])
-    y_data = data_with_extra_features[[data.subset_column_name]]
+
+    stl_decomposition_object = seasonal_decompose(data)
+
+    y_data_resid = np.abs(stl_decomposition_object.values.resid)
 
     binarized_x_data = __binarize_data(x_data)
 
     logging.info("Splitting data into training, validation and test sets...")
 
-    return __get_train_and_test_sets(binarized_x_data, y_data)
+    return __get_train_and_test_sets(binarized_x_data, y_data_resid)
 
 
 def __get_test_date_index(data: Dataset, y_test_shape: int) -> pd.DatetimeIndex:
@@ -432,6 +453,17 @@ def __tsetlin_configs() -> list:
     logging.info(f"Total number of configs: {len(model_configs)}")
     return model_configs
 
+def __seasonal_decompose_data(data: Dataset) -> Dataset:
+    """First gets the training data, then decomposes the data into trend, 
+    seasonal and residual components.
+    Return the full decomposition object inside the Dataset object"""
+
+    training_dataset = __get_training_set(data)
+
+    logging.info(f"Decomposing {data.name} with STL")
+
+    return seasonal_decompose(training_dataset)
+
 
 def __get_best_model_config(
     data: Dataset, parallel: bool = False
@@ -499,6 +531,7 @@ def __get_forecast(
 
 
 tsetlin_machine = method(
+    __seasonal_decompose_data
     __get_best_model_config,
     __get_forecast,
 )
