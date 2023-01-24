@@ -13,7 +13,7 @@ from .decompose import Decompose
 
 def seasonal_decompose(
     seasonal_decompose_data: Callable[[Dataset], Dataset],
-) -> Decompose[Dataset, Dataset]:
+) -> Decompose[Dataset]:
     def decompose(
         data: Dataset,
     ) -> Dataset:
