@@ -371,7 +371,7 @@ def __fit_model(stl_decomposition_dataset: Dataset) -> Model:
     """Fits the SES model to the data"""
     logging.info(f"Fitting SES model to {stl_decomposition_dataset.name}")
 
-    de_trended_residual = np.abs(stl_decomposition_dataset.values.resid)  # remove negative values
+    de_trended_residual = stl_decomposition_dataset.values.resid  # keep negative values
 
     return SimpleExpSmoothing(endog=de_trended_residual).fit(
         smoothing_level=__alpha,
