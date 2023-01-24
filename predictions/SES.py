@@ -83,9 +83,8 @@ component, then the seasonal component should be added back also.
 
 """
 import os
-from typing import TypeVar, Generic, List, Tuple, Dict, Optional, Union
+from typing import TypeVar, Generic, List, Tuple, Dict
 from statsmodels.tsa.holtwinters import SimpleExpSmoothing
-from statsmodels.tsa.seasonal import seasonal_decompose, DecomposeResult, STL
 
 import matplotlib.pyplot as plt
 
@@ -93,6 +92,8 @@ import pandas as pd
 import numpy as np
 
 from plots.color_map_by_method import get_color_map_by_method
+from data.seasonal_decompose import seasonal_decompose as seasonal_decompose_data
+
 
 import logging
 
@@ -104,6 +105,7 @@ from data.dataset import Dataset, Result
 from predictions.Prediction import PredictionData
 
 from methods.SES import ses as method
+
 
 Model = TypeVar("Model")
 
@@ -216,7 +218,6 @@ def __calculate_next_trend_values(
     return pd.DataFrame(m * x + c, index=x, columns=["trend"])
 
 
-
 def __get_seasonal_period(data: Dataset) -> int:
     """Returns the seasonal period"""
     if data.time_unit == "months":
@@ -255,9 +256,9 @@ def __calculate_next_additive_seasonal_values(
             len(train_seasonal_component) + number_of_steps,
         ),
         name="seasonal",
-    )    
+    )
 
-    
+
 def __calculate_next_multiplicative_seasonal_values(
     train_seasonal_component: pd.DataFrame,
     number_of_steps: int,
@@ -352,79 +353,27 @@ def __determine_if_seasonality_is_multiplicative(
     return increase_decrease_present, multiplicative_factor
 
 
-def __store_plot_of_decomposition_results(
-    data: Dataset, decompose_result: DecomposeResult, type: str = "old"
-) -> None:
-    """Stores a plot of the decomposition results"""
-    logging.info("Storing plot of decomposition results")
-    plt.rcParams.update({"figure.figsize": (10, 9)})
-    fig = decompose_result.plot()
-
-    file_path = f"{PROJECT_FOLDER}/plots/{data.name}/{data.subset_row_name}/SES/{type}_seasonal_decomposition.png"
-
-    if not os.path.exists(os.path.dirname(file_path)):
-        os.makedirs(os.path.dirname(file_path))
-
-    fig.savefig(file_path)
-
 
 def __seasonal_decompose_data(data: Dataset) -> Dataset:
-    """Removes trend and seasonality from the training data"""
-    logging.info(f"Decomposing {data.name}")
-    training_data = __get_training_set(data)
+    """First gets the training data, then decomposes the data into trend, 
+    seasonal and residual components.
+    Return the full decomposition object inside the Dataset object"""
 
-    seasonal_component_present = __determine_if_seasonal_with_acf(training_data)
+    training_dataset = __get_training_set(data)
 
-    logging.info(
-        f"Seasonal component present: {seasonal_component_present} for {data.name}"
-    )
+    logging.info(f"Decomposing {data.name} with STL")
 
-    seasonal_period = __get_seasonal_period(training_data)
-
-    logging.info(f"Seasonal period: {seasonal_period} for  {data.name}")
-
-    decomposition_stl = STL(
-        training_data.values[training_data.subset_column_name],
-        period=seasonal_period,
-        robust=True,
-    ).fit()
-
-    __store_plot_of_decomposition_results(data, decomposition_stl, "STL")
-
-    return Dataset(
-        name=data.name,
-        time_unit=data.time_unit,
-        number_columns=data.number_columns,
-        values=decomposition_stl,
-        subset_column_name=data.subset_column_name,
-        subset_row_name=data.subset_row_name,
-        seasonality=data.seasonality,
-    )
+    return seasonal_decompose_data(training_dataset)
 
 
-def __tidy_up_decomposition_data(data: Dataset) -> Dataset:
-    """Tidies up the decomposition data"""
-    logging.info(f"Tidying up decomposition data for {data.name}")
-    residual_values = data.values.resid
-    residual_values = np.abs(residual_values)  # remove negative values
 
-    return Dataset(
-        name=data.name,
-        time_unit=data.time_unit,
-        number_columns=data.number_columns,
-        values=residual_values,
-        subset_column_name=data.subset_column_name,
-        subset_row_name=data.subset_row_name,
-        seasonality=data.seasonality,
-    )
+def __fit_model(stl_decomposition_dataset: Dataset) -> Model:
+    """Fits the SES model to the data"""
+    logging.info(f"Fitting SES model to {stl_decomposition_dataset.name}")
 
+    de_trended_residual = np.abs(stl_decomposition_dataset.values.resid)  # remove negative values
 
-def __fit_model(data: Dataset) -> Model:
-    """Fits the model to the data"""
-    logging.info(f"Fitting model to {data.name}")
-    de_trended_data = __tidy_up_decomposition_data(data).values
-
-    return SimpleExpSmoothing(endog=de_trended_data).fit(
+    return SimpleExpSmoothing(endog=de_trended_residual).fit(
         smoothing_level=__alpha,
         optimized=False,
     )
@@ -449,8 +398,12 @@ def __predict(
 ) -> PredictionData:
     """Predicts the next values in the time series"""
     title = f"{decomposed_dataset.subset_column_name} forecast for {decomposed_dataset.subset_row_name} with SES"
-    forecasted_resid = model.forecast(__number_of_steps(data))  # out of sample prediction
-    forecasted_resid_in_sample = model.predict(start=1, end=len(decomposed_dataset.values.resid))  # in sample prediction
+    forecasted_resid = model.forecast(
+        __number_of_steps(data)
+    )  # out of sample prediction
+    forecasted_resid_in_sample = model.predict(
+        start=1, end=len(decomposed_dataset.values.resid)
+    )  # in sample prediction
     # add seasonal and trend components back to the forecast for the correct number of steps
     # if __determine_if_trend_with_acf(decomposed_dataset):
     logging.debug(f"Trend component present for {decomposed_dataset.name} with SES")
@@ -458,11 +411,13 @@ def __predict(
         decomposed_dataset.values.trend, __number_of_steps(data)
     )
     trend_component_in_sample = decomposed_dataset.values.trend
-    
+
     logging.debug(f"Calculating residual values for {decomposed_dataset.name}")
     forecasted_resid = __sum_of_two_series(forecasted_resid, trend_component["trend"])
-    forecasted_resid_in_sample = __sum_of_two_series(forecasted_resid_in_sample, trend_component_in_sample)
-    
+    forecasted_resid_in_sample = __sum_of_two_series(
+        forecasted_resid_in_sample, trend_component_in_sample
+    )
+
     if __determine_if_seasonal_with_acf(decomposed_dataset):
         logging.debug(
             f"Seasonal component present for {decomposed_dataset.name} with SES... calculating seasonal values"
@@ -489,16 +444,22 @@ def __predict(
                 __number_of_steps(data),
                 __get_seasonal_period(data),
             )
-        
+
         seasonal_component_in_sample = decomposed_dataset.values.seasonal
-        #TODO: remove this once have solved the gap in the plot between the in sample and out of sample
-        print(f"\n\nseasonal_component_in_sample tail: {seasonal_component_in_sample.tail()}")
+        # TODO: remove this once have solved the gap in the plot between the in sample and out of sample
+        print(
+            f"\n\nseasonal_component_in_sample tail: {seasonal_component_in_sample.tail()}"
+        )
         print(f"\n\nnext seasonal_component head: {seasonal_component.head()}")
         forecasted_resid = __sum_of_two_series(forecasted_resid, seasonal_component)
-        forecasted_resid_in_sample = __sum_of_two_series(forecasted_resid_in_sample, seasonal_component_in_sample)
-        #TODO: remove this once have solved the gap in the plot between the in sample and out of sample
-        print (f"\n\nforecasted_resid_in_sample tail: {forecasted_resid_in_sample.tail()}")
-        print (f"forecasted_resid head: {forecasted_resid.head()}")
+        forecasted_resid_in_sample = __sum_of_two_series(
+            forecasted_resid_in_sample, seasonal_component_in_sample
+        )
+        # TODO: remove this once have solved the gap in the plot between the in sample and out of sample
+        print(
+            f"\n\nforecasted_resid_in_sample tail: {forecasted_resid_in_sample.tail()}"
+        )
+        print(f"forecasted_resid head: {forecasted_resid.head()}")
     return PredictionData(
         method_name="SES",
         values=forecasted_resid,
@@ -513,5 +474,6 @@ def __predict(
         color=get_color_map_by_method("SES"),
         in_sample_prediction=forecasted_resid_in_sample,
     )
+
 
 ses = method(__seasonal_decompose_data, __fit_model, __predict)
