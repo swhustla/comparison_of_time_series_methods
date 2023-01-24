@@ -1,4 +1,5 @@
 import os
+import logging
 
 import numpy as np
 from typing import Tuple, Optional, List, Dict, Any, Union
@@ -64,7 +65,12 @@ def __full_data_plus_prediction_plot(
     title = prediction.title
     figure, axis = plt.subplots(figsize=(10, 5))
 
-    training_data_series = training_data.iloc[:, 0]
+    logging.debug(f"type of training data: {type(training_data)}")
+    logging.debug(f"size of training data: {training_data.shape}")
+    logging.debug(f"samples of training data: {training_data[:5]}")
+
+    if type(training_data) is pd.DataFrame:
+        training_data_series = training_data.iloc[:, 0]
 
     training_data_series.plot(ax=axis, label="Training data", style=".", c="blue")
 
@@ -132,7 +138,7 @@ def __full_data_plus_prediction_plot(
     axis.set_ylabel(f"{training_data.columns[0]}")
 
     axis.set_ylim(
-        bottom=0, top=1.1 * max(training_data_series.max(), prediction_series.max())
+        bottom=0, top=1.1 * max(training_data_series.max(), prediction_series.max(), ground_truth_series.max())
     )
     axis.legend()
     return figure
