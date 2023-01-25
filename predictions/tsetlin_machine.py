@@ -470,12 +470,13 @@ def __seasonal_decompose_data(data: Dataset) -> Dataset:
 
 def __get_best_model_config(
     data: Dataset, parallel: bool = False
-) -> Dict:
+) -> Tuple[dict, int]:
     """
     Get the best model from a grid search.
     """
     # grid search
     configs = __tsetlin_configs()
+    total_number_of_configs = len(configs)
     x_train, _ , y_train, _ = __prepare_and_split_data(data)
     scores = __grid_search(x_train=x_train, y_train=y_train, cfg_list=configs, parallel=parallel)
     # get the best config
@@ -488,7 +489,7 @@ def __get_best_model_config(
     logging.info(f"Best incremental: {best_config['incremental']}")
     logging.info(f"Best weighted_clauses: {best_config['weighted_clauses']}")
 
-    return best_config
+    return best_config, total_number_of_configs
 
 
 def __train_tsetlin_machine_regression_model(
@@ -549,7 +550,8 @@ def __combine_trend_seasonal_residual(
 
 def __get_forecast(
     data: Dataset,
-    best_config: dict
+    best_config: dict,
+    number_of_configs: int,
 ) -> PredictionData:
     """
     Get the forecast for the test set.
@@ -572,6 +574,7 @@ def __get_forecast(
         title=title,
         plot_folder=f"{data.name}/{data.subset_row_name}/tsetlin_machine_regression_model/",
         plot_file_name=f"{data.subset_column_name}_forecast",
+        number_of_iterations=number_of_configs,
         color=get_color_map_by_method("Tsetlin Machine Regression"),
     )
 

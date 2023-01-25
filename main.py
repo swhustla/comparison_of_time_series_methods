@@ -251,7 +251,9 @@ if __name__ == "__main__":
                     results_store.append(reports_per_dataset)
 
                 # plot into a scatter plot if at least 3 methods are used
-                if len(methods) > 2:
+                logging.info(f"Number of methods: {number_of_methods}")
+                if number_of_methods > 2:
+                    logging.info(f"Plotting results into scatter plot for {dataset.name} - {dataset.subset_row_name}...")
                     plot_results_in_scatter_plot(reports_per_dataset)
 
                 yield reports_per_dataset
@@ -286,7 +288,7 @@ if __name__ == "__main__":
         # "FCNN",
         # "FCNN_embedding",
         # "SARIMA",
-        "auto_arima",
+        # "auto_arima",
         "SES",
         "TsetlinMachineSingle",
         # "TsetlinMachineMulti",
