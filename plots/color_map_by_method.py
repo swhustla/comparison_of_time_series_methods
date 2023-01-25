@@ -17,6 +17,8 @@ __color_map_by_method_dict = {
         "SES": "darkorange",
         "TsetlinMachine": "lightgray",
         "Tsetlin Machine Regression": "lightgray",
+        "TsetlinMachineSingle": "lightgray",
+        "TsetlinMachineMulti": "lightgray",
     }
 
 
