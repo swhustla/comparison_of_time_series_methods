@@ -121,12 +121,13 @@ if __name__ == "__main__":
         prediction = __predictors[method_name](data)
         metrics = calculate_metrics(prediction)
 
-
         # if data is a series, then we need to convert it to a dataframe
         if isinstance(data.values, pd.Series):
             data.values = data.values.to_frame()
 
-        training_data = data.values.iloc[: int(len(data.values.index) * (1 - __testset_size)), :]
+        training_data = data.values.iloc[
+            : int(len(data.values.index) * (1 - __testset_size)), :
+        ]
 
         comparison_plot(
             training_data,
@@ -276,17 +277,17 @@ if __name__ == "__main__":
     ]
 
     __methods = [
-        # "AR",
-        #  "linear_regression",
-        # "ARIMA",
-        # "HoltWinters",
-        # "MA",
-        # "Prophet",
+        "AR",
+        "linear_regression",
+        "ARIMA",
+        "HoltWinters",
+        "MA",
+        "Prophet",
         # "FCNN",
         # "FCNN_embedding",
         # "SARIMA",
-        # "auto_arima"
-        #  "SES",
+        "auto_arima",
+        "SES",
         "TsetlinMachineSingle",
         # "TsetlinMachineMulti",
     ]
