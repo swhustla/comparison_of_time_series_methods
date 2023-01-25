@@ -16,8 +16,16 @@ if __name__ == "__main__":
     from predictions.Prediction import PredictionData
     from data.load import Load
     from data.report import Report
-    from data.india_pollution import india_pollution, get_list_of_city_names, get_list_of_coastal_indian_cities
-    from data.stock_prices import stock_prices, get_a_list_of_value_stock_tickers, get_a_list_of_growth_stock_tickers
+    from data.india_pollution import (
+        india_pollution,
+        get_list_of_city_names,
+        get_list_of_coastal_indian_cities,
+    )
+    from data.stock_prices import (
+        stock_prices,
+        get_a_list_of_value_stock_tickers,
+        get_a_list_of_growth_stock_tickers,
+    )
     from data.list_of_tuples import list_of_tuples
     from data.airline_passengers import airline_passengers
     from data.sun_spots import sun_spots
@@ -33,7 +41,7 @@ if __name__ == "__main__":
     from predictions.FCNN import fcnn
     from predictions.FCNN_embedding import fcnn_embedding
     from predictions.SES import ses
-    from predictions.tsetlin_machine import tsetlin_machine
+    from predictions.tsetlin_machine import tsetlin_machine, tsetlin_machine_single
     from measurements.get_metrics import get_metrics
     from measurements.store_metrics import store_metrics
     from plots.comparison_plot import comparison_plot
@@ -44,6 +52,7 @@ if __name__ == "__main__":
     import time
     import logging
     import numpy as np
+    import pandas as pd
 
     __dataset_loaders: dict[str, Load[Dataset]] = {
         "india_pollution": india_pollution,
@@ -56,8 +65,12 @@ if __name__ == "__main__":
 
     __dataset_row_items: dict[str, list[str]] = {
         # take first 3 from list of cities
-        "india_pollution": get_list_of_city_names()[:3],  # ["Gurugram"]
-        "stock_prices": ["DIS"],#get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+        "india_pollution": [
+            "Gurugram"
+        ],  # get_list_of_city_names()[:3],  # ["Gurugram"]
+        "stock_prices": [
+            "DIS"
+        ],  # get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
     }
 
     __dataset_group_titles: dict[str, str] = {
@@ -77,7 +90,8 @@ if __name__ == "__main__":
         "auto_arima": auto_arima,
         "MA": ma,
         "HoltWinters": holt_winters,
-        "TsetlinMachine": tsetlin_machine,
+        "TsetlinMachineMulti": tsetlin_machine,
+        "TsetlinMachineSingle": tsetlin_machine_single,
     }
 
     __testset_size = 0.2
@@ -107,16 +121,29 @@ if __name__ == "__main__":
         prediction = __predictors[method_name](data)
         metrics = calculate_metrics(prediction)
 
-        training_index = data.values.index[
-            : int(len(data.values.index) * (1 - __testset_size))
-        ]
-        comparison_plot(data.values.loc[training_index, :], prediction)
+
+        # if data is a series, then we need to convert it to a dataframe
+        if isinstance(data.values, pd.Series):
+            data.values = data.values.to_frame()
+
+        training_data = data.values.iloc[: int(len(data.values.index) * (1 - __testset_size)), :]
+
+        comparison_plot(
+            training_data,
+            prediction,
+        )
         datestring_today = time.strftime("%Y-%m-%d")
         filepath = f"reports/full_data/{data.name}_{data.subset_row_name}_{method_name}_{datestring_today}.json.gz"
         end_time = time.time()
         logging.info(f"Saving report to {filepath}...")
         return Report(
-            start_time, method_name, data, prediction, metrics, filepath=filepath, end_time=end_time
+            start_time,
+            method_name,
+            data,
+            prediction,
+            metrics,
+            filepath=filepath,
+            end_time=end_time,
         )
 
     def __calculate_minimum_length_given_periodicity(periodicity: int) -> int:
@@ -141,7 +168,6 @@ if __name__ == "__main__":
             minimum_length = int(minimum_length / 2 * 1.2)
 
         return int(minimum_length)
-
 
     def __check_to_convert_to_weekly_data(data: Dataset) -> Dataset:
         """Convert the data to weekly data if it is in daily data, and if there are enough data points.
@@ -233,33 +259,36 @@ if __name__ == "__main__":
                 logging.info(
                     f"Plotting results for all {len(results_store)} datasets in {dataset_name} for {number_of_methods} methods..."
                 )
-                plot_results_in_heatmap(results_store, __dataset_group_titles[dataset_name])
+                plot_results_in_heatmap(
+                    results_store, __dataset_group_titles[dataset_name]
+                )
                 logging.info(
                     f"Plotting results for all {len(results_store)} datasets in {dataset_name} - done"
                 )
 
     __datasets = [
-        # "india_pollution",
-         "stock_prices",
-        #"airline_passengers",
+        "india_pollution",
+        #  "stock_prices",
+        # "airline_passengers",
         # "list_of_tuples",
         #  "sun_spots",
         # "csv",
     ]
 
     __methods = [
-        "AR",
-         "linear_regression",
+        # "AR",
+        #  "linear_regression",
         # "ARIMA",
         # "HoltWinters",
-        "MA",
+        # "MA",
         # "Prophet",
         # "FCNN",
         # "FCNN_embedding",
         # "SARIMA",
         # "auto_arima"
         #  "SES",
-        # "TsetlinMachine",
+        "TsetlinMachineSingle",
+        # "TsetlinMachineMulti",
     ]
 
     for list_of_reports in generate_predictions(__methods, __datasets):
