@@ -78,6 +78,7 @@ def __plot_scatterplot(
         ax=ax,
         palette=color_map,
     )
+    plt.xscale("log")
 
     ax.set_title(title)
     ax.set_xlabel("Elapsed (s)")
