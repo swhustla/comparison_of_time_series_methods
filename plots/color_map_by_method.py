@@ -16,6 +16,7 @@ __color_map_by_method_dict = {
         "auto_arima": "darkgreen",
         "SES": "darkorange",
         "TsetlinMachine": "lightgray",
+        "Tsetlin Machine Regression": "lightgray",
     }
 
 

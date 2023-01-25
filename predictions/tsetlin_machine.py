@@ -151,16 +151,19 @@ from pyTsetlinMachine.tm import RegressionTsetlinMachine
 from pyTsetlinMachine.tools import Binarizer
 
 from methods.tsetlin_machine import tsetlin_machine as method
+from methods.tsetlin_machine import tsetlin_machine_single as method_single
 
 from sklearn.model_selection import train_test_split
 
 from data.dataset import Dataset
 from predictions.Prediction import PredictionData
 
+from data.seasonal_decompose import seasonal_decompose
+
 from plots.color_map_by_method import get_color_map_by_method
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 import warnings
 
@@ -174,13 +177,33 @@ __s: float = 1.9  # s represents the number of states per unit of the output
 __number_of_state_bits: int = 2
 
 
+def __number_of_steps(data: Dataset) -> int:
+    return int(len(data.values) * __test_size)
+
+def __get_training_set(data: Dataset) -> Dataset:
+    return Dataset(
+        name=data.name,
+        values=data.values[: -__number_of_steps(data)],
+        number_columns=data.number_columns,
+        subset_column_name=data.subset_column_name,
+        time_unit=data.time_unit,
+        subset_row_name=data.subset_row_name,
+        seasonality=data.seasonality,
+    )
+
+
 def _add_month_and_year_columns(data: Dataset) -> pd.DataFrame:
-    """
-    Add normalised month and year (and potentially week) columns to a dataframe.
+    """ Add normalised month and year (and potentially week) columns to a dataframe.
     """
     df = data.values
+    # convert to pandas dataframe if series
+    if isinstance(df, pd.Series):
+        df = df.to_frame()
+        df.columns = [data.subset_column_name]
+
     # Add month and year columns, normalising to start from 0
     df["year"] = df.index.year - df.index.year.min()
+
 
     if data.time_unit != "years":
         df["month"] = df.index.month - 1
@@ -208,8 +231,8 @@ def _add_month_and_year_columns(data: Dataset) -> pd.DataFrame:
 #         default_fc_parameters=tsf_settings,
 #     )
 
-    logging.info(f"Data with features: {data_with_features.head()}")
-    return data_with_features
+    # logging.info(f"Data with features: {data_with_features.head()}")
+    # return data_with_features
 
 
 def __binarize_data(data: pd.DataFrame) -> pd.DataFrame:
@@ -219,7 +242,7 @@ def __binarize_data(data: pd.DataFrame) -> pd.DataFrame:
     The Tsetlin Machine requires the data to be binarized,
     i.e. to be represented as a set of 0s and 1s, due to the way that it works.
     """
-    logging.info("Binarizing the data...")
+    logging.debug("Binarizing the data...")
     binarizer = Binarizer(max_bits_per_feature=10)
     np_array_version_of_data = np.array(data)
     binarizer.fit(np_array_version_of_data)
@@ -238,7 +261,7 @@ def __prepare_training_data(
     """
     Prepare the training data for the Tsetlin Machine.
     """
-    logging.info("Preparing training data...")
+    logging.debug("Preparing training data...")
     # convert to numpy array
     x_data = np.array(x_data)
     # convert to numpy array with 1 dimension
@@ -262,13 +285,16 @@ def __prepare_and_split_data(
     data: Dataset,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Split data into training, validation and test sets."""
+    logging.debug("Preparing data...")
+
     data_with_extra_features = _add_month_and_year_columns(data)
     x_data = data_with_extra_features.drop(columns=[data.subset_column_name])
+
     y_data = data_with_extra_features[[data.subset_column_name]]
 
     binarized_x_data = __binarize_data(x_data)
 
-    logging.info("Splitting data into training, validation and test sets...")
+    logging.debug("Splitting data into training and test sets...")
 
     return __get_train_and_test_sets(binarized_x_data, y_data)
 
@@ -283,7 +309,7 @@ def __create_tsetlin_machine_regression_model(
     """
     Create a Tsetlin Machine regression model for time series prediction.
     """
-    logging.info("Creating Tsetlin Machine regression model...")
+    logging.debug("Creating Tsetlin Machine regression model...")
     number_of_states = int(1 + (data_targets.max() - data_targets.min()) / (2 * __s))
     tm = RegressionTsetlinMachine(
         number_of_clauses=config["number_of_clauses"],
@@ -306,7 +332,7 @@ def __tsetlin_machine_regression_forecast(
     Make a forecast using a Tsetlin Machine regression model.
     """
     # fit model
-    logging.info("Fitting Tsetlin Machine regression model...")
+    logging.debug("Fitting Tsetlin Machine regression model...")
 
 
     model.fit(
@@ -316,7 +342,7 @@ def __tsetlin_machine_regression_forecast(
         incremental=config["incremental"],
     )
     # make multi-step forecast
-    logging.info("Making multi-step forecast...")
+    logging.debug("Making multi-step forecast...")
 
     yhat = model.predict(x_data)
     ground_truth = y_data
@@ -326,7 +352,7 @@ def __tsetlin_machine_regression_forecast(
 
 def __measure_mape(actual: pd.Series, predicted: pd.Series) -> float:
     """Calculate the mean absolute percentage error."""
-    logging.info("Calculating the mean absolute percentage error...")
+    logging.debug("Calculating the mean absolute percentage error...")
     return np.mean(np.abs((actual - predicted) / actual)) * 100
 
 
@@ -334,7 +360,7 @@ def __validation(x_train: np.array, y_train: np.array, config: dict) -> float:
     """
     Evaluate a config using a given dataset.
     """
-    logging.info("Evaluating config...")
+    logging.debug("Evaluating config...")
     # create model
     model = __create_tsetlin_machine_regression_model(y_train, config)
     y_pred, y_val = __tsetlin_machine_regression_forecast(model=model, x_data=x_train, y_data=y_train, config=config)
@@ -432,6 +458,15 @@ def __tsetlin_configs() -> list:
     logging.info(f"Total number of configs: {len(model_configs)}")
     return model_configs
 
+def __seasonal_decompose_data(data: Dataset) -> Dataset:
+    """Decomposes the data into trend, seasonal and residual components.
+    Return the full decomposition object inside the Dataset object"""
+
+    logging.debug(f"Decomposing {data.name} with STL")
+
+    return seasonal_decompose(data)
+
+
 
 def __get_best_model_config(
     data: Dataset, parallel: bool = False
@@ -468,6 +503,50 @@ def __train_tsetlin_machine_regression_model(
     return t_model
 
 
+def __combine_trend_seasonal_residual(
+    trend_prediction: PredictionData,
+    seasonal_prediction: PredictionData,
+    residual_prediction: PredictionData,
+    stl_decomposition_object: Dataset,
+
+) -> PredictionData:
+    """
+    Combine the trend, seasonal and residual predictions for the test set.
+    Update the ground truth values with the original STL decomposition values.
+    """
+    # get the prediction data object
+    combined_prediction = residual_prediction
+
+    # print out the three components in three columns for easy comparison
+    combined_prediction_df = pd.concat(
+        [trend_prediction.values, seasonal_prediction.values, residual_prediction.values],
+        axis=1,
+    )
+    combined_prediction_df.columns = ["trend", "seasonal", "residual"]
+    logging.info(f"Combined prediction components:\n{combined_prediction_df.head()}")
+
+    # compare with seasonal decomposition
+    combined_actual_df = pd.concat(
+        [stl_decomposition_object.values.trend, stl_decomposition_object.values.seasonal, stl_decomposition_object.values.resid],
+        axis=1,
+    )
+    combined_actual_df.columns = ["trend", "seasonal", "residual"]
+    logging.info(f"Combined actual components:\n{combined_actual_df.head()}")
+
+    # combine all components in an additive way
+    combined_prediction.values = (
+        trend_prediction.values + seasonal_prediction.values + residual_prediction.values
+    )
+
+
+    # get the length of the prediction
+    prediction_length = combined_prediction.values.shape[0]
+
+    # update the ground truth values with the original STL decomposition values
+    combined_prediction.ground_truth_values = stl_decomposition_object.values.observed[-prediction_length:]
+    return combined_prediction
+
+
 def __get_forecast(
     data: Dataset,
     best_config: dict
@@ -499,6 +578,13 @@ def __get_forecast(
 
 
 tsetlin_machine = method(
+    __seasonal_decompose_data,
+    __get_best_model_config,
+    __get_forecast,
+    __combine_trend_seasonal_residual
+)
+
+tsetlin_machine_single = method_single(
     __get_best_model_config,
     __get_forecast,
 )
