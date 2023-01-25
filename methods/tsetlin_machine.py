@@ -22,7 +22,7 @@ def tsetlin_machine(
     seasonal_decompose_data: Callable[[Dataset], Dataset],
     get_best_model_config: Callable[[Dataset], Dict],
     get_forecast: Callable[[Dataset, dict], Prediction],
-    combine_trend_seasonal_residual: Callable[[Prediction, Prediction, Prediction, Data, Data], Prediction],
+    combine_trend_seasonal_residual: Callable[[Prediction, Prediction, Prediction, Data], Prediction],
 ) -> Predict[Dataset, PredictionData]:
     """
     Return a function that takes a dataset and returns a prediction.
@@ -57,7 +57,7 @@ def tsetlin_machine(
             logging.info(f"Running Tsetlin for stream: {dataset_component.name}")
             params = get_best_model_config(dataset, parallel)   
             list_of_predictions.append(get_forecast(dataset, params))
-        return combine_trend_seasonal_residual(*list_of_predictions, stl_dataset, dataset)
+        return combine_trend_seasonal_residual(*list_of_predictions, stl_dataset)
             
     return predict
 
