@@ -17,7 +17,8 @@ from predictions.Prediction import PredictionData
 from data.report import Report
 
 
-from methods.plot_results_in_heatmap import plot_results_in_heatmap as method
+from methods.plot_results_in_heatmap import plot_results_in_heatmap as method_report
+from methods.plot_results_in_heatmap import plot_results_in_heatmap_from_csv as method_report_from_csv
 
 
 def __compile_results(list_of_list_of_reports: List[List[Report]]) -> Tuple[pd.DataFrame, str]:
@@ -138,4 +139,6 @@ def __save_plot(figure: Figure, dataset_name: str, chosen_metric: str) -> None:
     plt.close(figure.figure)
 
 
-plot_results_in_heatmap = method(__compile_results, __plot_heatmap, __save_plot)
+plot_results_in_heatmap = method_report(__compile_results, __plot_heatmap, __save_plot)
+plot_results_in_heatmap_from_csv = method_report_from_csv(__plot_heatmap, __save_plot)
+
