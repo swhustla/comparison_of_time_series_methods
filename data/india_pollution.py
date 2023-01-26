@@ -78,13 +78,6 @@ def __impute_data_if_needed(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
-def __preprocess(dataframe: Data) -> pd.DataFrame:
-    """Preprocess the data."""
-    dataframe = __impute_data_if_needed(dataframe)
-
-    return dataframe
-
-
 def __resample(dataframe: Data) -> pd.DataFrame:
     """Resample the data to weekly."""
     return dataframe.resample("w").mean()
@@ -112,6 +105,29 @@ def get_list_of_city_names() -> list:
     path = __download_if_needed()
     data = __load_data(path)
     return list(data.City.unique())
+
+
+__list_of_coastal_cities = ["Mumbai", "Chennai", "Kolkata", "Visakhapatnam", "Goa", "Pondicherry"]
+
+__list_of_inland_cities = ["Bhopal", "Delhi", "Hyderabad", "Jaipur", "Lucknow", "Patna", "Ranchi", "Srinagar", "Thiruvananthapuram", "Bengaluru"]
+
+def get_list_of_coastal_indian_cities() -> list:
+    """Get a list of coastal cities in India, given the list of cities."""
+    list_of_cities = get_list_of_city_names()
+    coastal_cities = []
+    for city in list_of_cities:
+        if city in __list_of_coastal_cities:
+            coastal_cities.append(city)
+    return coastal_cities
+
+def get_list_of_inland_indian_cities() -> list:
+    """Get a list of inland cities in India, given the list of cities."""
+    list_of_cities = get_list_of_city_names()
+    inland_cities = []
+    for city in list_of_cities:
+        if city in __list_of_inland_cities:
+            inland_cities.append(city)
+    return inland_cities
 
 
 def india_pollution(
@@ -155,7 +171,7 @@ def india_pollution(
                 f"City {city} not in list of city names: {list_of_city_names}"
             )
         data_this_city = data[data["City"].isin([city])][pollution_columns]
-        data_this_city = __preprocess(data_this_city)
+        data_this_city = __impute_data_if_needed(data_this_city)
         data_this_city = __resample(data_this_city)
         data_this_city = __add_inferred_freq_to_index(data_this_city)
         yield Dataset(

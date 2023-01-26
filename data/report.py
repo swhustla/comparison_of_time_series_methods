@@ -10,3 +10,5 @@ class Report:
     dataset: Dataset
     prediction: PredictionData
     metrics: dict[str, float]
+    filepath: str
+    end_time: float

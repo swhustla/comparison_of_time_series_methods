@@ -18,17 +18,18 @@ from .plot import Plot
 __chosen_metrics = ["MAE", "RMSE", "R2", "MAPE"]
 
 def plot_results_in_heatmap(
-    compile_results: Callable[[List[List[Report]]],Tuple[Data, str]],
+    compile_results: Callable[[List[List[Report]], str],Tuple[Data, str]],
     plot_heatmap: Callable[[Data, str], Figure],
     save_plot: Callable[[Figure, str, str, str], None],
 ) -> Plot[Data, Prediction, ConfidenceInterval, Title]:
     def draw_plot(
-        list_of_list_of_reports: List[List[Report]]
+        list_of_list_of_reports: List[List[Report]],
+        group_name: str,
     ) -> None:
         print("Plotting results in heatmap: source: report")
         results_dataframe, dataset_name = compile_results(list_of_list_of_reports)
         for chosen_metric in __chosen_metrics:
-            figure = plot_heatmap(results_dataframe, chosen_metric)
+            figure = plot_heatmap(results_dataframe, chosen_metric, group_name)
             print(f"Saving {dataset_name} {chosen_metric} heatmap plot")
             save_plot(figure, dataset_name, chosen_metric)
 

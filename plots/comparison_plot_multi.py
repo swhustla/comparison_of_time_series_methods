@@ -89,6 +89,9 @@ def __plot_full_dataset_plus_predictions(
     axis.set_ylabel(f"{training_data.columns[0]}")
 
     axis.set_title(title)
+    axis.set_ylim(
+        bottom=0, top=1.1 * max(training_data_series.max(), prediction_series.max())
+    )
 
     return figure
 

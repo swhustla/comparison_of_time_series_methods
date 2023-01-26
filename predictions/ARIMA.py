@@ -48,6 +48,8 @@ import pandas as pd
 
 import logging
 
+from plots.color_map_by_method import get_color_map_by_method
+
 from arch.unitroot import ADF
 from statsmodels.tsa.forecasting.stl import STLForecast
 import statsmodels.api as sm
@@ -214,7 +216,7 @@ def __forecast(model: Model, data: Dataset) -> PredictionData:
         number_of_iterations=__calculate_number_of_configurations(),
         confidence_on_mean=True,
         confidence_method="95% confidence interval",
-        color="orange",
+        color=get_color_map_by_method("ARIMA"),
         in_sample_prediction=prediction_in_sample.iloc[:, 0],
     )
 

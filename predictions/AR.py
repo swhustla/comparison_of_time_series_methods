@@ -31,6 +31,8 @@ import pandas as pd
 
 import logging
 
+from plots.color_map_by_method import get_color_map_by_method
+
 from arch.unitroot import ADF
 from statsmodels.tsa.ar_model import ar_select_order
 from statsmodels.tsa.forecasting.stl import STLForecast
@@ -231,7 +233,7 @@ def __forecast(model: Model, data: Dataset) -> pd.DataFrame:
         number_of_iterations=__calculate_number_of_configurations(),
         confidence_on_mean=True,
         confidence_method="95% confidence interval",
-        color="red",
+        color=get_color_map_by_method("AR"),
         in_sample_prediction=prediction_in_sample.iloc[:, 0],
     )
 
