@@ -294,5 +294,7 @@ if __name__ == "__main__":
         # "TsetlinMachineMulti",
     ]
 
+
     for list_of_reports in generate_predictions(__methods, __datasets):
         print(list_of_reports)
+
