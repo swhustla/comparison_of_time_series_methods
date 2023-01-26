@@ -116,9 +116,18 @@ def get_list_of_coastal_indian_cities() -> list:
     list_of_cities = get_list_of_city_names()
     coastal_cities = []
     for city in list_of_cities:
-        if city in __list_of_coastal_cities or city not in __list_of_inland_cities:
+        if city in __list_of_coastal_cities:
             coastal_cities.append(city)
     return coastal_cities
+
+def get_list_of_inland_indian_cities() -> list:
+    """Get a list of inland cities in India, given the list of cities."""
+    list_of_cities = get_list_of_city_names()
+    inland_cities = []
+    for city in list_of_cities:
+        if city in __list_of_inland_cities:
+            inland_cities.append(city)
+    return inland_cities
 
 
 def india_pollution(
