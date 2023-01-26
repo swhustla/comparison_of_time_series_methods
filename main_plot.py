@@ -8,6 +8,12 @@ from reports.report_loader import report_loader
 
 from plots.plot_results_in_heatmap import plot_results_in_heatmap_from_csv
 
+from data.india_pollution import (
+        india_pollution,
+        get_list_of_city_names,
+        get_list_of_coastal_indian_cities,
+    )
+
 Data = TypeVar("Data", contravariant=True)
 Prediction = TypeVar("Prediction", covariant=True)
 ConfidenceInterval = TypeVar("ConfidenceInterval", covariant=True)
@@ -29,7 +35,7 @@ __dataset = [
 
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
-    "Indian city pollution": ["Ahmedabad", "Bengaluru", "Chennai"],
+    "Indian city pollution": get_list_of_city_names(),#["Ahmedabad", "Bengaluru", "Chennai"],
     "Stock prices": ["JPM", "AAPL", "MSFT"],
 }
 
@@ -72,7 +78,7 @@ def filter_dataframe_by_dataset_method_and_subset(
     dataframe_of_results = dataframe_of_results.loc[
         dataframe_of_results["Model"].isin(methods)
     ]
-    
+
     # sort the dataframe by the index, most recent first
 
     dataframe_of_results = dataframe_of_results.sort_index(ascending=False)
@@ -81,7 +87,7 @@ def filter_dataframe_by_dataset_method_and_subset(
     dataframe_of_results.drop_duplicates(
         subset=["Dataset", "Topic", "Model"], keep="first", inplace=True, ignore_index=False
     )
-
+    
     return dataframe_of_results
 
 
@@ -108,9 +114,16 @@ filtered_dataframe = filtered_dataframe.rename(
     }
 )
 dataset_name = __dataset[0]
-# plot the heatmap using the csv file
 
+
+#filter for R2 > -10
+name_cities =  filtered_dataframe.loc[filtered_dataframe['R2'] < -10].drop_duplicates(
+        subset=["subset_row"]
+    )["subset_row"]
+filtered_dataframe_R2 = filtered_dataframe[~filtered_dataframe.subset_row.isin(name_cities)]
+
+# plot the heatmap using the csv file
 for plotter_name, plotter in __plotters.items():
     print(f"Plotting {plotter_name} for dataset: {dataset_name}")
 
-    plotter(filtered_dataframe, dataset_name)
+    plotter(filtered_dataframe_R2, dataset_name)
