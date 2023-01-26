@@ -8,10 +8,10 @@ import numpy as np
 
 import seaborn as sns
 import matplotlib.pyplot as plt
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Callable, TypeVar, Generator
 import pandas as pd
 
-from methods.plot import Figure
+Figure = TypeVar("Figure")
 from predictions.Prediction import PredictionData
 
 from data.report import Report

@@ -4,15 +4,15 @@ on lots of different time series"""
 from typing import List, Tuple, Optional, Callable, TypeVar, Generator
 
 from data.report import Report
-from methods.plot import Figure
 
 Data = TypeVar("Data", contravariant=True)
 Prediction = TypeVar("Prediction")
 ConfidenceInterval = TypeVar("ConfidenceInterval")
 Title = TypeVar("Title", covariant=True)
+Figure = TypeVar("Figure")
 
 
-from .plot import Figure, Plot
+from .plot import Plot
 
 
 __chosen_metrics = ["MAE", "RMSE", "R2", "MAPE"]
