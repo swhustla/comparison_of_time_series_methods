@@ -2,10 +2,9 @@
 
 from typing import Generator, List, Optional, Tuple, Generic, TypeVar, Protocol
 
-from data.report import Report
+Report = TypeVar("Report")
 Data = TypeVar("Data", contravariant=True)
 
-class LoadReport(Protocol[Report], Generic[Data]):
+class LoadFromCsv(Protocol[Report]):
     def __call__(self) -> Generator[Report, None, None]:
-        pass
-
+        ...
