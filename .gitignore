@@ -17,3 +17,4 @@ plots/*/*/*/*.png
 .DS_Store
 write_up/*.fdb_latexmk
 write_up/*.log
+reports/full_data/*.gz
