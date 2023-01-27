@@ -117,13 +117,14 @@ dataset_name = __dataset[0]
 
 
 #filter for R2 > -10
-name_cities =  filtered_dataframe.loc[filtered_dataframe['R2'] < -10].drop_duplicates(
+mask_low_r_squared =  filtered_dataframe.loc[filtered_dataframe['R2'] < -10].drop_duplicates(
         subset=["subset_row"]
     )["subset_row"]
-filtered_dataframe_R2 = filtered_dataframe[~filtered_dataframe.subset_row.isin(name_cities)]
-
+filtered_dataframe_r_squared = filtered_dataframe[~filtered_dataframe.subset_row.isin(mask_low_r_squared)]
+# filtered_dataframe_r_squared = filtered_dataframe[filtered_dataframe['R2'] >= -10].drop_duplicates(
+#     subset=["dataset", "subset_row", "method"], keep="first", inplace=False, ignore_index=False)
 # plot the heatmap using the csv file
 for plotter_name, plotter in __plotters.items():
     print(f"Plotting {plotter_name} for dataset: {dataset_name}")
 
-    plotter(filtered_dataframe_R2, dataset_name)
+    plotter(filtered_dataframe_r_squared, dataset_name)
