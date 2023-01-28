@@ -280,17 +280,17 @@ if __name__ == "__main__":
 
     __methods = [
         "AR",
-        "linear_regression",
-        "ARIMA",
-        "HoltWinters",
-        "MA",
-        "Prophet",
+        # "linear_regression",
+        # "ARIMA",
+        # "HoltWinters",
+        # "MA",
+        # "Prophet",
         # "FCNN",
         # "FCNN_embedding",
         # "SARIMA",
         # "auto_arima",
-        "SES",
-        "TsetlinMachineSingle",
+        # "SES",
+        # "TsetlinMachineSingle",
         # "TsetlinMachineMulti",
     ]
 

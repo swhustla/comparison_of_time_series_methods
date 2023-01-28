@@ -124,6 +124,7 @@ def __full_data_plus_prediction_plot(
 
     # make index compatible with matplotlib
     dates_for_index = prediction_series.index.values
+   
 
     axis.fill_between(
         x=dates_for_index,
@@ -133,6 +134,11 @@ def __full_data_plus_prediction_plot(
         color=prediction.color,
         label=confidence_interval_label,
     )
+    if training_data.columns[0] == "PM2.5":
+        plt.axhline(y=40,color='r', linestyle='--',linewidth=2,label='India')
+        plt.axhline(y=5,color='darksalmon', linestyle='--',linewidth=2,label='WHO')
+        plt.text(pd.Timestamp("2020-02-01"), 50, 'India',color='r', ha='right', va='center')
+        plt.text(pd.Timestamp("2020-02-01"), 15, 'WHO',color='darksalmon', ha='right', va='center')
     axis.set_title(title)
     axis.set_xlabel("Date")
     axis.set_ylabel(f"{training_data.columns[0]}")
@@ -144,7 +150,7 @@ def __full_data_plus_prediction_plot(
     return figure
 
 
-def __plot(
+def __plot(training_data: pd.DataFrame,
     prediction: PredictionData,
 ) -> Figure:
     """Plot the data, optionally with confidence intervals."""
@@ -168,6 +174,12 @@ def __plot(
     prediction_series.plot(ax=ax, label="Forecast", color=prediction.color)
 
     dates_for_index = prediction_series.index.values
+
+    if training_data.columns[0] == "PM2.5":
+        plt.axhline(y=40,color='r', linestyle='--',linewidth=2,label='India')
+        plt.axhline(y=5,color='darksalmon', linestyle='--',linewidth=2,label='WHO')
+        plt.text(pd.Timestamp("2020-02-01"), 50, 'India',color='r', ha='right', va='center')
+        plt.text(pd.Timestamp("2020-02-01"), 15, 'WHO',color='darksalmon', ha='right', va='center')
 
     ax.fill_between(
         x=dates_for_index,
