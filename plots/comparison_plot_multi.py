@@ -53,7 +53,7 @@ def __plot_full_dataset_plus_predictions(
     training_data: pd.DataFrame, predictions: list[PredictionData], title: str
 ) -> Figure:
     """Plot the full data and the prediction."""
-    figure, axis = plt.subplots(figsize=(10, 5))
+    figure, axis = plt.subplots(figsize=(12, 7))
 
     training_data_series = training_data.iloc[:, 0]
     training_data_series.plot(ax=axis, label="Training data", style=".", c="blue")
@@ -83,6 +83,23 @@ def __plot_full_dataset_plus_predictions(
                 c=prediction.color,
                 alpha=0.7,
             )
+
+    if training_data.columns[0] == "PM2.5":
+        p1=axis.axhline(y=40,color='r', linestyle='--',linewidth=2)
+        p2=axis.axhline(y=5,color='darksalmon', linestyle='--',linewidth=2)
+        axis.text(pd.Timestamp("2016-02-01"), 50, 'India',color='r', ha='right', va='center')
+        axis.text(pd.Timestamp("2016-02-01"), 15, 'WHO',color='darksalmon', ha='right', va='center')
+        # Create a legend 
+        second_legend = plt.legend(handles=[p1,p2],labels=[r"India$^*$",r"WHO$^\dagger$"],loc=1,ncol=2,title='Recommendation:')
+        # Add the legend manually to the current Axes.
+        plt.gca().add_artist(second_legend)
+        axis.annotate(r"* = Indian National Ambient Air Quality Standards, annual average PM2.5 threshold 40[$\mu g/m^3$]"+"\n"+
+                        r"$\dagger$ = World Health Organization, annual average PM2.5 threshold 5[$\mu g/m^3$]",
+            xy=(0., 0), xytext=(0, 0),
+            xycoords=('axes fraction', 'figure fraction'),
+            textcoords='offset points',
+            size=8, ha='left', va='bottom',
+            annotation_clip=False)
 
     axis.legend(loc="upper left")
     axis.set_xlabel("Date")

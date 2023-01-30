@@ -63,7 +63,7 @@ def __full_data_plus_prediction_plot(
 ) -> Figure:
     """Plot the full data and the prediction."""
     title = prediction.title
-    figure, axis = plt.subplots(figsize=(10, 5))
+    figure, axis = plt.subplots(figsize=(12, 7))
 
     logging.debug(f"type of training data: {type(training_data)}")
     logging.debug(f"size of training data: {training_data.shape}")
@@ -134,11 +134,24 @@ def __full_data_plus_prediction_plot(
         color=prediction.color,
         label=confidence_interval_label,
     )
+
     if training_data.columns[0] == "PM2.5":
-        plt.axhline(y=40,color='r', linestyle='--',linewidth=2,label='India')
-        plt.axhline(y=5,color='darksalmon', linestyle='--',linewidth=2,label='WHO')
-        plt.text(pd.Timestamp("2020-02-01"), 50, 'India',color='r', ha='right', va='center')
-        plt.text(pd.Timestamp("2020-02-01"), 15, 'WHO',color='darksalmon', ha='right', va='center')
+        p1=axis.axhline(y=40,color='r', linestyle='--',linewidth=2)
+        p2=axis.axhline(y=5,color='darksalmon', linestyle='--',linewidth=2)
+        axis.text(pd.Timestamp("2016-02-01"), 50, 'India',color='r', ha='right', va='center')
+        axis.text(pd.Timestamp("2016-02-01"), 15, 'WHO',color='darksalmon', ha='right', va='center')
+        # Create a legend 
+        second_legend = plt.legend(handles=[p1,p2],labels=[r"India$^*$",r"WHO$^\dagger$"],loc=1,ncol=2,title='Recommendation:')
+        # Add the legend manually to the current Axes.
+        plt.gca().add_artist(second_legend)
+        axis.annotate(r"* = Indian National Ambient Air Quality Standards, annual average PM2.5 threshold 40[$\mu g/m^3$]"+"\n"+
+                        r"$\dagger$ = World Health Organization, annual average PM2.5 threshold 5[$\mu g/m^3$]",
+            xy=(0., 0), xytext=(0, 0),
+            xycoords=('axes fraction', 'figure fraction'),
+            textcoords='offset points',
+            size=8, ha='left', va='bottom',
+            annotation_clip=False)
+
     axis.set_title(title)
     axis.set_xlabel("Date")
     axis.set_ylabel(f"{training_data.columns[0]}")
@@ -146,7 +159,7 @@ def __full_data_plus_prediction_plot(
     axis.set_ylim(
         bottom=0, top=1.1 * max(training_data_series.max(), prediction_series.max(), ground_truth_series.max())
     )
-    axis.legend()
+    axis.legend(loc="upper left")
     return figure
 
 
@@ -168,7 +181,7 @@ def __plot(training_data: pd.DataFrame,
         confidence_interval_label,
     ) = __figure_out_confidence_interval_plot(prediction, prediction_series)
 
-    figure, ax = plt.subplots(figsize=(12, 6))
+    figure, ax = plt.subplots(figsize=(14, 8))
 
     ground_truth_series.plot(ax=ax, label="Ground truth", style="x", color="blue", alpha=0.5)
     prediction_series.plot(ax=ax, label="Forecast", color=prediction.color)
@@ -176,10 +189,21 @@ def __plot(training_data: pd.DataFrame,
     dates_for_index = prediction_series.index.values
 
     if training_data.columns[0] == "PM2.5":
-        plt.axhline(y=40,color='r', linestyle='--',linewidth=2,label='India')
-        plt.axhline(y=5,color='darksalmon', linestyle='--',linewidth=2,label='WHO')
-        plt.text(pd.Timestamp("2020-02-01"), 50, 'India',color='r', ha='right', va='center')
-        plt.text(pd.Timestamp("2020-02-01"), 15, 'WHO',color='darksalmon', ha='right', va='center')
+        p1=ax.axhline(y=40,color='r', linestyle='--',linewidth=2)
+        p2=ax.axhline(y=5,color='darksalmon', linestyle='--',linewidth=2)
+        ax.text(pd.Timestamp("2020-01-01"), 50, 'India',color='r', ha='right', va='center')
+        ax.text(pd.Timestamp("2020-01-01"), 15, 'WHO',color='darksalmon', ha='right', va='center')
+        # Create additional legend 
+        second_legend = plt.legend(handles=[p1,p2],labels=[r"India$^*$",r"WHO$^\dagger$"],loc=1,ncol=2,title='Recommendation:')
+        # Add the legend manually to the current Axes.
+        plt.gca().add_artist(second_legend)
+        ax.annotate(r"* = Indian National Ambient Air Quality Standards, annual average PM2.5 threshold 40[$\mu g/m^3$]"+"\n"+
+                        r"$\dagger$ = World Health Organization, annual average PM2.5 threshold 5[$\mu g/m^3$]",
+            xy=(0., 0), xytext=(0, 0),
+            xycoords=('axes fraction', 'figure fraction'),
+            textcoords='offset points',
+            size=8, ha='left', va='bottom',
+            annotation_clip=False)
 
     ax.fill_between(
         x=dates_for_index,
@@ -197,7 +221,7 @@ def __plot(training_data: pd.DataFrame,
         bottom=0, top=1.1 * max(ground_truth_series.max(), prediction_series.max())
     )
 
-    ax.legend()
+    ax.legend(loc="upper left")
 
     return figure
 

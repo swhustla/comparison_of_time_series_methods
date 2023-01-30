@@ -22,7 +22,7 @@ def comparison_plot(
         prediction: PredictionData,
     ) -> Tuple[None, None]:
         full_figure = full_data_plus_prediction_plot(training_data, prediction)
-        figure = plot(prediction)
+        figure = plot(training_data, prediction)
         return (
             save_plot(
                 figure, prediction.plot_folder, prediction.plot_file_name, "comparison", prediction.title
