@@ -58,12 +58,29 @@ def __figure_out_confidence_interval_plot(
     return upper_limit, lower_limit, confidence_interval_label 
 
 
+__who_recommendation = 5
+__india_recommendation = 40
+
+def __add_india_who_recommendation(axis: plt.Axes) -> Tuple[plt.Axes, plt.Line2D, plt.Line2D]:
+    """Add India and WHO recommendation to the plot."""
+    line_one = axis.axhline(y=__india_recommendation, color="r", linestyle="--", linewidth=2)
+    line_two = axis.axhline(y=__who_recommendation, color="darksalmon", linestyle="--", linewidth=2)
+    twenty_percent_along_x_axis = (axis.get_xlim()[1] - axis.get_xlim()[0]) * 0.2
+    time_stamp_for_india_recommendation = axis.get_xlim()[0] + twenty_percent_along_x_axis
+    five_percent_along_y_axis = (axis.get_ylim()[1] - axis.get_ylim()[0]) * 0.05
+    location_who = __who_recommendation + five_percent_along_y_axis
+    location_india = __india_recommendation + five_percent_along_y_axis
+    axis.text(time_stamp_for_india_recommendation, location_india, "India", color="r", ha="right", va="center")
+    axis.text(time_stamp_for_india_recommendation, location_who, "WHO", color="darksalmon", ha="right", va="center")
+
+    return axis, line_one, line_two
+
 def __full_data_plus_prediction_plot(
     training_data: pd.DataFrame, prediction: PredictionData
 ) -> Figure:
     """Plot the full data and the prediction."""
     title = prediction.title
-    figure, axis = plt.subplots(figsize=(10, 5))
+    figure, axis = plt.subplots(figsize=(12, 7))
 
     logging.debug(f"type of training data: {type(training_data)}")
     logging.debug(f"size of training data: {training_data.shape}")
@@ -124,6 +141,7 @@ def __full_data_plus_prediction_plot(
 
     # make index compatible with matplotlib
     dates_for_index = prediction_series.index.values
+   
 
     axis.fill_between(
         x=dates_for_index,
@@ -133,18 +151,36 @@ def __full_data_plus_prediction_plot(
         color=prediction.color,
         label=confidence_interval_label,
     )
+
+    if training_data.columns[0] == "PM2.5":
+        axis, line_1, line_2 = __add_india_who_recommendation(axis)
+        # Create a legend 
+        second_legend = plt.legend(handles=[line_1,line_2],labels=[r"India$^*$",r"WHO$^\dagger$"],loc=1,ncol=2,title='Recommendation:')
+        # Add the legend manually to the current Axes.
+        plt.gca().add_artist(second_legend)
+        axis.annotate(r"* = Indian National Ambient Air Quality Standards, annual average PM2.5 threshold 40[$\mu g/m^3$]"+"\n"+
+                        r"$\dagger$ = World Health Organization, annual average PM2.5 threshold 5[$\mu g/m^3$]",
+            xy=(0., 0), xytext=(0, 0),
+            xycoords=('axes fraction', 'figure fraction'),
+            textcoords='offset points',
+            size=8, ha='left', va='bottom',
+            annotation_clip=False)
+
     axis.set_title(title)
     axis.set_xlabel("Date")
-    axis.set_ylabel(f"{training_data.columns[0]}")
+    if training_data.columns[0] == "PM2.5":
+        axis.set_ylabel(f"{training_data.columns[0]} [$\mu g/m^3$]")
+    else:
+        axis.set_ylabel(f"{training_data.columns[0]}")
 
     axis.set_ylim(
         bottom=0, top=1.1 * max(training_data_series.max(), prediction_series.max(), ground_truth_series.max())
     )
-    axis.legend()
+    axis.legend(loc="upper left")
     return figure
 
 
-def __plot(
+def __plot(training_data: pd.DataFrame,
     prediction: PredictionData,
 ) -> Figure:
     """Plot the data, optionally with confidence intervals."""
@@ -162,12 +198,29 @@ def __plot(
         confidence_interval_label,
     ) = __figure_out_confidence_interval_plot(prediction, prediction_series)
 
-    figure, ax = plt.subplots(figsize=(12, 6))
+    figure, ax = plt.subplots(figsize=(14, 8))
 
     ground_truth_series.plot(ax=ax, label="Ground truth", style="x", color="blue", alpha=0.5)
     prediction_series.plot(ax=ax, label="Forecast", color=prediction.color)
 
     dates_for_index = prediction_series.index.values
+
+    if training_data.columns[0] == "PM2.5":
+        p1=ax.axhline(y=40,color='r', linestyle='--',linewidth=2)
+        p2=ax.axhline(y=5,color='darksalmon', linestyle='--',linewidth=2)
+        ax.text(pd.Timestamp("2020-01-01"), 50, 'India',color='r', ha='right', va='center')
+        ax.text(pd.Timestamp("2020-01-01"), 15, 'WHO',color='darksalmon', ha='right', va='center')
+        # Create additional legend 
+        second_legend = plt.legend(handles=[p1,p2],labels=[r"India$^*$",r"WHO$^\dagger$"],loc=1,ncol=2,title='Recommendation:')
+        # Add the legend manually to the current Axes.
+        plt.gca().add_artist(second_legend)
+        ax.annotate(r"* = Indian National Ambient Air Quality Standards, annual average PM2.5 threshold 40[$\mu g/m^3$]"+"\n"+
+                        r"$\dagger$ = World Health Organization, annual average PM2.5 threshold 5[$\mu g/m^3$]",
+            xy=(0., 0), xytext=(0, 0),
+            xycoords=('axes fraction', 'figure fraction'),
+            textcoords='offset points',
+            size=8, ha='left', va='bottom',
+            annotation_clip=False)
 
     ax.fill_between(
         x=dates_for_index,
@@ -185,7 +238,7 @@ def __plot(
         bottom=0, top=1.1 * max(ground_truth_series.max(), prediction_series.max())
     )
 
-    ax.legend()
+    ax.legend(loc="upper left")
 
     return figure
 
