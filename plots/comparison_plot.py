@@ -153,9 +153,9 @@ def __full_data_plus_prediction_plot(
     )
 
     if training_data.columns[0] == "PM2.5":
-        axis, p1, p2 = __add_india_who_recommendation(axis)
+        axis, line_1, line_2 = __add_india_who_recommendation(axis)
         # Create a legend 
-        second_legend = plt.legend(handles=[p1,p2],labels=[r"India$^*$",r"WHO$^\dagger$"],loc=1,ncol=2,title='Recommendation:')
+        second_legend = plt.legend(handles=[line_1,line_2],labels=[r"India$^*$",r"WHO$^\dagger$"],loc=1,ncol=2,title='Recommendation:')
         # Add the legend manually to the current Axes.
         plt.gca().add_artist(second_legend)
         axis.annotate(r"* = Indian National Ambient Air Quality Standards, annual average PM2.5 threshold 40[$\mu g/m^3$]"+"\n"+
