@@ -58,6 +58,20 @@ def __figure_out_confidence_interval_plot(
     return upper_limit, lower_limit, confidence_interval_label 
 
 
+__who_recommendation = 5
+__india_recommendation = 40
+
+def __add_india_who_recommendation(axis: plt.Axes) -> Tuple[plt.Axes, plt.Line2D, plt.Line2D]:
+    """Add India and WHO recommendation to the plot."""
+    line_one = axis.axhline(y=__india_recommendation, color="r", linestyle="--", linewidth=2)
+    line_two = axis.axhline(y=__who_recommendation, color="darksalmon", linestyle="--", linewidth=2)
+    twenty_percent_along_x_axis = (axis.get_xlim()[1] - axis.get_xlim()[0]) * 0.2
+    time_stamp_for_india_recommendation = axis.get_xlim()[0] + twenty_percent_along_x_axis
+    axis.text(time_stamp_for_india_recommendation, 50, "India", color="r", ha="right", va="center")
+    axis.text(time_stamp_for_india_recommendation, 15, "WHO", color="darksalmon", ha="right", va="center")
+
+    return axis, line_one, line_two
+
 def __full_data_plus_prediction_plot(
     training_data: pd.DataFrame, prediction: PredictionData
 ) -> Figure:
@@ -136,10 +150,7 @@ def __full_data_plus_prediction_plot(
     )
 
     if training_data.columns[0] == "PM2.5":
-        p1=axis.axhline(y=40,color='r', linestyle='--',linewidth=2)
-        p2=axis.axhline(y=5,color='darksalmon', linestyle='--',linewidth=2)
-        axis.text(pd.Timestamp("2016-02-01"), 50, 'India',color='r', ha='right', va='center')
-        axis.text(pd.Timestamp("2016-02-01"), 15, 'WHO',color='darksalmon', ha='right', va='center')
+        axis, p1, p2 = __add_india_who_recommendation(axis)
         # Create a legend 
         second_legend = plt.legend(handles=[p1,p2],labels=[r"India$^*$",r"WHO$^\dagger$"],loc=1,ncol=2,title='Recommendation:')
         # Add the legend manually to the current Axes.
