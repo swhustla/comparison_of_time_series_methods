@@ -168,7 +168,10 @@ def __full_data_plus_prediction_plot(
 
     axis.set_title(title)
     axis.set_xlabel("Date")
-    axis.set_ylabel(f"{training_data.columns[0]}")
+    if training_data.columns[0] == "PM2.5":
+        axis.set_ylabel(f"{training_data.columns[0]} [$\mu g/m^3$]")
+    else:
+        axis.set_ylabel(f"{training_data.columns[0]}")
 
     axis.set_ylim(
         bottom=0, top=1.1 * max(training_data_series.max(), prediction_series.max(), ground_truth_series.max())

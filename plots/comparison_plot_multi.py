@@ -11,7 +11,7 @@ from methods.plot import Figure
 from predictions.Prediction import PredictionData
 
 from methods.comparison_plot_multi import comparison_plot_multi as method
-
+from plots.comparison_plot import __add_india_who_recommendation
 
 def __get_prediction_series(prediction: PredictionData) -> pd.Series:
     if type(prediction.values) is pd.DataFrame:
@@ -85,12 +85,9 @@ def __plot_full_dataset_plus_predictions(
             )
 
     if training_data.columns[0] == "PM2.5":
-        p1=axis.axhline(y=40,color='r', linestyle='--',linewidth=2)
-        p2=axis.axhline(y=5,color='darksalmon', linestyle='--',linewidth=2)
-        axis.text(pd.Timestamp("2016-02-01"), 50, 'India',color='r', ha='right', va='center')
-        axis.text(pd.Timestamp("2016-02-01"), 15, 'WHO',color='darksalmon', ha='right', va='center')
+        axis, line_1, line_2 = __add_india_who_recommendation(axis)     
         # Create a legend 
-        second_legend = plt.legend(handles=[p1,p2],labels=[r"India$^*$",r"WHO$^\dagger$"],loc=1,ncol=2,title='Recommendation:')
+        second_legend = plt.legend(handles=[line_1,line_2],labels=[r"India$^*$",r"WHO$^\dagger$"],loc=1,ncol=2,title='Recommendation:')
         # Add the legend manually to the current Axes.
         plt.gca().add_artist(second_legend)
         axis.annotate(r"* = Indian National Ambient Air Quality Standards, annual average PM2.5 threshold 40[$\mu g/m^3$]"+"\n"+
@@ -101,14 +98,21 @@ def __plot_full_dataset_plus_predictions(
             size=8, ha='left', va='bottom',
             annotation_clip=False)
 
+
     axis.legend(loc="upper left")
     axis.set_xlabel("Date")
-    axis.set_ylabel(f"{training_data.columns[0]}")
+    if training_data.columns[0] == "PM2.5":
+        axis.set_ylabel(f"{training_data.columns[0]} [$\mu g/m^3$]")
+    else:
+        axis.set_ylabel(f"{training_data.columns[0]}")
 
     axis.set_title(title)
     axis.set_ylim(
         bottom=0, top=1.1 * max(training_data_series.max(), prediction_series.max())
     )
+
+   
+
 
     return figure
 
