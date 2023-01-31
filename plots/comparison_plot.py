@@ -67,8 +67,11 @@ def __add_india_who_recommendation(axis: plt.Axes) -> Tuple[plt.Axes, plt.Line2D
     line_two = axis.axhline(y=__who_recommendation, color="darksalmon", linestyle="--", linewidth=2)
     twenty_percent_along_x_axis = (axis.get_xlim()[1] - axis.get_xlim()[0]) * 0.2
     time_stamp_for_india_recommendation = axis.get_xlim()[0] + twenty_percent_along_x_axis
-    axis.text(time_stamp_for_india_recommendation, 50, "India", color="r", ha="right", va="center")
-    axis.text(time_stamp_for_india_recommendation, 15, "WHO", color="darksalmon", ha="right", va="center")
+    five_percent_along_y_axis = (axis.get_ylim()[1] - axis.get_ylim()[0]) * 0.05
+    location_who = __who_recommendation + five_percent_along_y_axis
+    location_india = __india_recommendation + five_percent_along_y_axis
+    axis.text(time_stamp_for_india_recommendation, location_india, "India", color="r", ha="right", va="center")
+    axis.text(time_stamp_for_india_recommendation, location_who, "WHO", color="darksalmon", ha="right", va="center")
 
     return axis, line_one, line_two
 
