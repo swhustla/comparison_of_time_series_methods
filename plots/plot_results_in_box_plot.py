@@ -1,4 +1,4 @@
-"""Plot a heatmap plot showing the accuracy of lots of time series prediction methods 
+"""Plot a heatmap and box plot showing the accuracy of lots of time series prediction methods 
 on lots of different time series"""
 import os
 import logging
