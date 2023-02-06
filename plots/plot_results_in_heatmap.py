@@ -140,7 +140,8 @@ def __save_plot(figure: Figure, dataset_name: str, chosen_metric: str) -> None:
         os.makedirs(f"{folder_location}")
     
     figure.savefig(
-        f"{folder_location}/heat_map_{time_stamp_string}.png",
+        f"{folder_location}/heat_map.png",
+        # f"{folder_location}/heat_map_{time_stamp_string}.png",
         bbox_inches="tight",
         pad_inches=0.1,
     )
