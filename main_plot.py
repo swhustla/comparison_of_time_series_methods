@@ -44,20 +44,10 @@ __dataset = [
 
 
 # choose the subset rows for the dataset to be plotted
-# __dataset_row_items: dict[str, list[str]] = {
-#     "Indian city pollution": get_list_of_city_names(),#["Ahmedabad", "Bengaluru", "Chennai"],
-#     "Stock price": ["JPM", "AAPL", "MSFT"],
-# }
 __dataset_row_items: dict[str, list[str]] = {
-        # take first 3 from list of cities
-        "india_pollution": [
-            "Gurugram"
-        ],  # get_list_of_city_names()[:3],  # ["Gurugram"]
-        "Stock price": get_a_list_of_value_stock_tickers(),
-        #[
-        #    "DIS"
-        #],  # get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
-    }
+    "Indian city pollution": get_list_of_city_names(),#["Ahmedabad", "Bengaluru", "Chennai"],
+    "Stock price": get_a_list_of_value_stock_tickers(),#["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+}
 
 
 # pick at least 2 methods from the list
@@ -76,8 +66,10 @@ __methods = [
     # "TsetlinMachine",
 ]
 
-__plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {"heatmap": plot_results_in_heatmap_from_csv}
-__plotters_boxplot: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {"boxplot": plot_results_in_boxplot_from_csv}
+__plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
+    "heatmap": plot_results_in_heatmap_from_csv,
+    "boxplot": plot_results_in_boxplot_from_csv, "boxplot": plot_results_in_boxplot_from_csv,
+    }
 
 def filter_dataframe_by_dataset_method_and_subset(
     dataset: str, topics: List[str], methods: List[str]
@@ -148,10 +140,10 @@ filtered_dataframe_r_squared = filtered_dataframe[~filtered_dataframe.subset_row
 
 for plotter_name, plotter in __plotters.items():
     print(f"Plotting {plotter_name} for dataset: {dataset_name}")
+    if plotter_name == "boxplot":
+        plotter(filtered_dataframe, dataset_name)
+    else:
+        plotter(filtered_dataframe_r_squared, dataset_name)
 
-    plotter(filtered_dataframe_r_squared, dataset_name)
 
-for plotter_name, plotter in __plotters_boxplot.items():
-    print(f"Plotting {plotter_name} for dataset: {dataset_name}")
 
-    plotter(filtered_dataframe, dataset_name)
