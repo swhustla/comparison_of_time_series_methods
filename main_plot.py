@@ -8,6 +8,8 @@ from typing import TypeVar, List
 from reports.report_loader import report_loader
 from matplotlib import pyplot as plt
 import seaborn as sns
+import json
+import gzip
 
 from plots.plot_results_in_heatmap import plot_results_in_heatmap_from_csv
 from plots.plot_results_in_box_plot import plot_results_in_boxplot_from_csv
@@ -34,8 +36,8 @@ from methods.plot import Plot
 
 # pick one dataset from the list only
 __dataset = [
-    #"Indian city pollution",
-       "Stock price",
+    "Indian city pollution",
+    #   "Stock price",
     # "Airline passengers",
     # "Straight line",
     # "Sunspots",
@@ -104,7 +106,6 @@ def filter_dataframe_by_dataset_method_and_subset(
     
     return dataframe_of_results
 
-
 print(f"Plotting results for dataset: {__dataset[0]}")
 
 print(f"...and methods: {__methods}")
@@ -113,9 +114,11 @@ print(f"......and subset rows: { __dataset_row_items[__dataset[0]]}")
 filtered_dataframe = filter_dataframe_by_dataset_method_and_subset(
     __dataset[0], __dataset_row_items[__dataset[0]], __methods
 )
+
+
 # re-format the report to be used in the heatmap
 filtered_dataframe = filtered_dataframe[
-    ["Dataset", "Topic", "Model", "MAE", "RMSE", "MAPE", "R Squared"]
+    ["Dataset", "Topic", "Model", "MAE", "RMSE", "MAPE", "R Squared", "Filepath"]
 ]
 
 # rename the columns to be used in the heatmap
@@ -138,6 +141,20 @@ mask_low_r_squared =  filtered_dataframe.loc[filtered_dataframe['R2'] < -10].dro
 #Filteres the above cities from the final list
 filtered_dataframe_r_squared = filtered_dataframe[~filtered_dataframe.subset_row.isin(mask_low_r_squared)]
 
+#decoding zip json
+filtered_dataframe_file_path_excl_cities =  filtered_dataframe.loc[filtered_dataframe['R2'] < -10].drop_duplicates(
+        subset=["subset_row"]
+    )["Filepath"]
+print(f"cities with R2 <-10\n{filtered_dataframe_file_path_excl_cities}")
+
+with gzip.open(filtered_dataframe_file_path_excl_cities[4], 'rt') as zipfile:
+    my_object = json.load(zipfile)
+print(my_object.keys())
+my_object_values = my_object['values']
+print(my_object_values)
+print(type(my_object_values))
+
+exit()
 for plotter_name, plotter in __plotters.items():
     print(f"Plotting {plotter_name} for dataset: {dataset_name}")
     if plotter_name == "boxplot":
