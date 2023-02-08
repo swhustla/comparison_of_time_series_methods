@@ -23,16 +23,16 @@ from pathlib import Path
 
 
 
-def __zipped_json_file_to_prediction_data_object(file: Path) -> PredictionData:
+def __zipped_json_file_to_prediction_data_object(file_path: Path) -> PredictionData:
     """Method to load in the reports from the reports folder."""
     try:
-        with gzip.open(file, "rb") as f:
+        with gzip.open(file_path, "rb") as f:
             data = json.load(f)
     except FileNotFoundError as e:
-        print(f"The file {file} could not be found.")
+        print(f"The file {file_path} could not be found.")
         raise e
     except Exception as e:
-        print(f"An error occurred while loading the file {file}: {e}")
+        print(f"An error occurred while loading the file {file_path}: {e}")
         raise e
     
     # the data is a dictionary, we want it to be a PredictionData object
