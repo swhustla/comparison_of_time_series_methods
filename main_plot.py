@@ -15,16 +15,16 @@ from plots.plot_results_in_heatmap import plot_results_in_heatmap_from_csv
 from plots.plot_results_in_box_plot import plot_results_in_boxplot_from_csv
 
 from data.india_pollution import (
-        india_pollution,
-        get_list_of_city_names,
-        get_list_of_coastal_indian_cities,
-    )
+    india_pollution,
+    get_list_of_city_names,
+    get_list_of_coastal_indian_cities,
+)
 
 from data.stock_prices import (
-        stock_prices,
-        get_a_list_of_value_stock_tickers,
-        get_a_list_of_growth_stock_tickers,
-    )
+    stock_prices,
+    get_a_list_of_value_stock_tickers,
+    get_a_list_of_growth_stock_tickers,
+)
 
 Data = TypeVar("Data", contravariant=True)
 Prediction = TypeVar("Prediction", covariant=True)
@@ -47,8 +47,8 @@ __dataset = [
 
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
-    "Indian city pollution": get_list_of_city_names(),#["Ahmedabad", "Bengaluru", "Chennai"],
-    "Stock price": get_a_list_of_value_stock_tickers(),#["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+    "Indian city pollution": get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
+    "Stock price": get_a_list_of_value_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
 }
 
 
@@ -70,8 +70,9 @@ __methods = [
 
 __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
     "heatmap": plot_results_in_heatmap_from_csv,
-    "boxplot": plot_results_in_boxplot_from_csv, "boxplot": plot_results_in_boxplot_from_csv,
-    }
+    "boxplot": plot_results_in_boxplot_from_csv,
+}
+
 
 def filter_dataframe_by_dataset_method_and_subset(
     dataset: str, topics: List[str], methods: List[str]
@@ -81,7 +82,7 @@ def filter_dataframe_by_dataset_method_and_subset(
     Dataset, Topic, Method, Start Time, End Time, Training Time, Prediction Time, MAE, RMSE, MAPE, R2, Prediction
     Ensure the most recent run for a given dataset, method and subset row is used only.
     """
-    
+
     dataframe_of_results = report_loader()
     if dataframe_of_results is None:
         return pd.DataFrame()
@@ -101,10 +102,14 @@ def filter_dataframe_by_dataset_method_and_subset(
 
     # drop the duplicates, check the columns to be used in duplicate removal
     dataframe_of_results.drop_duplicates(
-        subset=["Dataset", "Topic", "Model"], keep="first", inplace=True, ignore_index=False
+        subset=["Dataset", "Topic", "Model"],
+        keep="first",
+        inplace=True,
+        ignore_index=False,
     )
-    
+
     return dataframe_of_results
+
 
 print(f"Plotting results for dataset: {__dataset[0]}")
 
@@ -134,23 +139,25 @@ filtered_dataframe = filtered_dataframe.rename(
 dataset_name = __dataset[0]
 
 
-#Creates a list of cities with R2<-10,if a city repeated twice (different methods),cancels the duplicate
-mask_low_r_squared =  filtered_dataframe.loc[filtered_dataframe['R2'] < -10].drop_duplicates(
-        subset=["subset_row"]
-    )["subset_row"]
-#Filteres the above cities from the final list
-filtered_dataframe_r_squared = filtered_dataframe[~filtered_dataframe.subset_row.isin(mask_low_r_squared)]
+# Creates a list of cities with R2<-10,if a city repeated twice (different methods),cancels the duplicate
+mask_low_r_squared = filtered_dataframe.loc[
+    filtered_dataframe["R2"] < -10
+].drop_duplicates(subset=["subset_row"])["subset_row"]
+# Filteres the above cities from the final list
+filtered_dataframe_r_squared = filtered_dataframe[
+    ~filtered_dataframe.subset_row.isin(mask_low_r_squared)
+]
 
-#decoding zip json
-filtered_dataframe_file_path_excl_cities =  filtered_dataframe.loc[filtered_dataframe['R2'] < -10].drop_duplicates(
-        subset=["subset_row"]
-    )["Filepath"]
+# decoding zip json
+filtered_dataframe_file_path_excl_cities = filtered_dataframe.loc[
+    filtered_dataframe["R2"] < -10
+].drop_duplicates(subset=["subset_row"])["Filepath"]
 print(f"cities with R2 <-10\n{filtered_dataframe_file_path_excl_cities}")
 
-with gzip.open(filtered_dataframe_file_path_excl_cities[4], 'rt') as zipfile:
+with gzip.open(filtered_dataframe_file_path_excl_cities[4], "rt") as zipfile:
     my_object = json.load(zipfile)
 print(my_object.keys())
-my_object_values = my_object['values']
+my_object_values = my_object["values"]
 print(my_object_values)
 print(type(my_object_values))
 
@@ -161,6 +168,3 @@ for plotter_name, plotter in __plotters.items():
         plotter(filtered_dataframe, dataset_name)
     else:
         plotter(filtered_dataframe_r_squared, dataset_name)
-
-
-
