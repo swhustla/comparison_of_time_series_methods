@@ -9,5 +9,7 @@ install:
 	poetry install
 lint:
 	poetry run pylint -d duplicate-code ./**/*.py
+test: 
+	poetry run python -m unittest discover -s tests -p "test_*.py"
 run: install
 	poetry run python ./main.py
