@@ -8,6 +8,8 @@ import gzip
 import pandas as pd
 
 from methods.report_loader import report_loader as method
+from methods.json_report_loader import json_report_loader as json_method
+
 from predictions.Prediction import PredictionData
 
 Report = TypeVar("Report", contravariant=True)
@@ -54,3 +56,4 @@ def __load_reports() -> Optional[Report]:
 
 
 report_loader = method(__load_reports)
+json_report_loader = json_method(__zipped_json_file_to_prediction_data_object)
