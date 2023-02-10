@@ -48,12 +48,12 @@ def plot_results_in_boxplot_from_csv(
                 save_plot_boxplot(figure_city, dataset_name, 'by_data_old', chosen_metric),
             )           
                 #save_plot_boxplot(figure_method, figure_city, dataset_name, chosen_metric)
-        else:
+        if dataset_name =='India city pollution':
              return (
                 save_plot_boxplot(
-                    figure_method, dataset_name,'by_method', chosen_metric
+                    figure_method, "Indian city pollution", 'by_method', chosen_metric
                 ),
-                save_plot_boxplot(figure_city, dataset_name, 'by_data', chosen_metric),
+                save_plot_boxplot(figure_city, "Indian city pollution", 'by_data', chosen_metric),
             )           
                 #save_plot_boxplot(figure_method, figure_city, dataset_name, chosen_metric)           
 
