@@ -131,16 +131,16 @@ def __get_time_stamp_for_file_name() -> str:
 
 
 
-def __save_plot(figure: Figure, dataset_name: str, chosen_metric: str) -> None:
+def __save_plot(figure: Figure, dataset_name: str, plot_type: str ,chosen_metric: str) -> None:
     """Save the plot"""
     time_stamp_string = __get_time_stamp_for_file_name()
     folder_location = f"plots/{dataset_name}/{chosen_metric}_heatmaps"
-    logging.info(f"Saving heatmap to {folder_location}/heat_map_{time_stamp_string}.png")
+    logging.info(f"Saving heatmap to {folder_location}/heat_map_{plot_type}_{time_stamp_string}.png")
     if not os.path.exists(f"{folder_location}"):
         os.makedirs(f"{folder_location}")
     
     figure.savefig(
-        f"{folder_location}/heat_map.png",
+        f"{folder_location}/heat_map_{plot_type}.png",
         # f"{folder_location}/heat_map_{time_stamp_string}.png",
         bbox_inches="tight",
         pad_inches=0.1,

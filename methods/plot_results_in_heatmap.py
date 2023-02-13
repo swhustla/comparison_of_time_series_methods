@@ -46,7 +46,27 @@ def plot_results_in_heatmap_from_csv(
         print("Plotting results in heatmap; source: csv")
         for chosen_metric in __chosen_metrics:
             figure = plot_heatmap(data_to_plot, chosen_metric)
+            stock_company_name = data_to_plot["subset_row"][0]
             print(f"Saving {dataset_name} {chosen_metric} heatmap plot")
-            save_plot(figure, dataset_name, chosen_metric)
-
+            # save_plot(figure, dataset_name, chosen_metric)
+        if dataset_name =='Stock price' and stock_company_name == 'HD':
+            return (
+                save_plot(
+                    figure, dataset_name,'young', chosen_metric
+                )
+            )
+        if dataset_name =='Stock price' and stock_company_name == 'GOOG':
+            return (
+                save_plot(
+                    figure, dataset_name,'old', chosen_metric
+                )
+            )           
+        
+        if dataset_name =='India city pollution':
+             return (
+                save_plot(
+                    figure, "Indian city pollution","_", chosen_metric
+                )
+            )           
+        
     return draw_plot
