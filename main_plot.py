@@ -26,11 +26,24 @@ import json
 import gzip
 from data.dataset import Dataset, Result
 from data.report import Report
+from methods.predict import Predict
 
 from plots.plot_results_in_heatmap import plot_results_in_heatmap_from_csv
 from plots.plot_results_in_box_plot import plot_results_in_boxplot_from_csv
 from plots.comparison_plot_multi import comparison_plot_multi
 
+from predictions.AR import ar
+from predictions.MA import ma
+from predictions.HoltWinters import holt_winters
+from predictions.ARIMA import arima
+from predictions.SARIMA import sarima
+from predictions.auto_arima import auto_arima
+from predictions.linear_regression import linear_regression
+from predictions.prophet import prophet
+from predictions.FCNN import fcnn
+from predictions.FCNN_embedding import fcnn_embedding
+from predictions.SES import ses
+from predictions.tsetlin_machine import tsetlin_machine, tsetlin_machine_single
 
 from data.list_of_tuples import list_of_tuples
 from data.airline_passengers import airline_passengers
@@ -84,9 +97,7 @@ __dataset = [
 
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
-    "India city pollution": [
-        "Ahmedabad"
-    ],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
+    "India city pollution": get_list_of_city_names()[6:7],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
     "Stock price": get_a_list_of_growth_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),# get_a_list_of_growth_stock_tickers()[:2],
 }
 
@@ -103,7 +114,7 @@ __methods = [
     # "FCNN_embedding",
     # "SARIMA",
     # "auto_arima"
-    "SES",
+    # "SES",
     # "TsetlinMachine",
 ]
 
@@ -111,6 +122,22 @@ __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
     "heatmap": plot_results_in_heatmap_from_csv,
     "boxplot": plot_results_in_boxplot_from_csv,
     # "comparison": comparison_plot_multi,
+}
+
+__predictors: dict[str, Predict[Dataset, Result]] = {
+    "linear_regression": linear_regression,
+    "AR": ar,
+    "ARIMA": arima,
+    "Prophet": prophet,
+    "FCNN": fcnn,
+    "FCNN_embedding": fcnn_embedding,
+    "SES": ses,
+    "SARIMA": sarima,
+    "auto_arima": auto_arima,
+    "MA": ma,
+    "HoltWinters": holt_winters,
+    "TsetlinMachineMulti": tsetlin_machine,
+    "TsetlinMachineSingle": tsetlin_machine_single,
 }
 
 
@@ -194,6 +221,7 @@ filtered_dataframe_r_squared = filtered_dataframe[
     ~filtered_dataframe.subset_row.isin(mask_low_r_squared)
 ]
 
+
 def load_dataset(dataset_name: str) -> list[Dataset]:
     """
     Load the given dataset.
@@ -212,9 +240,8 @@ def generate_predictions_from_zip_json(data: pd.DataFrame) -> PredictionData:
     for i in range(len(data["Filepath"].index)):
         if not np.isnan(data["MAPE"][i]):
             json_data = json_report_loader(data["Filepath"][i])
-            # json_data_store.append([data['subset_row'][i],json_data])
             json_data_store.append(json_data)
-    return json_data
+    return json_data_store
 
 
 for dataset_name in __dataset:
@@ -225,16 +252,9 @@ for dataset_name in __dataset:
     training_index = dataset.values.index[
         : int(len(dataset.values.index) * (1 - __testset_size))
     ]
+    prediction = generate_predictions_from_zip_json(filtered_dataframe)
+    comparison_plot_multi(dataset.values.loc[training_index, :], prediction)
 
-    for method_name in __methods:
-        #generate a comparison plot for each method
-        print(method_name)
-        comparison_plot_multi(
-            dataset.values.loc[training_index, :],
-            generate_predictions_from_zip_json(filtered_dataframe),
-        )
-
-exit()
 
 for plotter_name, plotter in __plotters.items():
     print(f"Plotting {plotter_name} for dataset: {dataset_name}")
