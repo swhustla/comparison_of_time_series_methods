@@ -6,6 +6,7 @@ from typing import Tuple, Optional, List
 from data.dataset import Dataset
 from pandas import Timestamp
 from six import string_types
+from numpy import nan
 
 from matplotlib import pyplot as plt
 
@@ -101,13 +102,14 @@ def __tidy_up_prediction_data_object(
         cleaned_pred_data.ground_truth_values = __convert_string_to_series(
             prediction.ground_truth_values
         )
+
         try:
             cleaned_pred_data.values = pd.DataFrame(eval(prediction.values))
         except:
             cleaned_pred_data.values = __convert_string_to_series(
                prediction.values
             )
-
+            
         cleaned_pred_data.in_sample_prediction = __convert_string_to_series(
             prediction.in_sample_prediction
         )
@@ -129,17 +131,13 @@ def __plot_full_dataset_plus_predictions(
     training_data_series = training_data.iloc[:, 0]
     training_data_series.plot(ax=axis, label="Training data", style=".", c="blue")
 
-    list_prediction_data_objects = __tidy_up_prediction_data_object(
-            prediction=list_prediction_data_objects
-        )
-
     try:
         list_prediction_data_objects = __tidy_up_prediction_data_object(
             prediction=list_prediction_data_objects
         )
     except:
         ground_truth_values = list_prediction_data_objects[0].ground_truth_values
-
+    
     ground_truth_values = list_prediction_data_objects[0].ground_truth_values
 
     
