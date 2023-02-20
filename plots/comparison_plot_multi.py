@@ -57,7 +57,6 @@ def __get_plot_metadata(
 
 def __convert_string_to_series(string_format: str) -> pd.Series:
     """Convert ground truth, prediction values, in sample prediciton to correct format from string"""
-    print(f"Type {eval(string_format)}")
 
     try:
         tidy_series = pd.Series(eval(string_format))
