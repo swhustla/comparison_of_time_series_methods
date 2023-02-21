@@ -87,21 +87,24 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 # pick one dataset from the list only
 __dataset = [
     # "India city pollution",
-    "stock_prices",
-    # "Airline passengers",
-#    "airline_passengers",
-    # "Straight line",
-    # "Sunspots",
+    # "stock_prices",
+    # "airline_passengers",
+    "list_of_tuples",
+    # "sun_spots",
     # "CSV",
 ]
 
 
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
-    "India city pollution": get_list_of_city_names()[:7],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
+    "India city pollution": get_list_of_city_names()[
+        :7
+    ],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
     "stock_prices": get_a_list_of_value_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+    "airline_passengers": ["all"],
+    "list_of_tuples": ["random"],
+    "sun_spots": ["All"],
 }
-
 
 
 # pick at least 2 methods from the list
@@ -116,7 +119,7 @@ __methods = [
     # "FCNN_embedding",
     "SARIMA",
     # "auto_arima"
-    "SES",
+    # "SES",
     # "TsetlinMachine",
 ]
 
@@ -155,6 +158,7 @@ def filter_dataframe_by_dataset_method_and_subset(
     dataframe_of_results = report_loader()
     if dataframe_of_results is None:
         return pd.DataFrame()
+
     if dataset == "India city pollution":
         dataframe_of_results = dataframe_of_results.loc[
             dataframe_of_results["Dataset"] == "Indian city pollution"
@@ -163,6 +167,20 @@ def filter_dataframe_by_dataset_method_and_subset(
         dataframe_of_results = dataframe_of_results.loc[
             dataframe_of_results["Dataset"] == "Stock price"
         ]
+    elif dataset == "airline_passengers":
+        dataframe_of_results = dataframe_of_results.loc[
+            dataframe_of_results["Dataset"] == "Airline passengers"
+        ]
+    elif dataset == "sun_spots":
+        dataframe_of_results = dataframe_of_results.loc[
+            dataframe_of_results["Dataset"] == "Sun spots"
+        ]
+
+    elif dataset == "list_of_tuples":
+        dataframe_of_results = dataframe_of_results.loc[
+            dataframe_of_results["Dataset"] == "Straight line"
+        ]
+
     else:
         dataframe_of_results = dataframe_of_results.loc[
             dataframe_of_results["Dataset"] == dataset
@@ -171,6 +189,7 @@ def filter_dataframe_by_dataset_method_and_subset(
     dataframe_of_results = dataframe_of_results.loc[
         dataframe_of_results["Topic"].isin(topics)
     ]
+
     dataframe_of_results = dataframe_of_results.loc[
         dataframe_of_results["Model"].isin(methods)
     ]
@@ -232,7 +251,12 @@ def load_dataset(dataset_name: str) -> list[Dataset]:
     """
     Load the given dataset.
     """
-    if dataset_name not in __dataset_row_items:
+    if (
+        dataset_name not in __dataset_row_items
+        or dataset_name == "airline_passengers"
+        or dataset_name == "sun_spots"
+        or dataset_name == "list_of_tuples"
+    ):
         return [__dataset_loaders[dataset_name]()]
     else:
         return __dataset_loaders[dataset_name](__dataset_row_items[dataset_name])
@@ -258,16 +282,19 @@ for dataset_name in __dataset:
         training_index = dataset.values.index[
             : int(len(dataset.values.index) * (1 - __testset_size))
         ]
-        id_count = np.where(filtered_dataframe['subset_row']==dataset.subset_row_name)
+        id_count = np.where(filtered_dataframe["subset_row"] == dataset.subset_row_name)
         id_count = np.array(id_count).ravel()
 
         prediction_per_city = []
-        for i in range (len(id_count)):
-            prediction = generate_predictions_from_zip_json(filtered_dataframe)[id_count[i]]
+        for i in range(len(id_count)):
+            prediction = generate_predictions_from_zip_json(filtered_dataframe)[
+                id_count[i]
+            ]
             prediction_per_city.append(prediction)
 
-        comparison_plot_multi(dataset.values.loc[training_index, :], prediction_per_city)
-
+        comparison_plot_multi(
+            dataset.values.loc[training_index, :], prediction_per_city
+        )
 
 
 for plotter_name, plotter in __plotters.items():
