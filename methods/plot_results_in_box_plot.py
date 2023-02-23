@@ -17,44 +17,46 @@ from .plot import Plot
 
 __chosen_metrics = ["MAE", "RMSE", "R2", "MAPE"]
 
+
 def plot_results_in_boxplot_from_csv(
     plot_boxplot_by_method: Callable[[Data, str], Figure],
     plot_boxplot_by_city: Callable[[Data, str], Figure],
     save_plot_boxplot: Callable[[Figure, str, str, str], None],
 ) -> Plot[Data, Prediction, ConfidenceInterval, Title]:
-    def draw_plot(
-        data_to_plot: Data,
-        dataset_name: str
-    ) -> None:
+    def draw_plot(data_to_plot: Data, dataset_name: str) -> None:
         print("Plotting results in boxplot; source: csv")
         for chosen_metric in __chosen_metrics:
             figure_method = plot_boxplot_by_method(data_to_plot, chosen_metric)
             figure_city = plot_boxplot_by_city(data_to_plot, chosen_metric)
             stock_company_name = data_to_plot["subset_row"][0]
             print(f"Saving {dataset_name} {chosen_metric} boxplot plot")
-        if dataset_name =='Stock price' and stock_company_name == 'HD':
-            return (
-                save_plot_boxplot(
-                    figure_method, dataset_name,'by_method_young', chosen_metric
+            input_map = {
+                ("Stock price", "HD"): (
+                    figure_method,
+                    "Stock price",
+                    "by_method_young",
+                    chosen_metric,
+                    "by_data_young",
                 ),
-                save_plot_boxplot(figure_city, dataset_name, 'by_data_young', chosen_metric),
-            )           
-                #save_plot_boxplot(figure_method, figure_city, dataset_name, chosen_metric)
-        if dataset_name =='Stock price' and stock_company_name == 'GOOG':
-            return (
-                save_plot_boxplot(
-                    figure_method, dataset_name,'by_method_old', chosen_metric
+                ("Stock price", "GOOG"): (
+                    figure_method,
+                    "Stock price",
+                    "by_method_old",
+                    chosen_metric,
+                    "by_data_old",
                 ),
-                save_plot_boxplot(figure_city, dataset_name, 'by_data_old', chosen_metric),
-            )           
-                #save_plot_boxplot(figure_method, figure_city, dataset_name, chosen_metric)
-        if dataset_name =='India city pollution':
-             return (
-                save_plot_boxplot(
-                    figure_method, "Indian city pollution", 'by_method', chosen_metric
+                ("India city pollution", "Ahmedabad"): (
+                    figure_method,
+                    "Indian city pollution",
+                    "by_method",
+                    chosen_metric,
+                    "by_data",
                 ),
-                save_plot_boxplot(figure_city, "Indian city pollution", 'by_data', chosen_metric),
-            )           
-                #save_plot_boxplot(figure_method, figure_city, dataset_name, chosen_metric)           
-
+            }
+            input_key = (dataset_name, stock_company_name)
+            if input_key in input_map:
+                figure_params = input_map[input_key]
+                save_plot_boxplot(*figure_params[:-1]),
+                save_plot_boxplot(figure_city, figure_params[1],figure_params[4], chosen_metric),
+               
     return draw_plot

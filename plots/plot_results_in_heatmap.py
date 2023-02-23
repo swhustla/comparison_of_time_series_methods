@@ -18,10 +18,14 @@ from data.report import Report
 
 
 from methods.plot_results_in_heatmap import plot_results_in_heatmap as method_report
-from methods.plot_results_in_heatmap import plot_results_in_heatmap_from_csv as method_report_from_csv
+from methods.plot_results_in_heatmap import (
+    plot_results_in_heatmap_from_csv as method_report_from_csv,
+)
 
 
-def __compile_results(list_of_list_of_reports: List[List[Report]]) -> Tuple[pd.DataFrame, str]:
+def __compile_results(
+    list_of_list_of_reports: List[List[Report]],
+) -> Tuple[pd.DataFrame, str]:
     """Compile the results from a list of lists of reports into a dataframe"""
     results = []
     for list_of_method_results_per_dataset in list_of_list_of_reports:
@@ -47,15 +51,20 @@ def __get_dataset_name(results_dataframe: pd.DataFrame) -> str:
     return results_dataframe["dataset"].unique()[0]
 
 
-def __get_title(results_dataframe: pd.DataFrame, chosen_metric: str, group_name: str) -> str:
+def __get_title(
+    results_dataframe: pd.DataFrame, chosen_metric: str, group_name: str
+) -> str:
     """Get the title of the plot"""
     if group_name is None:
         return f"{chosen_metric} results for {__get_dataset_name(results_dataframe)} for {results_dataframe['method'].unique().size} predictive methods on {results_dataframe['subset_row'].unique().size} datasets"
     else:
         return f"{chosen_metric} results for {group_name} with {results_dataframe['method'].unique().size} predictive methods"
 
+
 def __plot_heatmap(
-    results_dataframe: pd.DataFrame, chosen_metric: str = "MAE", group_name: Optional[str] = None
+    results_dataframe: pd.DataFrame,
+    chosen_metric: str = "MAE",
+    group_name: Optional[str] = None,
 ) -> Figure:
     """Plot the results in a heatmap"""
     logging.info(f"Plotting {chosen_metric} heatmap")
@@ -72,18 +81,22 @@ def __plot_heatmap(
     colormap = sns.diverging_palette(220, 20, as_cmap=True)
 
     # condensed distance matrix must contain only finite values
-    results_dataframe[chosen_metric] = results_dataframe[chosen_metric].replace([np.inf, -np.inf], np.nan)
+    results_dataframe[chosen_metric] = results_dataframe[chosen_metric].replace(
+        [np.inf, -np.inf], np.nan
+    )
 
-    pivoted_dataframe = results_dataframe.pivot(columns="method", index="subset_row", values=chosen_metric)
+    pivoted_dataframe = results_dataframe.pivot(
+        columns="method", index="subset_row", values=chosen_metric
+    )
     # condensed distance matrix must contain only finite values
     pivoted_dataframe = pivoted_dataframe.replace([np.inf, -np.inf], np.nan)
 
-    #deal with the case where there are no results for a method
+    # deal with the case where there are no results for a method
     pivoted_dataframe = pivoted_dataframe.fillna(0)
     mask_for_missing_values = pivoted_dataframe == 0
 
-    #colorbar for MAPE case
-    if chosen_metric == 'MAPE':
+    # colorbar for MAPE case
+    if chosen_metric == "MAPE":
         cluster_grid = sns.clustermap(
             pivoted_dataframe,
             annot=True,
@@ -91,13 +104,13 @@ def __plot_heatmap(
             cmap="rainbow",
             vmin=10,
             vmax=60,
-            mask=mask_for_missing_values
+            mask=mask_for_missing_values,
         )
         cluster_grid.ax_col_dendrogram.set_title(title)
-        return cluster_grid  
+        return cluster_grid
 
-    #reversing the colorbar for R2 case
-    if chosen_metric == 'R2':
+    # reversing the colorbar for R2 case
+    if chosen_metric == "R2":
         cluster_grid = sns.clustermap(
             pivoted_dataframe,
             annot=True,
@@ -105,12 +118,10 @@ def __plot_heatmap(
             cmap=colormap.reversed(),
             vmin=-1,
             vmax=1,
-            mask=mask_for_missing_values
+            mask=mask_for_missing_values,
         )
         cluster_grid.ax_col_dendrogram.set_title(title)
-        return cluster_grid   
-
-    print(f"pivoted dataframe: {pivoted_dataframe}")
+        return cluster_grid
 
     cluster_grid = sns.clustermap(
         pivoted_dataframe,
@@ -119,7 +130,7 @@ def __plot_heatmap(
         cmap=colormap,
         vmin=0,
         vmax=100,
-        mask=mask_for_missing_values
+        mask=mask_for_missing_values,
     )
     cluster_grid.ax_col_dendrogram.set_title(title)
     return cluster_grid
@@ -130,24 +141,33 @@ def __get_time_stamp_for_file_name() -> str:
     return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
-
-def __save_plot(figure: Figure, dataset_name: str, plot_type: str ,chosen_metric: str) -> None:
-    """Save the plot"""
+def __save_heatmap(
+    figure: Figure,
+    dataset_name: str,
+    plot_type: str,
+    chosen_metric: str,
+    file_format="png",
+) -> None:
+    """Save a heatmap plot."""
     time_stamp_string = __get_time_stamp_for_file_name()
     folder_location = f"plots/{dataset_name}/{chosen_metric}_heatmaps"
-    logging.info(f"Saving heatmap to {folder_location}/heat_map_{plot_type}_{time_stamp_string}.png")
-    if not os.path.exists(f"{folder_location}"):
-        os.makedirs(f"{folder_location}")
-    
-    figure.savefig(
-        f"{folder_location}/heat_map_{plot_type}.png",
-        # f"{folder_location}/heat_map_{time_stamp_string}.png",
-        bbox_inches="tight",
-        pad_inches=0.1,
-    )
+    os.makedirs(folder_location, exist_ok=True)
+
+    filename = f"heat_map_{plot_type}_{time_stamp_string}.{file_format}"
+    counter = 1
+    while os.path.exists(os.path.join(folder_location, filename)):
+        counter += 1
+        filename = f"heat_map_{plot_type}_{time_stamp_string}_{counter}.{file_format}"
+
+    filepath = os.path.join(folder_location, filename)
+    logging.info(f"Saving heatmap to {filepath}")
+    figure.savefig(filepath, bbox_inches="tight", pad_inches=0.1)
     plt.close(figure.figure)
 
 
-plot_results_in_heatmap = method_report(__compile_results, __plot_heatmap, __save_plot)
-plot_results_in_heatmap_from_csv = method_report_from_csv(__plot_heatmap, __save_plot)
-
+plot_results_in_heatmap = method_report(
+    __compile_results, __plot_heatmap, __save_heatmap
+)
+plot_results_in_heatmap_from_csv = method_report_from_csv(
+    __plot_heatmap, __save_heatmap
+)
