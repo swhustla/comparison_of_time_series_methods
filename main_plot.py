@@ -77,33 +77,31 @@ from methods.plot import Plot
 
 __dataset_loaders: dict[str, Load[Dataset]] = {
     "India city pollution": india_pollution,
-    "stock_prices": stock_prices,
+    "Stock price": stock_prices,
     "list_of_tuples": list_of_tuples,
-    "airline_passengers": airline_passengers,
-    "sun_spots": sun_spots,
+    "Airline passengers": airline_passengers,
+    "Sun spots": sun_spots,
     "csv": load_from_csv,
 }
 
 # pick one dataset from the list only
 __dataset = [
     # "India city pollution",
-    # "stock_prices",
-    # "airline_passengers",
-    "list_of_tuples",
-    # "sun_spots",
+    "Stock price"
+    # "Airline passengers",
+    # "list_of_tuples",
+    # "Sun spots",
     # "CSV",
 ]
 
 
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
-    "India city pollution": get_list_of_city_names()[
-        :7
-    ],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
-    "stock_prices": get_a_list_of_value_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
-    "airline_passengers": ["all"],
+    "India city pollution": get_list_of_city_names()[:5],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
+    "Stock price": get_a_list_of_growth_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+    "Airline passengers": ["all"],
     "list_of_tuples": ["random"],
-    "sun_spots": ["All"],
+    "Sun spots": ["All"],
 }
 
 
@@ -145,6 +143,11 @@ __predictors: dict[str, Predict[Dataset, Result]] = {
     "TsetlinMachineSingle": tsetlin_machine_single,
 }
 
+dataset_to_string = {
+    "India city pollution": "Indian city pollution",
+    "list_of_tuples": "Straight line",
+}
+
 
 def filter_dataframe_by_dataset_method_and_subset(
     dataset: str, topics: List[str], methods: List[str]
@@ -159,28 +162,10 @@ def filter_dataframe_by_dataset_method_and_subset(
     if dataframe_of_results is None:
         return pd.DataFrame()
 
-    if dataset == "India city pollution":
+    if dataset in dataset_to_string:
         dataframe_of_results = dataframe_of_results.loc[
-            dataframe_of_results["Dataset"] == "Indian city pollution"
+            dataframe_of_results["Dataset"] == dataset_to_string[dataset]
         ]
-    elif dataset == "stock_prices":
-        dataframe_of_results = dataframe_of_results.loc[
-            dataframe_of_results["Dataset"] == "Stock price"
-        ]
-    elif dataset == "airline_passengers":
-        dataframe_of_results = dataframe_of_results.loc[
-            dataframe_of_results["Dataset"] == "Airline passengers"
-        ]
-    elif dataset == "sun_spots":
-        dataframe_of_results = dataframe_of_results.loc[
-            dataframe_of_results["Dataset"] == "Sun spots"
-        ]
-
-    elif dataset == "list_of_tuples":
-        dataframe_of_results = dataframe_of_results.loc[
-            dataframe_of_results["Dataset"] == "Straight line"
-        ]
-
     else:
         dataframe_of_results = dataframe_of_results.loc[
             dataframe_of_results["Dataset"] == dataset
@@ -246,20 +231,22 @@ filtered_dataframe_r_squared = filtered_dataframe[
     ~filtered_dataframe.subset_row.isin(mask_low_r_squared)
 ]
 
+exception_datasets = {
+    "Airline passengers": None,
+    "Sun spots": None,
+    "list_of_tuples": None,
+}
+
 
 def load_dataset(dataset_name: str) -> list[Dataset]:
     """
     Load the given dataset.
     """
-    if (
-        dataset_name not in __dataset_row_items
-        or dataset_name == "airline_passengers"
-        or dataset_name == "sun_spots"
-        or dataset_name == "list_of_tuples"
-    ):
-        return [__dataset_loaders[dataset_name]()]
+    if dataset_name in __dataset_row_items and dataset_name not in exception_datasets:
+        return __dataset_loaders[dataset_name](__dataset_row_items.get(dataset_name))
     else:
-        return __dataset_loaders[dataset_name](__dataset_row_items[dataset_name])
+        return [__dataset_loaders[dataset_name]()]
+
 
 
 def generate_predictions_from_zip_json(data: pd.DataFrame) -> PredictionData:
@@ -303,5 +290,5 @@ for plotter_name, plotter in __plotters.items():
         plotter(filtered_dataframe, dataset_name)
     # elif plotter_name == "comparison":
     #     plotter(filtered_dataframe, dataset_name)
-    # else:
-    #     plotter(filtered_dataframe_r_squared, dataset_name)
+    else:
+        plotter(filtered_dataframe, dataset_name)
