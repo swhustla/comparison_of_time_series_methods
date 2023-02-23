@@ -1,7 +1,8 @@
 import os
 import pandas as pd
 import numpy as np
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Union
+from io import StringIO
 
 from data.dataset import Dataset
 from pandas import Timestamp
@@ -55,66 +56,63 @@ def __get_plot_metadata(
     return plot_folder, plot_file_name, title
 
 
-def __convert_string_to_series(string_format: str) -> pd.Series:
-    """Convert ground truth, prediction values, in sample prediciton to correct format from string"""
+def __convert_string_to_series(
+    data_string: str,
+) -> Union[pd.Series, pd.DataFrame, List]:
+    """Convert ground truth, prediction values, in sample prediction to correct format from string"""
 
     try:
-        tidy_series = pd.Series(eval(string_format))
-    except:
+        tidy_series = pd.Series(eval(data_string))
+    except SyntaxError:
         try:
-            print("Series conversion failed; trying to Dataframe")
-            tidy_series = pd.DataFrame(eval(string_format), index=0)
-        except:
-            print("DF conversion failed; trying to list")
-            tidy_series = list(eval(string_format))
-
+            print("Series conversion failed; trying to convert to DataFrame")
+            tidy_series = pd.DataFrame(eval(data_string), index=[0])
+        except SyntaxError:
+            print("DataFrame conversion failed; trying to convert to list")
+            tidy_series = list(eval(data_string))
+        except Exception as e:
+            print(f"Failed to convert to list: {e}")
+    except Exception as e:
+        print(f"Failed to convert to series: {e}")
     return tidy_series
 
 
 def __tidy_up_prediction_data_object(
-    prediction: list[PredictionData],
+    predictions: List[PredictionData],
 ) -> List[PredictionData]:
     pred_data = []
-    for prediction in prediction:
+    for pred in predictions:
         cleaned_pred_data = PredictionData(
-            method_name=prediction.method_name,
-            values=prediction.values,
-            prediction_column_name=prediction.prediction_column_name,
-            ground_truth_values=prediction.ground_truth_values,
-            confidence_columns=prediction.confidence_columns,
-            title=prediction.title,
-            plot_folder=prediction.plot_folder,
-            plot_file_name=prediction.plot_file_name,
-            model_config=prediction.model_config,
-            number_of_iterations=prediction.number_of_iterations,
-            confidence_on_mean=prediction.confidence_on_mean,
-            confidence_method=prediction.confidence_method,
-            color=prediction.color,
-            in_sample_prediction=prediction.in_sample_prediction,
+            method_name=pred.method_name,
+            values=pred.values,
+            prediction_column_name=pred.prediction_column_name,
+            ground_truth_values=pred.ground_truth_values,
+            confidence_columns=pred.confidence_columns,
+            title=pred.title,
+            plot_folder=pred.plot_folder,
+            plot_file_name=pred.plot_file_name,
+            model_config=pred.model_config,
+            number_of_iterations=pred.number_of_iterations,
+            confidence_on_mean=pred.confidence_on_mean,
+            confidence_method=pred.confidence_method,
+            color=pred.color,
+            in_sample_prediction=pred.in_sample_prediction,
         )
 
-        # get all the other values (non-series) as string
-        # for key, value in predictions_string_format:
-        #     if key not in  ["values", "ground_truth_values"]:
-        #         cleaned_pred_data[key] = value
-
         cleaned_pred_data.ground_truth_values = __convert_string_to_series(
-            prediction.ground_truth_values
+            pred.ground_truth_values
         )
 
         try:
-            cleaned_pred_data.values = pd.DataFrame(eval(prediction.values))
+            cleaned_pred_data.values = pd.DataFrame(eval(pred.values))
         except:
-            cleaned_pred_data.values = __convert_string_to_series(
-               prediction.values
-            )
-            
+            cleaned_pred_data.values = __convert_string_to_series(pred.values)
+
         cleaned_pred_data.in_sample_prediction = __convert_string_to_series(
-            prediction.in_sample_prediction
+            pred.in_sample_prediction
         )
 
         pred_data.append(cleaned_pred_data)
-
 
     return pred_data
 
@@ -132,20 +130,19 @@ def __plot_full_dataset_plus_predictions(
 
     try:
         list_prediction_data_objects = __tidy_up_prediction_data_object(
-            prediction=list_prediction_data_objects
+            predictions=list_prediction_data_objects
         )
     except:
         ground_truth_values = list_prediction_data_objects[0].ground_truth_values
-    
+
     ground_truth_values = list_prediction_data_objects[0].ground_truth_values
 
-    
     ground_truth_values.plot(
         ax=axis, label="Ground truth", style="x", c="blue", alpha=0.5
     )
-    
+
     for prediction in list_prediction_data_objects:
-       
+
         prediction_series = __get_prediction_series(prediction)
         if type(prediction_series) is np.ndarray:
             prediction_series = pd.Series(
@@ -193,8 +190,7 @@ def __plot_full_dataset_plus_predictions(
             va="bottom",
             annotation_clip=False,
         )
-       
-        
+
     axis.legend(loc="upper left")
     axis.set_xlabel("Date")
     if training_data.columns[0] == "PM2.5":
@@ -210,13 +206,25 @@ def __plot_full_dataset_plus_predictions(
     return figure
 
 
-def __save_plot(figure: Figure, folder: str, file_name: str, plot_type: str) -> None:
-    """Save the plot to disk."""
-    print(f"Saving plot to {folder}/{file_name}_{plot_type}.png")
-    if not os.path.exists(f"plots/{folder}"):
-        os.makedirs(f"plots/{folder}")
+def __save_plot(
+    figure: Figure,
+    folder: str,
+    file_name: str,
+    plot_type: str,
+    file_format: Optional[str] = "png",
+) -> str:
+    """Save the plot to disk and return the file path."""
+    file_path = os.path.join("plots", folder, f"{file_name}_{plot_type}.{file_format}")
+    print(f"Saving plot to {file_path}")
 
-    figure.savefig(f"plots/{folder}{file_name}_{plot_type}.png", bbox_inches="tight")
+    try:
+        if not os.path.exists(os.path.dirname(file_path)):
+            os.makedirs(os.path.dirname(file_path))
+        figure.savefig(file_path, format=file_format)
+        return file_path
+    except Exception as e:
+        print(f"Error saving plot: {e}")
+        return ""
 
 
 comparison_plot_multi = method(
