@@ -97,7 +97,9 @@ __dataset = [
 
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
-    "India city pollution": get_list_of_city_names()[:5],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
+    "India city pollution": get_list_of_city_names()[
+        :5
+    ],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
     "Stock price": get_a_list_of_growth_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
     "Airline passengers": ["all"],
     "list_of_tuples": ["random"],
@@ -241,12 +243,27 @@ exception_datasets = {
 def load_dataset(dataset_name: str) -> list[Dataset]:
     """
     Load the given dataset.
+
+    Args:
+        dataset_name: A string representing the name of the dataset to load.
+
+    Returns:
+        A list of Dataset objects representing the loaded dataset.
+
+    Raises:
+        KeyError: If `dataset_name` is not a valid dataset name.
+
+    Notes:
+        If `dataset_name` is in `__dataset_row_items`, the corresponding dataset
+        loader function is called with the row items (if any) from `__dataset_row_items`.
+        Otherwise, the dataset loader function is called without any row items.
+        The format of the row items is a dictionary with keys corresponding to the column
+        names and values corresponding to the row values.
     """
     if dataset_name in __dataset_row_items and dataset_name not in exception_datasets:
         return __dataset_loaders[dataset_name](__dataset_row_items.get(dataset_name))
     else:
         return [__dataset_loaders[dataset_name]()]
-
 
 
 def generate_predictions_from_zip_json(data: pd.DataFrame) -> PredictionData:
