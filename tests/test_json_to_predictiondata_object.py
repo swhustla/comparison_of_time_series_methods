@@ -42,6 +42,7 @@ class TestReportLoader(unittest.TestCase):
             "Elapsed (s)",
             "MAPE",
             "Filepath",
+            "BIC",
         ]
 
     @staticmethod

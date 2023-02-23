@@ -184,19 +184,26 @@ def __get_time_stamp_for_file_name() -> str:
     """Get the time stamp for the file name"""
     return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-def __save_plot_boxplot(figure: Figure, dataset_name: str, plot_type: str ,chosen_metric: str) -> None:
-    """Save the plot"""
-    time_stamp_string = __get_time_stamp_for_file_name()
-    folder_location = f"plots/{dataset_name}/{chosen_metric}_boxplot"
-    logging.info(f"Saving box_plot to {folder_location}/boxplot_{plot_type}_{time_stamp_string}.png")
-    if not os.path.exists(f"{folder_location}"):
-        os.makedirs(f"{folder_location}")
-    
-    figure.savefig(
-        f"{folder_location}/box_plot_{plot_type}.png",
-        bbox_inches="tight",
-        pad_inches=0.1,
-    )
+def __save_plot_boxplot(figure, dataset_name, plot_type, chosen_metric, file_format="png"):
+    """Save the box plot to disk."""
+    try:
+        time_stamp_string = __get_time_stamp_for_file_name()
+        folder_location = os.path.join("plots", dataset_name, f"{chosen_metric}_boxplot")
+        file_name = f"boxplot_{plot_type}_{time_stamp_string}.{file_format}"
+        file_path = os.path.join(folder_location, file_name)
+
+        if not os.path.exists(folder_location):
+            os.makedirs(folder_location)
+
+        logging.info(f"Saving box plot to {file_path}")
+        figure.savefig(
+            file_path,
+            format=file_format,
+            bbox_inches="tight",
+            pad_inches=0.1,
+        )
+    except Exception as e:
+        logging.error(f"Error saving box plot: {e}")
 
 
 plot_results_in_boxplot_from_csv = method_report_from_csv(
