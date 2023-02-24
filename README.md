@@ -11,7 +11,8 @@ This project enables a selection of different time-series techniques to be compa
 4. In the base folder of the cloned repo type `$ make install` which will set up a Poetry virtual environment and install all dependencies required.
 5. To run the main code: `$make run`
 6. Check the `plots/` and `reports/` folders for any output.
-
+7. Plots can also be produced outside the main code using 'reports/summary_report.csv' and 'reports/full_data/....zip' as input. To produce plots: '$poetry run python ./main_plot.py
+8.  Check the `plots/` folder for any output.
 
 ### Configuration
 
