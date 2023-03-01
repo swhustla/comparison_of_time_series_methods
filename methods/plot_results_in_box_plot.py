@@ -31,21 +31,21 @@ def plot_results_in_boxplot_from_csv(
             stock_company_name = data_to_plot["subset_row"][0]
             print(f"Saving {dataset_name} {chosen_metric} boxplot plot")
             input_map = {
-                ("Stock price", "HD"): (
-                    figure_method,
-                    "Stock price",
-                    "by_method_young",
-                    chosen_metric,
-                    "by_data_young",
-                ),
-                ("Stock price", "GOOG"): (
+                ("Stock price", "KO"): (
                     figure_method,
                     "Stock price",
                     "by_method_old",
                     chosen_metric,
                     "by_data_old",
                 ),
-                ("India city pollution", "Ahmedabad"): (
+                ("Stock price", "AAPL"): (
+                    figure_method,
+                    "Stock price",
+                    "by_method_young",
+                    chosen_metric,
+                    "by_data_young",
+                ),
+                ("India city pollution", stock_company_name): (
                     figure_method,
                     "Indian city pollution",
                     "by_method",
