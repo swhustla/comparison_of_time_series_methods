@@ -48,8 +48,13 @@ def plot_results_in_heatmap_from_csv(
             stock_company_name = data_to_plot["subset_row"][0]
             print(f"Saving {dataset_name} {chosen_metric} heatmap plot")
             input_map = {
-                ("Stock price", "KO"): (figure, dataset_name, "old", chosen_metric),
-                ("Stock price", "AAPL"): (figure, dataset_name, "young", chosen_metric),
+                ("Stock price", "KO"): (figure, dataset_name, "value", chosen_metric),
+                ("Stock price", "AAPL"): (
+                    figure,
+                    dataset_name,
+                    "growth",
+                    chosen_metric,
+                ),
                 ("India city pollution", stock_company_name): (
                     figure,
                     "Indian city pollution",

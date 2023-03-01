@@ -34,16 +34,16 @@ def plot_results_in_boxplot_from_csv(
                 ("Stock price", "KO"): (
                     figure_method,
                     "Stock price",
-                    "by_method_old",
+                    "by_method_value",
                     chosen_metric,
-                    "by_data_old",
+                    "by_data_value",
                 ),
                 ("Stock price", "AAPL"): (
                     figure_method,
                     "Stock price",
-                    "by_method_young",
+                    "by_method_growth",
                     chosen_metric,
-                    "by_data_young",
+                    "by_data_growth",
                 ),
                 ("India city pollution", stock_company_name): (
                     figure_method,
@@ -57,6 +57,8 @@ def plot_results_in_boxplot_from_csv(
             if input_key in input_map:
                 figure_params = input_map[input_key]
                 save_plot_boxplot(*figure_params[:-1]),
-                save_plot_boxplot(figure_city, figure_params[1],figure_params[4], chosen_metric),
-               
+                save_plot_boxplot(
+                    figure_city, figure_params[1], figure_params[4], chosen_metric
+                ),
+
     return draw_plot
