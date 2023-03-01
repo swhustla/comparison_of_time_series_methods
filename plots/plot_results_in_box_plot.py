@@ -121,9 +121,12 @@ def __plot_boxplot_by_method(
     plt.yticks(weight = 'normal')
     plt.legend(fontsize='x-large', title_fontsize='40',loc='upper right')
     if __get_dataset_name(results_dataframe) == 'Stock price':
-        axis.set_ylim(0, 70)
+        MAPE = results_dataframe["MAPE"]
+        MAPE_filter = MAPE[MAPE < 100]
     else:
-        axis.set_ylim(0, 150)
+        MAPE = results_dataframe["MAPE"]
+        MAPE_filter = MAPE[MAPE < 160]
+    axis.set_ylim(0, 1.1 * MAPE_filter.max())
     axis.set_xlabel("Method",fontsize=18,weight = 'semibold')
     axis.set_ylabel(chosen_metric,fontsize=18,weight = 'semibold')
     return figure
@@ -172,10 +175,13 @@ def __plot_boxplot_by_city(
     plt.legend(fontsize='x-large', title_fontsize='40',loc='upper right')
     if __get_dataset_name(results_dataframe) == 'Stock price':
         axis.set_xlabel("Stock price",fontsize=18,weight = 'semibold')
-        axis.set_ylim(0, 70)
+        MAPE = results_dataframe["MAPE"]
+        MAPE_filter = MAPE[MAPE < 100]
     else:
         axis.set_xlabel("City",fontsize=18,weight = 'semibold')
-        axis.set_ylim(0, 150)
+        MAPE = results_dataframe["MAPE"]
+        MAPE_filter = MAPE[MAPE < 100]
+    axis.set_ylim(0, 1.1 * MAPE_filter.max())
     axis.set_title(title,fontsize=18)
     axis.set_ylabel(chosen_metric,fontsize=18,weight = 'semibold')
     return figure
