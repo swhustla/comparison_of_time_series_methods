@@ -129,6 +129,37 @@ def get_list_of_inland_indian_cities() -> list:
             inland_cities.append(city)
     return inland_cities
 
+def get_city_list_by_tier(city_type: str) -> list:
+    """Get the list of cities in each tier"""
+    tier1 = ["Bengaluru", "Chennai", "Delhi", "Hyderabad", "Kolkata", "Mumbai"]
+    tier2 = ["Agra", "Ahmedabad", "Amritsar", "Bhopal", "Coimbatore", "Indore", "Jaipur", "Kanpur", "Lucknow", "Nagpur", "Patna", "Pune", "Surat", "Visakhapatnam"]
+    tier3 = ["Aizawl", "Amaravati", "Brajrajnagar", "Chandigarh", "Ernakulam", "Guwahati", "Gurugram", "Jorapokhar", "Kochi", "Shillong", "Talcher", "Thiruvananthapuram"]
+
+    # Handle likely typos
+    if city_type == "Tier 1 Cities" or city_type == "Tier 1 cities" or city_type == "Tier 1 city" or city_type == "Tier 1 City" or city_type == "Tier 1":
+        return tier1
+    elif city_type == "Tier 2 Cities" or city_type == "Tier 2 cities" or city_type == "Tier 2 city" or city_type == "Tier 2 City" or city_type == "Tier 2":
+        return tier2
+    elif city_type == "Tier 3 Cities" or city_type == "Tier 3 cities" or city_type == "Tier 3 city" or city_type == "Tier 3 City" or city_type == "Tier 3":
+        return tier3
+
+
+__list_of_northern_cities = ["Delhi", "Lucknow", "Jaipur", "Patna", "Chandigarh"]
+__list_of_southern_cities = ["Chennai", "Coimbatore", "Kochi", "Ernakulam", "Thiruvananthapuram"]
+__list_of_eastern_cities = ["Kolkata", "Bhopal", "Brajrajnagar", "Talcher"]
+__list_of_western_cities = ["Ahmedabad", "Amaravati", "Amritsar", "Bengaluru", "Gurugram", "Guwahati", "Hyderabad", "Mumbai", "Shillong", "Visakhapatnam", "Jorapokhar", "Aizawl"]
+
+def get_cities_from_geographical_region(geographical_region: str)-> list:
+    """Get the list of cities in each geographical region"""
+    if geographical_region == "Northern":
+        return __list_of_northern_cities
+    elif geographical_region == "Southern":
+        return __list_of_southern_cities
+    elif geographical_region == "Eastern":
+        return __list_of_eastern_cities
+    elif geographical_region == "Western":
+        return __list_of_western_cities
+
 
 def india_pollution(
     city_list: list = __city_choice,
