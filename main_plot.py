@@ -87,8 +87,8 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 # pick one dataset from the list only
 __dataset = [
-    "India city pollution",
-    # "Stock price"
+    # "India city pollution",
+    "Stock price"
     # "Airline passengers",
     # "list_of_tuples",
     # "Sun spots",
@@ -99,9 +99,10 @@ __dataset = [
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
     "India city pollution": [
-        "Ahmedabad"
+        "Jaipur",
+        "Visakhapatnam",
     ],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
-    "Stock price": get_a_list_of_value_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+    "Stock price": get_a_list_of_growth_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
     "Airline passengers": ["all"],
     "list_of_tuples": ["random"],
     "Sun spots": ["All"],
@@ -287,7 +288,10 @@ for dataset_name in __dataset:
         training_index = dataset.values.index[
             : int(len(dataset.values.index) * (1 - __testset_size))
         ]
-        id_count = np.where(filtered_dataframe["subset_row"] == dataset.subset_row_name)
+        id_count = np.where(
+            (filtered_dataframe["subset_row"] == dataset.subset_row_name)
+            & (np.isfinite(filtered_dataframe["MAPE"]))
+        )
         id_count = np.array(id_count).ravel()
 
         prediction_per_city = []
