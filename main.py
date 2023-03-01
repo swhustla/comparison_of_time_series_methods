@@ -20,6 +20,8 @@ if __name__ == "__main__":
         india_pollution,
         get_list_of_city_names,
         get_list_of_coastal_indian_cities,
+        get_cities_from_geographical_region,
+        get_city_list_by_tier,
     )
     from data.stock_prices import (
         stock_prices,
@@ -65,9 +67,7 @@ if __name__ == "__main__":
 
     __dataset_row_items: dict[str, list[str]] = {
         # take first 3 from list of cities
-        "india_pollution": [
-            "Gurugram"
-        ],  # get_list_of_city_names()[:3],  # ["Gurugram"]
+        "india_pollution": get_cities_from_geographical_region("Northern"),
         "stock_prices": [
             "DIS"
         ],  # get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
@@ -281,9 +281,9 @@ if __name__ == "__main__":
     __methods = [
         "AR",
         # "linear_regression",
-        # "ARIMA",
-        # "HoltWinters",
-        # "MA",
+        "ARIMA",
+        "HoltWinters",
+        "MA",
         # "Prophet",
         # "FCNN",
         # "FCNN_embedding",

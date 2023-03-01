@@ -29,6 +29,11 @@ def plot_results_in_scatter_plot(
         print("Plotting results in scatter plot")
         results_dataframe = compile_results_single_dataset(list_of_list_of_reports)
         for chosen_metric in __chosen_metrics:
+            # check that results_dataframe has chosen_metric, and is not empty
+            if chosen_metric not in results_dataframe.columns:
+                continue
+            if len(results_dataframe[chosen_metric]) == 0:
+                continue
             figure = plot_scatterplot(results_dataframe, chosen_metric)
             save_plot(figure, results_dataframe, chosen_metric)
 
