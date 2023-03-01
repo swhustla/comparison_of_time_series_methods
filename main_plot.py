@@ -31,6 +31,7 @@ from methods.predict import Predict
 from plots.plot_results_in_heatmap import plot_results_in_heatmap_from_csv
 from plots.plot_results_in_box_plot import plot_results_in_boxplot_from_csv
 from plots.comparison_plot_multi import comparison_plot_multi
+from plots.comparison_plot import comparison_plot
 
 from predictions.AR import ar
 from predictions.MA import ma
@@ -97,8 +98,9 @@ __dataset = [
 
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
-    "India city pollution": get_list_of_city_names()[
-        :5
+    "India city pollution": [
+        "Jaipur",
+        "Visakhapatnam",
     ],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
     "Stock price": get_a_list_of_growth_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
     "Airline passengers": ["all"],
@@ -119,7 +121,7 @@ __methods = [
     # "FCNN_embedding",
     "SARIMA",
     # "auto_arima"
-    # "SES",
+    "SES",
     # "TsetlinMachine",
 ]
 
@@ -286,7 +288,10 @@ for dataset_name in __dataset:
         training_index = dataset.values.index[
             : int(len(dataset.values.index) * (1 - __testset_size))
         ]
-        id_count = np.where(filtered_dataframe["subset_row"] == dataset.subset_row_name)
+        id_count = np.where(
+            (filtered_dataframe["subset_row"] == dataset.subset_row_name)
+            & (np.isfinite(filtered_dataframe["MAPE"]))
+        )
         id_count = np.array(id_count).ravel()
 
         prediction_per_city = []
@@ -294,6 +299,7 @@ for dataset_name in __dataset:
             prediction = generate_predictions_from_zip_json(filtered_dataframe)[
                 id_count[i]
             ]
+            comparison_plot(dataset.values.loc[training_index, :], prediction)
             prediction_per_city.append(prediction)
 
         comparison_plot_multi(
