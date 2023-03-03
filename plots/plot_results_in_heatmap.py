@@ -102,12 +102,13 @@ def __plot_heatmap(
             annot=True,
             fmt=".2f",
             cmap="rainbow",
-            vmin=10,
+            vmin=pivoted_dataframe.min().min(),
             vmax=60,
             mask=mask_for_missing_values,
         )
         cluster_grid.ax_col_dendrogram.set_title(title)
         return cluster_grid
+    
 
     # reversing the colorbar for R2 case
     if chosen_metric == "R2":
