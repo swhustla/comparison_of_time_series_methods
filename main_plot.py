@@ -32,6 +32,7 @@ from plots.plot_results_in_heatmap import plot_results_in_heatmap_from_csv
 from plots.plot_results_in_box_plot import plot_results_in_boxplot_from_csv
 from plots.comparison_plot_multi import comparison_plot_multi
 from plots.comparison_plot import comparison_plot
+from plots.plot_results_in_scatter_plot import plot_results_in_scatter_plot_from_csv
 
 from predictions.AR import ar
 from predictions.MA import ma
@@ -99,10 +100,11 @@ __dataset = [
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
     "India city pollution": [
-        "Jaipur",
-        "Visakhapatnam",
+        "Ahmedabad",
+        "Bengaluru",
+        "Chennai",
     ],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
-    "Stock price": get_a_list_of_growth_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+    "Stock price": get_a_list_of_value_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
     "Airline passengers": ["all"],
     "list_of_tuples": ["random"],
     "Sun spots": ["All"],
@@ -128,7 +130,9 @@ __methods = [
 __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
     "heatmap": plot_results_in_heatmap_from_csv,
     "boxplot": plot_results_in_boxplot_from_csv,
-    # "comparison": comparison_plot_multi,
+    "comparison_plot": comparison_plot,
+    "comparison_plot_multi": comparison_plot_multi,
+    "scatter_plot": plot_results_in_scatter_plot_from_csv,
 }
 
 __predictors: dict[str, Predict[Dataset, Result]] = {
@@ -210,7 +214,17 @@ filtered_dataframe = filter_dataframe_by_dataset_method_and_subset(
 
 # re-format the report to be used in the heatmap
 filtered_dataframe = filtered_dataframe[
-    ["Dataset", "Topic", "Model", "MAE", "RMSE", "MAPE", "R Squared", "Filepath"]
+    [
+        "Dataset",
+        "Topic",
+        "Model",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "R Squared",
+        "Filepath",
+        "Elapsed (s)",
+    ]
 ]
 
 # rename the columns to be used in the heatmap
@@ -280,13 +294,15 @@ def generate_predictions_from_zip_json(data: pd.DataFrame) -> PredictionData:
     return json_data_store
 
 
-for dataset_name in __dataset:
+def run_plotting_pipeline(filtered_dataframe, testset_size, plot_type="all"):
+
+    # for dataset_name in __dataset:
     # TODO: decide if need to run on lots of datasets or just one
 
     data_list = load_dataset(dataset_name)
     for dataset in data_list:
         training_index = dataset.values.index[
-            : int(len(dataset.values.index) * (1 - __testset_size))
+            : int(len(dataset.values.index) * (1 - testset_size))
         ]
         id_count = np.where(
             (filtered_dataframe["subset_row"] == dataset.subset_row_name)
@@ -294,24 +310,48 @@ for dataset_name in __dataset:
         )
         id_count = np.array(id_count).ravel()
 
-        prediction_per_city = []
+        prediction_per_dataset = []
+        filtered_dataframe_per_dataset = []
         for i in range(len(id_count)):
             prediction = generate_predictions_from_zip_json(filtered_dataframe)[
                 id_count[i]
             ]
-            comparison_plot(dataset.values.loc[training_index, :], prediction)
-            prediction_per_city.append(prediction)
-
-        comparison_plot_multi(
-            dataset.values.loc[training_index, :], prediction_per_city
-        )
+            filtered_dataframe_per_dataset.append(filtered_dataframe.iloc[id_count[i]])
+            if plot_type == "comparison_plot":
+                # plot comparison plot per method
+                comparison_plot(dataset.values.loc[training_index, :], prediction)
+            prediction_per_dataset.append(prediction)
+        if plot_type == "comparison_plot_multi":
+            # plot comparison plot per dataset
+            comparison_plot_multi(
+                dataset.values.loc[training_index, :], prediction_per_dataset
+            )
+        filtered_dataframe_per_dataset = pd.DataFrame(filtered_dataframe_per_dataset)
+        if plot_type == "scatter_plot":
+            # plot scatter plot per dataset
+            plot_results_in_scatter_plot_from_csv(
+                filtered_dataframe_per_dataset, dataset
+            )
 
 
 for plotter_name, plotter in __plotters.items():
     print(f"Plotting {plotter_name} for dataset: {dataset_name}")
     if plotter_name == "boxplot":
-        plotter(filtered_dataframe, dataset_name)
-    # elif plotter_name == "comparison":
-    #     plotter(filtered_dataframe, dataset_name)
+        try:
+            plotter(filtered_dataframe, dataset_name)
+        except Exception as e:
+            print(f"Error plotting {plotter_name}: {str(e)}")
+            continue
+    elif plotter_name == "comparison_plot":
+        run_plotting_pipeline(filtered_dataframe, __testset_size, "comparison_plot")
+    elif plotter_name == "comparison_plot_multi":
+        run_plotting_pipeline(
+            filtered_dataframe, __testset_size, "comparison_plot_multi"
+        )
+    elif plotter_name == "scatter_plot":
+        run_plotting_pipeline(filtered_dataframe, __testset_size, "scatter_plot")
     else:
-        plotter(filtered_dataframe, dataset_name)
+        try:
+            plotter(filtered_dataframe, dataset_name)
+        except Exception as e:
+            print(f"Error plotting {plotter_name}: {str(e)}")

@@ -24,6 +24,7 @@ from data.report import Report
 from plots.plot_results_in_heatmap import __get_dataset_name, __get_time_stamp_for_file_name
 from methods.plot_results_in_scatter_plot import plot_results_in_scatter_plot as method
 
+from methods.plot_results_in_scatter_plot import plot_results_in_scatter_plot_from_csv as method_report_from_csv
 
 
 def __compile_results_single_dataset(list_of_reports: List[Report]) -> Tuple[pd.DataFrame, str]:
@@ -111,6 +112,7 @@ def __save_plot(figure: Figure, results_dataframe: pd.DataFrame, chosen_metric: 
 
 plot_results_in_scatter_plot = method(__compile_results_single_dataset, __plot_scatterplot, __save_plot)
 
+plot_results_in_scatter_plot_from_csv =  method_report_from_csv( __plot_scatterplot, __save_plot)
 
 
 

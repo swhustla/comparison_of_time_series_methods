@@ -106,12 +106,13 @@ def __plot_boxplot_by_method(
 
     sns.scatterplot(
         data=results_dataframe,
-        x=results_dataframe["method"],
-        y=results_dataframe["MAPE"],
-        hue="method",
+        x="method",
+        y="MAPE",
+        hue="subset_row",
         ax=axis,
-        palette=color_map,
-        s=100,
+        palette=sns.color_palette("tab10",results_dataframe.subset_row.unique().shape[0]),
+        marker="X",
+        s=200,
     )
     add_median_labels(box_plot)
 
@@ -156,17 +157,19 @@ def __plot_boxplot_by_city(
         x="subset_row", 
         y="MAPE", 
         data=results_dataframe,
+        palette=sns.color_palette("tab10",results_dataframe.subset_row.unique().shape[0]),
         linewidth=3,)
     add_median_labels(box_plot)
 
     sns.scatterplot(
         data=results_dataframe,
-        x=results_dataframe["subset_row"],
-        y=results_dataframe["MAPE"],
+        x="subset_row",
+        y="MAPE",
         hue="method",
         ax=axis,
         palette=color_map,
-        s=100,
+        marker="X",
+        s=200,
     )
     
     plt.tick_params(axis='both', which='major', labelsize=17, width=2)
