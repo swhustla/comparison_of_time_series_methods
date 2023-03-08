@@ -152,13 +152,13 @@ __list_of_north_eastern_cities = ["Bhopal", "Brajrajnagar", "Talcher", "Visakhap
 
 def get_cities_from_geographical_region(geographical_region: str)-> list:
     """Get the list of cities in each geographical region"""
-    if geographical_region == "Indo-Gangetic Plain":
+    if geographical_region == "Indo-Gangetic Plain" or geographical_region == "Indo Gangetic Plain" or geographical_region == "Northern":
         return __list_of_indo_gangetic_plain_cities
-    elif geographical_region == "South Eastern":
+    elif geographical_region == "South Eastern" or geographical_region == "Southern":
         return __list_of_south_eastern_cities
-    elif geographical_region == "North Eastern":
+    elif geographical_region == "North Eastern" or geographical_region == "Eastern":
         return __list_of_north_eastern_cities
-    elif geographical_region == "Western":
+    elif geographical_region == "Western" or geographical_region == "Western Coast" or geographical_region == "South Western":
         return __list_of_western_cities
 
 
