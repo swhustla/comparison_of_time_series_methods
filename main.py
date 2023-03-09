@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     __dataset_row_items: dict[str, list[str]] = {
         # take first 3 from list of cities
-        "india_pollution": get_cities_from_geographical_region("Northern"),
+        "india_pollution": get_cities_from_geographical_region("Indo-Gangetic Plain"),
         "stock_prices": [
             "DIS"
         ],  # get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
@@ -281,7 +281,7 @@ if __name__ == "__main__":
     __methods = [
         "AR",
         # "linear_regression",
-        "ARIMA",
+        # "ARIMA",
         "HoltWinters",
         "MA",
         # "Prophet",

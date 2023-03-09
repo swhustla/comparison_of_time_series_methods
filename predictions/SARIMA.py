@@ -294,7 +294,7 @@ def __get_best_sarima_model(data: Dataset) -> Tuple[SARIMAX, int]:
         configs = __get_sarima_configs(m_params=[seasonal])
 
     # grid search
-    scores = __grid_search_configs(data, configs, parallel=True)
+    scores = __grid_search_configs(data, configs, parallel=False)
     logging.info("Grid search done")
     # list top 3 configs
     for cfg, error in scores[:3]:
