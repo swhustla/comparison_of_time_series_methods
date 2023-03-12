@@ -15,6 +15,10 @@ Figure = TypeVar("Figure")
 from predictions.Prediction import PredictionData
 
 from data.report import Report
+from data.stock_prices import (
+    get_a_list_of_growth_stock_tickers,
+    get_a_list_of_value_stock_tickers,
+)
 
 
 from methods.plot_results_in_heatmap import plot_results_in_heatmap as method_report
@@ -108,7 +112,6 @@ def __plot_heatmap(
         )
         cluster_grid.ax_col_dendrogram.set_title(title)
         return cluster_grid
-    
 
     # reversing the colorbar for R2 case
     if chosen_metric == "R2":
@@ -142,6 +145,43 @@ def __get_time_stamp_for_file_name() -> str:
     return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
+def __get_plot_params(
+    figure: Figure, chosen_metric: str, data_to_plot: pd.DataFrame, dataset_name: str
+):
+    sub_category_name = data_to_plot["subset_row"][0]
+    input_map = {}
+    if dataset_name == "Stock price":
+        list_of_growth = get_a_list_of_growth_stock_tickers()
+        for ticker in list_of_growth:
+            input_map[(dataset_name, ticker)] = (
+                figure,
+                dataset_name,
+                "growth",
+                chosen_metric,
+            )
+        list_of_value = get_a_list_of_value_stock_tickers()
+        for ticker in list_of_value:
+            input_map[(dataset_name, ticker)] = (
+                figure,
+                dataset_name,
+                "value",
+                chosen_metric,
+            )
+    elif (
+        dataset_name == "India city pollution"
+        or dataset_name == "Indian city pollution"
+    ):
+        input_map[(dataset_name, sub_category_name)] = (
+            figure,
+            "Indian city pollution",
+            "_",
+            chosen_metric,
+        )
+    input_key = (dataset_name, sub_category_name)
+
+    return input_map.get(input_key, "__")
+
+
 def __save_heatmap(
     figure: Figure,
     dataset_name: str,
@@ -167,8 +207,8 @@ def __save_heatmap(
 
 
 plot_results_in_heatmap = method_report(
-    __compile_results, __plot_heatmap, __save_heatmap
+    __compile_results, __plot_heatmap, __get_plot_params, __save_heatmap
 )
 plot_results_in_heatmap_from_csv = method_report_from_csv(
-    __plot_heatmap, __save_heatmap
+    __plot_heatmap, __get_plot_params, __save_heatmap
 )

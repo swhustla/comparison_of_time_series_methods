@@ -17,6 +17,10 @@ from predictions.Prediction import PredictionData
 from plots.color_map_by_method import __color_map_by_method_dict
 
 from data.report import Report
+from data.stock_prices import (
+    get_a_list_of_growth_stock_tickers,
+    get_a_list_of_value_stock_tickers,
+)
 
 
 from methods.plot_results_in_box_plot import plot_results_in_boxplot_from_csv as method_report_from_csv
@@ -193,6 +197,48 @@ def __get_time_stamp_for_file_name() -> str:
     """Get the time stamp for the file name"""
     return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
+
+def __get_plot_params(
+    figure: Figure, chosen_metric: str, data_to_plot: pd.DataFrame, dataset_name: str
+):
+    sub_category_name = data_to_plot["subset_row"][0]
+    input_map = {}
+    if dataset_name == "Stock price":
+        list_of_growth = get_a_list_of_growth_stock_tickers()
+        for ticker in list_of_growth:
+            input_map[(dataset_name, ticker)] = (
+                figure,
+                dataset_name,
+                "by_method_growth",
+                chosen_metric,
+                "by_data_growth",
+            )
+        list_of_value = get_a_list_of_value_stock_tickers()
+        for ticker in list_of_value:
+            input_map[(dataset_name, ticker)] = (
+                figure,
+                dataset_name,
+                 "by_method_value",
+                chosen_metric,
+                "by_data_value"
+            )
+    elif (
+        dataset_name == "India city pollution"
+        or dataset_name == "Indian city pollution"
+    ):
+        input_map[(dataset_name, sub_category_name)] = (
+            figure,
+            "Indian city pollution",
+            "by_method",
+            chosen_metric,
+            "by_data",
+        )
+    input_key = (dataset_name, sub_category_name)
+
+    return input_map.get(input_key, "__")
+
+
+
 def __save_plot_boxplot(figure, dataset_name, plot_type, chosen_metric, file_format="png"):
     """Save the box plot to disk."""
     try:
@@ -216,5 +262,5 @@ def __save_plot_boxplot(figure, dataset_name, plot_type, chosen_metric, file_for
 
 
 plot_results_in_boxplot_from_csv = method_report_from_csv(
-    __plot_boxplot_by_method, __plot_boxplot_by_city, __save_plot_boxplot
+    __plot_boxplot_by_method, __plot_boxplot_by_city, __get_plot_params, __save_plot_boxplot
     )

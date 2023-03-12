@@ -67,10 +67,8 @@ if __name__ == "__main__":
 
     __dataset_row_items: dict[str, list[str]] = {
         # take first 3 from list of cities
-        "india_pollution": get_cities_from_geographical_region("Northern"),
-        "stock_prices": [
-            "DIS"
-        ],  # get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+        "india_pollution": ["Kolkata","Ahmedabad"],#get_cities_from_geographical_region("Northern"),
+        "stock_prices":   get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
     }
 
     __dataset_group_titles: dict[str, str] = {
@@ -270,8 +268,8 @@ if __name__ == "__main__":
                 )
 
     __datasets = [
-        "india_pollution",
-        #  "stock_prices",
+        # "india_pollution",
+         "stock_prices",
         # "airline_passengers",
         # "list_of_tuples",
         #  "sun_spots",
@@ -279,12 +277,12 @@ if __name__ == "__main__":
     ]
 
     __methods = [
-        "AR",
-        # "linear_regression",
-        "ARIMA",
-        "HoltWinters",
-        "MA",
-        # "Prophet",
+        # "AR",
+        "linear_regression",
+        # "ARIMA",
+        # "HoltWinters",
+        # "MA",
+        "Prophet",
         # "FCNN",
         # "FCNN_embedding",
         # "SARIMA",
