@@ -23,11 +23,14 @@ from data.stock_prices import (
 )
 
 
-from methods.plot_results_in_box_plot import plot_results_in_boxplot_from_csv as method_report_from_csv
+from methods.plot_results_in_box_plot import (
+    plot_results_in_boxplot_from_csv as method_report_from_csv,
+)
 
 
-
-def __compile_results(list_of_list_of_reports: List[List[Report]]) -> Tuple[pd.DataFrame, str]:
+def __compile_results(
+    list_of_list_of_reports: List[List[Report]],
+) -> Tuple[pd.DataFrame, str]:
     """Compile the results from a list of lists of reports into a dataframe"""
     results = []
     for list_of_method_results_per_dataset in list_of_list_of_reports:
@@ -53,7 +56,9 @@ def __get_dataset_name(results_dataframe: pd.DataFrame) -> str:
     return results_dataframe["dataset"].unique()[0]
 
 
-def __get_title(results_dataframe: pd.DataFrame, chosen_metric: str, group_name: str) -> str:
+def __get_title(
+    results_dataframe: pd.DataFrame, chosen_metric: str, group_name: str
+) -> str:
     """Get the title of the plot"""
     if group_name is None:
         return f"Box plot {chosen_metric} for {__get_dataset_name(results_dataframe)} for {results_dataframe['method'].unique().size} predictive methods on {results_dataframe['subset_row'].unique().size} datasets"
@@ -61,28 +66,38 @@ def __get_title(results_dataframe: pd.DataFrame, chosen_metric: str, group_name:
         return f"Box plot {chosen_metric} for {group_name} with {results_dataframe['method'].unique().size} predictive methods"
 
 
-
-def add_median_labels(ax, fmt='.1f'):
-    """Credits: https://stackoverflow.com/a/63295846/4865723
-    """
+def add_median_labels(ax, fmt=".1f"):
+    """Credits: https://stackoverflow.com/a/63295846/4865723"""
     lines = ax.get_lines()
-    boxes = [c for c in ax.get_children() if type(c).__name__ == 'PathPatch']
+    boxes = [c for c in ax.get_children() if type(c).__name__ == "PathPatch"]
     lines_per_box = int(len(lines) / len(boxes))
-    for median in lines[4:len(lines):lines_per_box]:
+    for median in lines[4 : len(lines) : lines_per_box]:
         x, y = (data.mean() for data in median.get_data())
         # choose value depending on horizontal or vertical plot orientation
         value = x if (median.get_xdata()[1] - median.get_xdata()[0]) == 0 else y
-        text = ax.text(x, y, f'{value:{fmt}}', ha='center', va='center',
-                       fontweight='bold', color='white',fontsize=12)
+        text = ax.text(
+            x,
+            y,
+            f"{value:{fmt}}",
+            ha="center",
+            va="center",
+            fontweight="bold",
+            color="white",
+            fontsize=12,
+        )
         # create median-colored border around white text for contrast
-        text.set_path_effects([
-            path_effects.Stroke(linewidth=3, foreground=median.get_color()),
-            path_effects.Normal(),
-        ])
+        text.set_path_effects(
+            [
+                path_effects.Stroke(linewidth=3, foreground=median.get_color()),
+                path_effects.Normal(),
+            ]
+        )
 
 
 def __plot_boxplot_by_method(
-    results_dataframe: pd.DataFrame, chosen_metric: str = "MAE", group_name: Optional[str] = None
+    results_dataframe: pd.DataFrame,
+    chosen_metric: str = "MAE",
+    group_name: Optional[str] = None,
 ) -> Figure:
     """Plot the results in a boxplot"""
     logging.info(f"Plotting {chosen_metric} boxplot")
@@ -91,22 +106,29 @@ def __plot_boxplot_by_method(
     color_map = __color_map_by_method_dict
     figure, axis = plt.subplots(figsize=(15, 9))
 
-    results_dataframe[chosen_metric] = results_dataframe[chosen_metric].replace([np.inf, -np.inf], np.nan)
 
-    pivoted_dataframe = results_dataframe.pivot(columns="method", index="subset_row", values=chosen_metric)
+    results_dataframe = results_dataframe.copy()
+    results_dataframe.loc[:, chosen_metric] = results_dataframe[chosen_metric].replace(
+        ["none", "nan"], np.nan
+    )
+
+    pivoted_dataframe = results_dataframe.pivot(
+        columns="method", index="subset_row", values=chosen_metric
+    )
     # condensed distance matrix must contain only finite values
     pivoted_dataframe = pivoted_dataframe.replace([np.inf, -np.inf], np.nan)
 
-    #deal with the case where there are no results for a method
+    # deal with the case where there are no results for a method
     pivoted_dataframe = pivoted_dataframe.fillna(0)
     mask_for_missing_values = pivoted_dataframe == 0
 
     box_plot = sns.boxplot(
         x="method",
-        y="MAPE", 
+        y="MAPE",
         data=results_dataframe,
         palette=color_map,
-        linewidth=3,)
+        linewidth=3,
+    )
 
     sns.scatterplot(
         data=results_dataframe,
@@ -114,30 +136,35 @@ def __plot_boxplot_by_method(
         y="MAPE",
         hue="subset_row",
         ax=axis,
-        palette=sns.color_palette("tab10",results_dataframe.subset_row.unique().shape[0]),
+        palette=sns.color_palette(
+            "tab10", results_dataframe.subset_row.unique().shape[0]
+        ),
         marker="X",
         s=200,
     )
     add_median_labels(box_plot)
 
-    plt.tick_params(axis='both', which='major', labelsize=17, width=2)
-    axis.set_title(title,fontsize=18)
-    plt.xticks(rotation=50, weight = 'normal')
-    plt.yticks(weight = 'normal')
-    plt.legend(fontsize='x-large', title_fontsize='40',loc='upper right')
-    if __get_dataset_name(results_dataframe) == 'Stock price':
+    plt.tick_params(axis="both", which="major", labelsize=17, width=2)
+    axis.set_title(title, fontsize=18)
+    plt.xticks(rotation=50, weight="normal")
+    plt.yticks(weight="normal")
+    plt.legend(fontsize="x-large", title_fontsize="40", loc="upper right")
+    if __get_dataset_name(results_dataframe) == "Stock price":
         MAPE = results_dataframe["MAPE"]
         MAPE_filter = MAPE[MAPE < 100]
     else:
         MAPE = results_dataframe["MAPE"]
         MAPE_filter = MAPE[MAPE < 160]
     axis.set_ylim(0, 1.1 * MAPE_filter.max())
-    axis.set_xlabel("Method",fontsize=18,weight = 'semibold')
-    axis.set_ylabel(chosen_metric,fontsize=18,weight = 'semibold')
+    axis.set_xlabel("Method", fontsize=18, weight="semibold")
+    axis.set_ylabel(chosen_metric, fontsize=18, weight="semibold")
     return figure
 
+
 def __plot_boxplot_by_city(
-    results_dataframe: pd.DataFrame, chosen_metric: str = "MAE", group_name: Optional[str] = None
+    results_dataframe: pd.DataFrame,
+    chosen_metric: str = "MAE",
+    group_name: Optional[str] = None,
 ) -> Figure:
     """Plot the results in a boxplot"""
     logging.info(f"Plotting {chosen_metric} boxplot")
@@ -147,22 +174,30 @@ def __plot_boxplot_by_city(
     color_map = __color_map_by_method_dict
     figure, axis = plt.subplots(figsize=(15, 9))
 
-    results_dataframe[chosen_metric] = results_dataframe[chosen_metric].replace([np.inf, -np.inf], np.nan)
+    results_dataframe = results_dataframe.copy()
+    results_dataframe.loc[:, chosen_metric] = results_dataframe[chosen_metric].replace(
+        ["none", "nan"], np.nan
+    )
 
-    pivoted_dataframe = results_dataframe.pivot(columns="method", index="subset_row", values=chosen_metric)
+    pivoted_dataframe = results_dataframe.pivot(
+        columns="method", index="subset_row", values=chosen_metric
+    )
     # condensed distance matrix must contain only finite values
     pivoted_dataframe = pivoted_dataframe.replace([np.inf, -np.inf], np.nan)
 
-    #deal with the case where there are no results for a method
+    # deal with the case where there are no results for a method
     pivoted_dataframe = pivoted_dataframe.fillna(0)
     mask_for_missing_values = pivoted_dataframe == 0
 
     box_plot = sns.boxplot(
-        x="subset_row", 
-        y="MAPE", 
+        x="subset_row",
+        y="MAPE",
         data=results_dataframe,
-        palette=sns.color_palette("tab10",results_dataframe.subset_row.unique().shape[0]),
-        linewidth=3,)
+        palette=sns.color_palette(
+            "tab10", results_dataframe.subset_row.unique().shape[0]
+        ),
+        linewidth=3,
+    )
     add_median_labels(box_plot)
 
     sns.scatterplot(
@@ -175,23 +210,24 @@ def __plot_boxplot_by_city(
         marker="X",
         s=200,
     )
-    
-    plt.tick_params(axis='both', which='major', labelsize=17, width=2)
-    plt.xticks(rotation=50,weight ='normal')
-    plt.yticks(weight ='normal')
-    plt.legend(fontsize='x-large', title_fontsize='40',loc='upper right')
-    if __get_dataset_name(results_dataframe) == 'Stock price':
-        axis.set_xlabel("Stock price",fontsize=18,weight = 'semibold')
+
+    plt.tick_params(axis="both", which="major", labelsize=17, width=2)
+    plt.xticks(rotation=50, weight="normal")
+    plt.yticks(weight="normal")
+    plt.legend(fontsize="x-large", title_fontsize="40", loc="upper right")
+    if __get_dataset_name(results_dataframe) == "Stock price":
+        axis.set_xlabel("Stock price", fontsize=18, weight="semibold")
         MAPE = results_dataframe["MAPE"]
         MAPE_filter = MAPE[MAPE < 100]
     else:
-        axis.set_xlabel("City",fontsize=18,weight = 'semibold')
+        axis.set_xlabel("City", fontsize=18, weight="semibold")
         MAPE = results_dataframe["MAPE"]
         MAPE_filter = MAPE[MAPE < 100]
     axis.set_ylim(0, 1.1 * MAPE_filter.max())
-    axis.set_title(title,fontsize=18)
-    axis.set_ylabel(chosen_metric,fontsize=18,weight = 'semibold')
+    axis.set_title(title, fontsize=18)
+    axis.set_ylabel(chosen_metric, fontsize=18, weight="semibold")
     return figure
+
 
 def __get_time_stamp_for_file_name() -> str:
     """Get the time stamp for the file name"""
@@ -200,7 +236,7 @@ def __get_time_stamp_for_file_name() -> str:
 
 def __get_plot_params(
     figure: Figure, chosen_metric: str, data_to_plot: pd.DataFrame, dataset_name: str
-):
+) -> tuple:
     sub_category_name = data_to_plot["subset_row"][0]
     input_map = {}
     if dataset_name == "Stock price":
@@ -218,14 +254,11 @@ def __get_plot_params(
             input_map[(dataset_name, ticker)] = (
                 figure,
                 dataset_name,
-                 "by_method_value",
+                "by_method_value",
                 chosen_metric,
-                "by_data_value"
+                "by_data_value",
             )
-    elif (
-        dataset_name == "India city pollution"
-        or dataset_name == "Indian city pollution"
-    ):
+    elif dataset_name in ["India city pollution", "Indian city pollution"]:
         input_map[(dataset_name, sub_category_name)] = (
             figure,
             "Indian city pollution",
@@ -233,17 +266,24 @@ def __get_plot_params(
             chosen_metric,
             "by_data",
         )
+    else:
+        raise ValueError("Invalid dataset_name: {}".format(dataset_name))
+
     input_key = (dataset_name, sub_category_name)
+    # input_value = input_map.get(input_key, "__")
 
     return input_map.get(input_key, "__")
 
 
-
-def __save_plot_boxplot(figure, dataset_name, plot_type, chosen_metric, file_format="png"):
+def __save_plot_boxplot(
+    figure, dataset_name, plot_type, chosen_metric, file_format="png"
+):
     """Save the box plot to disk."""
     try:
         time_stamp_string = __get_time_stamp_for_file_name()
-        folder_location = os.path.join("plots", dataset_name, f"{chosen_metric}_boxplot")
+        folder_location = os.path.join(
+            "plots", dataset_name, f"{chosen_metric}_boxplot"
+        )
         file_name = f"boxplot_{plot_type}_{time_stamp_string}.{file_format}"
         file_path = os.path.join(folder_location, file_name)
 
@@ -262,5 +302,8 @@ def __save_plot_boxplot(figure, dataset_name, plot_type, chosen_metric, file_for
 
 
 plot_results_in_boxplot_from_csv = method_report_from_csv(
-    __plot_boxplot_by_method, __plot_boxplot_by_city, __get_plot_params, __save_plot_boxplot
-    )
+    __plot_boxplot_by_method,
+    __plot_boxplot_by_city,
+    __get_plot_params,
+    __save_plot_boxplot,
+)

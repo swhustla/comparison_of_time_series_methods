@@ -85,8 +85,9 @@ def __plot_heatmap(
     colormap = sns.diverging_palette(220, 20, as_cmap=True)
 
     # condensed distance matrix must contain only finite values
-    results_dataframe[chosen_metric] = results_dataframe[chosen_metric].replace(
-        [np.inf, -np.inf], np.nan
+    results_dataframe = results_dataframe.copy()
+    results_dataframe.loc[:, chosen_metric] = results_dataframe[chosen_metric].replace(
+        ["none", "nan"], np.nan
     )
 
     pivoted_dataframe = results_dataframe.pivot(
@@ -146,40 +147,31 @@ def __get_time_stamp_for_file_name() -> str:
 
 
 def __get_plot_params(
-    figure: Figure, chosen_metric: str, data_to_plot: pd.DataFrame, dataset_name: str
+    figure: Figure, metric: str, data_to_plot: pd.DataFrame, dataset_name: str
 ):
+    """Get the parameters for the plot"""
     sub_category_name = data_to_plot["subset_row"][0]
     input_map = {}
     if dataset_name == "Stock price":
         list_of_growth = get_a_list_of_growth_stock_tickers()
         for ticker in list_of_growth:
-            input_map[(dataset_name, ticker)] = (
-                figure,
-                dataset_name,
-                "growth",
-                chosen_metric,
-            )
+            input_map[(dataset_name, ticker)] = (figure, dataset_name, "growth", metric)
         list_of_value = get_a_list_of_value_stock_tickers()
         for ticker in list_of_value:
-            input_map[(dataset_name, ticker)] = (
-                figure,
-                dataset_name,
-                "value",
-                chosen_metric,
-            )
-    elif (
-        dataset_name == "India city pollution"
-        or dataset_name == "Indian city pollution"
-    ):
+            input_map[(dataset_name, ticker)] = (figure, dataset_name, "value", metric)
+    elif dataset_name in ["India city pollution", "Indian city pollution"]:
         input_map[(dataset_name, sub_category_name)] = (
             figure,
             "Indian city pollution",
             "_",
-            chosen_metric,
+            metric,
         )
+    else:
+        raise ValueError("Invalid dataset_name: {}".format(dataset_name))
     input_key = (dataset_name, sub_category_name)
+    input_value = input_map.get(input_key, "__")
 
-    return input_map.get(input_key, "__")
+    return input_value
 
 
 def __save_heatmap(
