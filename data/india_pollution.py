@@ -144,20 +144,21 @@ def get_city_list_by_tier(city_type: str) -> list:
         return tier3
 
 
-__list_of_northern_cities = ["Delhi", "Lucknow", "Jaipur", "Patna", "Chandigarh"]
-__list_of_southern_cities = ["Chennai", "Coimbatore", "Kochi", "Ernakulam", "Thiruvananthapuram"]
-__list_of_eastern_cities = ["Kolkata", "Bhopal", "Brajrajnagar", "Talcher"]
-__list_of_western_cities = ["Ahmedabad", "Amaravati", "Amritsar", "Bengaluru", "Gurugram", "Guwahati", "Hyderabad", "Mumbai", "Shillong", "Visakhapatnam", "Jorapokhar", "Aizawl"]
+__list_of_indo_gangetic_plain_cities = ["Ahmedabad",  "Amritsar", "Delhi", "Gurugram", "Lucknow", "Jaipur", "Patna", "Chandigarh", "Kolkata","Guwahati", "Shillong", "Jorapokhar", "Aizawl"]
+__list_of_south_eastern_cities = ["Chennai", "Coimbatore","Amaravati","Bengaluru", "Hyderabad"]
+__list_of_western_cities = ["Kochi", "Ernakulam", "Thiruvananthapuram","Mumbai"]
+__list_of_north_eastern_cities = ["Bhopal", "Brajrajnagar", "Talcher", "Visakhapatnam",]
+
 
 def get_cities_from_geographical_region(geographical_region: str)-> list:
     """Get the list of cities in each geographical region"""
-    if geographical_region == "Northern":
-        return __list_of_northern_cities
-    elif geographical_region == "Southern":
-        return __list_of_southern_cities
-    elif geographical_region == "Eastern":
-        return __list_of_eastern_cities
-    elif geographical_region == "Western":
+    if geographical_region == "Indo-Gangetic Plain" or geographical_region == "Indo Gangetic Plain" or geographical_region == "Northern":
+        return __list_of_indo_gangetic_plain_cities
+    elif geographical_region == "South Eastern" or geographical_region == "Southern":
+        return __list_of_south_eastern_cities
+    elif geographical_region == "North Eastern" or geographical_region == "Eastern":
+        return __list_of_north_eastern_cities
+    elif geographical_region == "Western" or geographical_region == "Western Coast" or geographical_region == "South Western":
         return __list_of_western_cities
 
 

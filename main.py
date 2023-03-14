@@ -67,13 +67,13 @@ if __name__ == "__main__":
 
     __dataset_row_items: dict[str, list[str]] = {
         # take first 3 from list of cities
-        "india_pollution": ["Kolkata","Ahmedabad"],#get_cities_from_geographical_region("Northern"),
         "stock_prices":   get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+        "india_pollution": get_cities_from_geographical_region("Indo-Gangetic Plain"),
     }
 
     __dataset_group_titles: dict[str, str] = {
-        "india_pollution": "Coastal cities in India",
-        "stock_prices": "Value stocks",
+        "india_pollution": "Cities on the Indo-Gangetic Plain in India",
+        "stock_prices": "Growth stocks",
     }
 
     __predictors: dict[str, Predict[Dataset, Result]] = {

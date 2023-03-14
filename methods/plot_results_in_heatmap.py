@@ -28,7 +28,7 @@ def plot_results_in_heatmap(
         list_of_list_of_reports: List[List[Report]],
         group_name: str,
     ) -> None:
-        print("Plotting results in heatmap: source: report")
+        print("Plotting results in heatmap: source: live report")
         results_dataframe, dataset_name = compile_results(list_of_list_of_reports)
         for chosen_metric in __chosen_metrics:
             figure = plot_heatmap(results_dataframe, chosen_metric, group_name)
@@ -47,7 +47,7 @@ def plot_results_in_heatmap_from_csv(
     save_heatmap: Callable[[Figure, str, str, str], None],
 ) -> Plot[Data, Prediction, ConfidenceInterval, Title]:
     def draw_plot(data_to_plot: Data, dataset_name: str) -> None:
-        print("Plotting results in heatmap; source: csv")
+        print("Plotting results in heatmap; source: stored csv")
         for chosen_metric in __chosen_metrics:
             print(chosen_metric)
             figure = plot_heatmap(data_to_plot, chosen_metric)
