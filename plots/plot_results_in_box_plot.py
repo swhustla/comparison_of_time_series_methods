@@ -161,7 +161,7 @@ def __plot_boxplot_by_method(
     return figure
 
 
-def __plot_boxplot_by_city(
+def __plot_boxplot_by_data(
     results_dataframe: pd.DataFrame,
     chosen_metric: str = "MAE",
     group_name: Optional[str] = None,
@@ -303,7 +303,7 @@ def __save_plot_boxplot(
 
 plot_results_in_boxplot_from_csv = method_report_from_csv(
     __plot_boxplot_by_method,
-    __plot_boxplot_by_city,
+    __plot_boxplot_by_data,
     __get_plot_params,
     __save_plot_boxplot,
 )

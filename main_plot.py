@@ -33,7 +33,7 @@ from plots.plot_results_in_box_plot import plot_results_in_boxplot_from_csv
 from plots.comparison_plot_multi import comparison_plot_multi
 from plots.comparison_plot import comparison_plot
 from plots.plot_results_in_scatter_plot import plot_results_in_scatter_plot_from_csv
-from plots.plot_correlation_Npoints import  plot_correlation_Npoints_vs_MAPE
+from plots.plot_correlation_n_points import plot_correlation_Npoints_vs_MAPE
 
 
 from predictions.AR import ar
@@ -126,11 +126,11 @@ __methods = [
 ]
 
 __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
-    "heatmap": plot_results_in_heatmap_from_csv,
-    "boxplot": plot_results_in_boxplot_from_csv,
-    "comparison_plot": comparison_plot,
-    "comparison_plot_multi": comparison_plot_multi,
-    "scatter_plot": plot_results_in_scatter_plot_from_csv,
+    # "heatmap": plot_results_in_heatmap_from_csv,
+    # "boxplot": plot_results_in_boxplot_from_csv,
+    # "comparison_plot": comparison_plot,
+    # "comparison_plot_multi": comparison_plot_multi,
+    # "scatter_plot": plot_results_in_scatter_plot_from_csv,
     "correlation_plot": plot_correlation_Npoints_vs_MAPE,
 }
 
@@ -243,10 +243,7 @@ dataset_name = __dataset[0]
 mask_low_r_squared = filtered_dataframe.loc[
     filtered_dataframe["R2"] < -10
 ].drop_duplicates(subset=["subset_row"])["subset_row"]
-# Filteres the above cities from the final list
-filtered_dataframe_r_squared = filtered_dataframe[
-    ~filtered_dataframe.subset_row.isin(mask_low_r_squared)
-]
+
 
 exception_datasets = {
     "Airline passengers": None,
@@ -304,7 +301,7 @@ def run_plotting_pipeline(filtered_dataframe, testset_size, plot_type="all"):
         training_index = dataset.values.index[
             : int(len(dataset.values.index) * (1 - testset_size))
         ]
-         # Append a list of training data for each dataset
+        # Append a list of training data for each dataset
         list_training_data.append(dataset.values.loc[training_index, :])
         id_count = np.where(
             (filtered_dataframe["subset_row"] == dataset.subset_row_name)
@@ -335,32 +332,33 @@ def run_plotting_pipeline(filtered_dataframe, testset_size, plot_type="all"):
                 filtered_dataframe_per_dataset, dataset
             )
     if plot_type == "plot_correlation":
-         # Plot the correlation between number of points and MAPE
+        # Plot the correlation between number of points and MAPE
         plot_correlation_Npoints_vs_MAPE(list_training_data, filtered_dataframe)
 
-for plotter_name, plotter in __plotters.items():
-    print(f"Plotting {plotter_name} for dataset: {dataset_name}")
-    # if plotter_name == "boxplot":
-    #     try:
-    #         plotter(filtered_dataframe, dataset_name)
-    #     except Exception as e:
-    #         print(f"Error plotting {plotter_name}: {str(e)}")
-    #         continue
-    # elif plotter_name == "comparison_plot":
-    #     run_plotting_pipeline(filtered_dataframe, __testset_size, "comparison_plot")
-    # elif plotter_name == "comparison_plot_multi":
-    #     run_plotting_pipeline(
-    #         filtered_dataframe, __testset_size, "comparison_plot_multi"
-    #     )
-    if plotter_name == "correlation_plot":
-        run_plotting_pipeline(filtered_dataframe, __testset_size,"plot_correlation")
 
-    # elif plotter_name == "scatter_plot":
-    #     run_plotting_pipeline(filtered_dataframe, __testset_size, "scatter_plot")
-    # elif plotter_name == "heatmap":
-    #     try:
-    #         plotter(filtered_dataframe_r_squared, dataset_name)
-    #     except Exception as e:
-    #         print(f"Error plotting {plotter_name}: {str(e)}")
- 
+def plot_data(filtered_dataframe, dataset_name):
+    # Filteres the above cities from the final list
+    filtered_dataframe_r_squared = filtered_dataframe[
+        ~filtered_dataframe.subset_row.isin(mask_low_r_squared)
+    ]
+    for plotter_name, plotter in __plotters.items():
+        print(f"Plotting {plotter_name} for dataset: {dataset_name}")
 
+        try:
+            if plotter_name == "boxplot":
+                plotter(filtered_dataframe_r_squared, dataset_name)
+            elif plotter_name == "comparison_plot":
+                run_plotting_pipeline(filtered_dataframe, __testset_size, "comparison_plot")
+            elif plotter_name == "comparison_plot_multi":
+                run_plotting_pipeline(filtered_dataframe, __testset_size, "comparison_plot_multi")
+            elif plotter_name == "correlation_plot":
+                run_plotting_pipeline(filtered_dataframe, __testset_size,"plot_correlation")
+            elif plotter_name == "scatter_plot":
+                run_plotting_pipeline(filtered_dataframe, __testset_size, "scatter_plot")
+            elif plotter_name == "heatmap":
+                plotter(filtered_dataframe_r_squared, dataset_name)
+        except Exception as e:
+            print(f"Error plotting {plotter_name}: {str(e)}")
+
+
+plot_data(filtered_dataframe, dataset_name)

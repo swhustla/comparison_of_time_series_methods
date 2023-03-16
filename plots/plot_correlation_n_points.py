@@ -14,7 +14,7 @@ import pandas as pd
 Figure = TypeVar("Figure")
 from predictions.Prediction import PredictionData
 from plots.color_map_by_method import __color_map_by_method_dict
-from methods.plot_correlation_Npoints import (
+from methods.plot_correlation_n_points import (
     plot_correlation_Npoints_vs_metric as method_report,
 )
 
@@ -36,123 +36,110 @@ def __get_title(
         return f"Correlation plot {chosen_metric} for {group_name} for min/max of {results_dataframe['method'].unique().size} predictive methods"
 
 
-def __plot_correlation_Npoints_vs_metric(
+def __plot_correlation_npoints_vs_metric(
     training_data: List[pd.DataFrame],
     results_dataframe: pd.DataFrame,
     chosen_metric: str = "MAE",
     group_name: Optional[str] = None,
+    plot_all_data: bool = False,  # optional argument
 ) -> Figure:
     """Plot correlation N data points in training set vs metric."""
     figure, axis = plt.subplots(figsize=(12, 7))
     axis.set_title(__get_title(results_dataframe, chosen_metric, group_name))
-    # condensed distance matrix must contain only finite values
+     # Replace infinite values with NaN
     results_dataframe[chosen_metric] = results_dataframe[chosen_metric].replace(
         [np.inf, -np.inf], np.nan
     )
-
+     # condensed distance matrix must contain only finite values
     pivoted_dataframe = results_dataframe.pivot(
         columns="method", index="subset_row", values=chosen_metric
     ).reset_index()
-    # condensed distance matrix must contain only finite values
     pivoted_dataframe = pivoted_dataframe.replace([np.inf, -np.inf], np.nan)
 
     # deal with the case where there are no results for a method
     pivoted_dataframe = pivoted_dataframe.fillna(0)
-    data_lenght = []
-    for data in training_data:
-        data_lenght.append(len(data))
+
+      # Calculate data length using list comprehension
+    data_length = [len(data) for data in training_data]
     pivoted_dataframe_Ndata = pivoted_dataframe.copy()
-    pivoted_dataframe_Ndata["Ndata"] = data_lenght
+    pivoted_dataframe_Ndata["Ndata"] = data_length
 
+    # Create a scatterplot based on the chosen metric
     if chosen_metric == "R2":
-        # create more ticks on the x axis
-        sns.scatterplot(
-            data=pivoted_dataframe,
-            x=pivoted_dataframe.min(axis=1, numeric_only=True),
-            y=data_lenght,
-            ax=axis,
-            hue=pivoted_dataframe["subset_row"],
-            palette=sns.color_palette("hls", len(data_lenght)),
-            marker="X",
-            s=200,
-        )
-        # add labels and legend to plot
-        for index, row in pivoted_dataframe.iterrows():
-            x = pd.to_numeric(row, errors="coerce").min()
-            y = data_lenght[index]
-            name = row["subset_row"]
-            bbox_props = dict(
-                boxstyle="round,pad=0.5", fc="white", ec="gray", lw=1, alpha=0.5
-            )
-            axis.text(x, y, name, ha="center", va="center", bbox=bbox_props)
-            axis.legend(fontsize="small", title_fontsize="40", loc="upper right")
-        # Add horizontal and vertical lines
-        axis.axhline(y=100, color="gray", linestyle="--")
-        axis.axvline(x=-10, color="gray", linestyle="--")
-        # set x-axis range
-        xmin = pivoted_dataframe.min(axis=1, numeric_only=True).min()
-        xmax = pivoted_dataframe.min(axis=1, numeric_only=True).max()
-
-        # set x-axis tick increment
-        xtick_increment = 0.1
-
-        # create x-axis ticks
-        xticks = [
-            xmin + i * xtick_increment
-            for i in range(int((xmax - xmin) / xtick_increment) + 1)
-        ]
-        axis.tick_params(
-            axis="both", which="major", labelsize=17, width=2, labelrotation=50
-        )
-        # set x-axis ticks
-        axis.set_xticks(xticks)
-        # set x-axis scale
-        axis.set_xscale("symlog")
-        axis.set_xlim(1.1 * xmin, 1.0)
+        x_data = pivoted_dataframe.min(axis=1, numeric_only=True)
     else:
-        sns.scatterplot(
-            data=pivoted_dataframe,
-            x=pivoted_dataframe.max(axis=1, numeric_only=True),
-            y=data_lenght,
-            ax=axis,
-            hue=pivoted_dataframe["subset_row"],
-            palette=sns.color_palette("hls", len(data_lenght)),
-            marker="X",
-            s=200,
-        )
-        # add labels and legend to plot
-        for index, row in pivoted_dataframe.iterrows():
-            x = pd.to_numeric(row, errors="coerce").max()
-            y = data_lenght[index]
-            name = row["subset_row"]
-            bbox_props = dict(
-                boxstyle="round,pad=0.5", fc="white", ec="gray", lw=1, alpha=0.5
-            )
-            axis.text(x, y, name, ha="center", va="center", bbox=bbox_props)
-            axis.legend(fontsize="small", title_fontsize="40", loc="upper right")
-        # add horizontal line
-        axis.axhline(y=100, color="gray", linestyle="--")
+        x_data = pivoted_dataframe.max(axis=1, numeric_only=True)
+    # set the color of the x and y axis to black
+    axis.spines['bottom'].set_color('black')
+    axis.spines['top'].set_color('black')
+    axis.spines['left'].set_color('black')
+    axis.spines['right'].set_color('black')
+    axis = sns.scatterplot(
+        data=pivoted_dataframe,
+        x=x_data,
+        y=data_length,
+        hue=pivoted_dataframe["subset_row"],
+        palette=sns.color_palette("hls", len(data_length)),
+        marker="X",
+        s=200,
+    )
 
-    # plot all data points of each method
-    # axis = sns.scatterplot(
-    #     x="value",
-    #     hue="series",
-    #     y="Ndata",
-    #     data=pivoted_dataframe_Ndata.melt(
-    #         value_vars=[
-    #             "AR",
-    #             "ARIMA",
-    #             "HoltWinters",
-    #             "MA",
-    #             "Prophet",
-    #             "SARIMA",
-    #             "SES",
-    #             "linear_regression",
-    #         ],
-    #         id_vars="Ndata",
-    #         var_name="series",
-    #     ),
-    # )
+    # Add labels and legend to plot
+    for index, row in pivoted_dataframe.iterrows():
+        if chosen_metric == "R2":
+            x = pd.to_numeric(row, errors="coerce").min()
+        else:
+            x = pd.to_numeric(row, errors="coerce").max()
+        y = data_length[index]
+        name = row["subset_row"]
+        bbox_props = dict(
+            boxstyle="round,pad=0.5", fc="white", ec="gray", lw=1, alpha=0.5
+        )
+        axis.text(x, y, name, ha="center", va="center", bbox=bbox_props)
+
+     # Add legend
+    axis.legend(fontsize="small", title_fontsize="20", loc="upper right")
+
+    # Add horizontal and vertical lines
+    axis.axhline(y=100, color="gray", linestyle="--")
+    axis.axvline(x=-10, color="gray", linestyle="--")
+
+    # Set x-axis range and ticks
+    xmin = x_data.min()
+    xmax = x_data.max()
+    xtick_increment = 0.1
+    xticks = [xmin + i * xtick_increment for i in range(int((xmax - xmin) / xtick_increment) + 1)]
+    axis.set_xlim(1.1 * xmin, 0.9)
+    axis.set_xticks(xticks)
+    # Set x-axis scale
+    axis.set_xscale("symlog")
+
+    # Set axis tick parameters
+    axis.tick_params(axis="both", which="major", labelsize=17, width=2, labelrotation=50)
+
+    # plot all data points of each method if plot_all_data is True
+    if plot_all_data:
+        method_vars = [
+            "AR",
+            "ARIMA",
+            "HoltWinters",
+            "MA",
+            "Prophet",
+            "SARIMA",
+            "SES",
+            "linear_regression",
+        ]
+        data = pivoted_dataframe_Ndata.melt(
+            value_vars=method_vars,
+            id_vars="Ndata",
+            var_name="series"
+        )
+        axis = sns.scatterplot(
+            x="value",
+            hue="series",
+            y="Ndata",
+            data=data,
+        )
 
     axis.set_xlabel(chosen_metric, fontsize=18, weight="semibold")
     axis.set_ylabel(
@@ -194,5 +181,5 @@ def __save_plot(
 
 
 plot_correlation_Npoints_vs_MAPE = method_report(
-    __plot_correlation_Npoints_vs_metric, __save_plot
+    __plot_correlation_npoints_vs_metric, __save_plot
 )

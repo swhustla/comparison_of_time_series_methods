@@ -68,9 +68,15 @@ def __plot_scatterplot(
     color_map = __color_map_by_method_dict
 
     # plot the results
-
     sns.set_theme(style="whitegrid")
-    fig, ax = plt.subplots(figsize=(12, 8))
+    sns.set_palette("dark")
+    sns.set_color_codes("dark")
+    fig, ax = plt.subplots(figsize=(14, 9))
+    # set the color of the x and y axis to black
+    ax.spines['bottom'].set_color('black')
+    ax.spines['top'].set_color('black')
+    ax.spines['left'].set_color('black')
+    ax.spines['right'].set_color('black')
     sns.scatterplot(
         data=results_dataframe,
         x="Elapsed (s)",
@@ -78,12 +84,20 @@ def __plot_scatterplot(
         hue="method",
         ax=ax,
         palette=color_map,
+        marker="X",
+        s=200,
     )
     plt.xscale("log")
 
-    ax.set_title(title)
-    ax.set_xlabel("Elapsed (s)")
-    ax.set_ylabel(chosen_metric)
+    ax.set_title(title, fontsize=18)
+    ax.set_xlabel("Elapsed (s)", fontsize=18, weight="semibold")
+    ax.set_ylabel(chosen_metric, fontsize=18, weight="semibold")
+    for spine in ax.spines.values():
+        spine.set_linewidth(2)
+   
+    # Set axis tick parameters
+    ax.tick_params(axis="both", which="major", labelsize=22, width=2, labelrotation=50)
+    plt.legend(fontsize="xx-large", title_fontsize="20", loc="upper right")
     return fig
 
 
