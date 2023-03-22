@@ -33,6 +33,9 @@ from plots.plot_results_in_box_plot import plot_results_in_boxplot_from_csv
 from plots.comparison_plot_multi import comparison_plot_multi
 from plots.comparison_plot import comparison_plot
 from plots.plot_results_in_scatter_plot import plot_results_in_scatter_plot_from_csv
+from plots.plot_results_in_scatter_plot import (
+    plot_results_in_scatter_plot_multi_from_csv_,
+)
 from plots.plot_correlation_n_points import plot_correlation_Npoints_vs_MAPE
 
 
@@ -121,19 +124,35 @@ __methods = [
     # "FCNN_embedding",
     "SARIMA",
     # "auto_arima"
-    "SES",
+    # "SES",
     # "TsetlinMachine",
 ]
 
-__plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
-    # "heatmap": plot_results_in_heatmap_from_csv,
-    # "boxplot": plot_results_in_boxplot_from_csv,
-    # "comparison_plot": comparison_plot,
-    # "comparison_plot_multi": comparison_plot_multi,
-    # "scatter_plot": plot_results_in_scatter_plot_from_csv,
+if __dataset[0] == "India city pollution":
+    __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
+    "heatmap": plot_results_in_heatmap_from_csv,
+    "boxplot": plot_results_in_boxplot_from_csv,
+    "comparison_plot": comparison_plot,
+    "comparison_plot_multi": comparison_plot_multi,
+    "scatter_plot": plot_results_in_scatter_plot_from_csv,
+    "scatter_plot_multi": plot_results_in_scatter_plot_multi_from_csv_,
     "correlation_plot": plot_correlation_Npoints_vs_MAPE,
 }
-
+elif __dataset[0] == "Stock price":
+    __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
+    "heatmap": plot_results_in_heatmap_from_csv,
+    "boxplot": plot_results_in_boxplot_from_csv,
+    "comparison_plot": comparison_plot,
+    "comparison_plot_multi": comparison_plot_multi,
+    "scatter_plot": plot_results_in_scatter_plot_from_csv,
+    "scatter_plot_multi": plot_results_in_scatter_plot_multi_from_csv_,
+}
+else:
+    __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
+    "comparison_plot": comparison_plot,
+    "comparison_plot_multi": comparison_plot_multi,
+    "scatter_plot": plot_results_in_scatter_plot_from_csv,
+}
 __predictors: dict[str, Predict[Dataset, Result]] = {
     "linear_regression": linear_regression,
     "AR": ar,
@@ -331,6 +350,9 @@ def run_plotting_pipeline(filtered_dataframe, testset_size, plot_type="all"):
             plot_results_in_scatter_plot_from_csv(
                 filtered_dataframe_per_dataset, dataset
             )
+    if plot_type == "scatter_plot_multi":
+        # plot scatter plot per dataset
+        plot_results_in_scatter_plot_multi_from_csv_(filtered_dataframe, dataset_name)
     if plot_type == "plot_correlation":
         # Plot the correlation between number of points and MAPE
         plot_correlation_Npoints_vs_MAPE(list_training_data, filtered_dataframe)
@@ -348,13 +370,25 @@ def plot_data(filtered_dataframe, dataset_name):
             if plotter_name == "boxplot":
                 plotter(filtered_dataframe_r_squared, dataset_name)
             elif plotter_name == "comparison_plot":
-                run_plotting_pipeline(filtered_dataframe, __testset_size, "comparison_plot")
+                run_plotting_pipeline(
+                    filtered_dataframe, __testset_size, "comparison_plot"
+                )
             elif plotter_name == "comparison_plot_multi":
-                run_plotting_pipeline(filtered_dataframe, __testset_size, "comparison_plot_multi")
+                run_plotting_pipeline(
+                    filtered_dataframe, __testset_size, "comparison_plot_multi"
+                )
             elif plotter_name == "correlation_plot":
-                run_plotting_pipeline(filtered_dataframe, __testset_size,"plot_correlation")
+                run_plotting_pipeline(
+                    filtered_dataframe, __testset_size, "plot_correlation"
+                )
             elif plotter_name == "scatter_plot":
-                run_plotting_pipeline(filtered_dataframe, __testset_size, "scatter_plot")
+                run_plotting_pipeline(
+                    filtered_dataframe, __testset_size, "scatter_plot"
+                )
+            elif plotter_name == "scatter_plot_multi":
+                run_plotting_pipeline(
+                    filtered_dataframe_r_squared, __testset_size, "scatter_plot_multi"
+                )
             elif plotter_name == "heatmap":
                 plotter(filtered_dataframe_r_squared, dataset_name)
         except Exception as e:

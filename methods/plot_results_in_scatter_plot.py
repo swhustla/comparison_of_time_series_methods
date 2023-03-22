@@ -40,13 +40,11 @@ def plot_results_in_scatter_plot(
     return draw_plot
 
 def plot_results_in_scatter_plot_from_csv(
-    # compile_results_single_dataset: Callable[[List[List[Report]]],Data],
     plot_scatterplot: Callable[[Data, str], Figure],
     save_plot: Callable[[Figure, pd.DataFrame, str], None],
 ) -> Plot[Data, Prediction, ConfidenceInterval, Title]:
     def draw_plot(data_to_plot: Data, dataset_name: str) -> None:
         print("Plotting results in scatter plot")
-        # results_dataframe = compile_results_single_dataset(list_of_list_of_reports)
         for chosen_metric in __chosen_metrics:
             # check that results_dataframe has chosen_metric, and is not empty
             if chosen_metric not in data_to_plot.columns:
@@ -55,5 +53,23 @@ def plot_results_in_scatter_plot_from_csv(
                 continue
             figure = plot_scatterplot(data_to_plot, chosen_metric)
             save_plot(figure, data_to_plot, chosen_metric)
+
+    return draw_plot
+
+def plot_results_in_scatter_plot_multi_from_csv(
+    plot_scatterplot_multi: Callable[[Data, str], Figure],
+    get_plot_params: Callable[[Figure, str, Data, str], List],
+    save_plot_multi: Callable[[Figure, str, str, str], None],
+) -> Plot[Data, Prediction, ConfidenceInterval, Title]:
+    def draw_plot(data_to_plot: Data, dataset_name: str) -> None:
+        print("Plotting results in scatter plot multi; source: stored csv")
+        for chosen_metric in __chosen_metrics:
+            print(chosen_metric)
+            figure = plot_scatterplot_multi(data_to_plot, chosen_metric)
+            plot_params = get_plot_params(
+                figure, chosen_metric, data_to_plot, dataset_name
+            )
+            print(f"Saving {dataset_name} {chosen_metric} scatter plot multi")
+            save_plot_multi(*plot_params)
 
     return draw_plot

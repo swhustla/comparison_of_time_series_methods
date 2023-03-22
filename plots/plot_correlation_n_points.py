@@ -63,6 +63,12 @@ def __plot_correlation_npoints_vs_metric(
     data_length = [len(data) for data in training_data]
     pivoted_dataframe_Ndata = pivoted_dataframe.copy()
     pivoted_dataframe_Ndata["Ndata"] = data_length
+    sns.set_theme(style="whitegrid",rc={
+    'xtick.bottom': True,
+    'ytick.left': True,
+})
+    #Customize the style to keep axis lines and ticks in black
+    sns.set_style({'axes.edgecolor': 'black', 'xtick.color': 'black', 'ytick.color': 'black'})
 
     # Create a scatterplot based on the chosen metric
     if chosen_metric == "R2":
@@ -84,7 +90,7 @@ def __plot_correlation_npoints_vs_metric(
         s=200,
     )
 
-    # Add labels and legend to plot
+    # Add labels to each point
     for index, row in pivoted_dataframe.iterrows():
         if chosen_metric == "R2":
             x = pd.to_numeric(row, errors="coerce").min()
