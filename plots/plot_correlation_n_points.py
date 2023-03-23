@@ -7,6 +7,7 @@ import numpy as np
 
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import matplotlib.patheffects as path_effects
 from typing import List, Tuple, Optional, Callable, TypeVar, Generator, Union
 import pandas as pd
@@ -75,11 +76,6 @@ def __plot_correlation_npoints_vs_metric(
         x_data = pivoted_dataframe.min(axis=1, numeric_only=True)
     else:
         x_data = pivoted_dataframe.max(axis=1, numeric_only=True)
-    # set the color of the x and y axis to black
-    axis.spines['bottom'].set_color('black')
-    axis.spines['top'].set_color('black')
-    axis.spines['left'].set_color('black')
-    axis.spines['right'].set_color('black')
     axis = sns.scatterplot(
         data=pivoted_dataframe,
         x=x_data,
@@ -103,9 +99,9 @@ def __plot_correlation_npoints_vs_metric(
         )
         axis.text(x, y, name, ha="center", va="center", bbox=bbox_props)
 
-     # Add legend
-    axis.legend(fontsize="small", title_fontsize="20", loc="upper right")
-
+    # Add legend
+    axis.legend(fontsize="x-small", title_fontsize="18", loc="upper right")
+    
     # Add horizontal and vertical lines
     axis.axhline(y=100, color="gray", linestyle="--")
     axis.axvline(x=-10, color="gray", linestyle="--")
@@ -122,7 +118,7 @@ def __plot_correlation_npoints_vs_metric(
 
     # Set axis tick parameters
     axis.tick_params(axis="both", which="major", labelsize=17, width=2, labelrotation=50)
-
+    axis.xaxis.set_major_formatter(ticker.ScalarFormatter())
     # plot all data points of each method if plot_all_data is True
     if plot_all_data:
         method_vars = [
