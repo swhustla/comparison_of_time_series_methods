@@ -21,6 +21,11 @@ from data.stock_prices import (
 )
 
 
+__dataset_group_titles: dict[str, str] = {
+    "Indian city pollution": "Cities on the Indo-Gangetic Plain in India",
+    "stock_prices": "Value stocks",
+}
+
 from methods.plot_results_in_heatmap import plot_results_in_heatmap as method_report
 from methods.plot_results_in_heatmap import (
     plot_results_in_heatmap_from_csv as method_report_from_csv,
@@ -52,7 +57,10 @@ def __compile_results(
 
 def __get_dataset_name(results_dataframe: pd.DataFrame) -> str:
     """Get the name of the dataset"""
-    return results_dataframe["dataset"].unique()[0]
+    if results_dataframe["dataset"].unique()[0] in __dataset_group_titles:
+        return __dataset_group_titles[results_dataframe["dataset"].unique()[0]]
+    else:
+        return results_dataframe["dataset"].unique()[0]
 
 
 def __get_title(

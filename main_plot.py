@@ -27,6 +27,13 @@ import gzip
 from data.dataset import Dataset, Result
 from data.report import Report
 from methods.predict import Predict
+from data.india_pollution import (
+    india_pollution,
+    get_list_of_city_names,
+    get_list_of_coastal_indian_cities,
+    get_cities_from_geographical_region,
+    get_city_list_by_tier,
+)
 
 from plots.plot_results_in_heatmap import plot_results_in_heatmap_from_csv
 from plots.plot_results_in_box_plot import plot_results_in_boxplot_from_csv
@@ -62,6 +69,7 @@ from data.india_pollution import (
     india_pollution,
     get_list_of_city_names,
     get_list_of_coastal_indian_cities,
+    get_cities_from_geographical_region,
 )
 
 
@@ -104,13 +112,17 @@ __dataset = [
 
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
-    "India city pollution": get_list_of_city_names(),  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
-    "Stock price": get_a_list_of_value_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+    "India city pollution": get_cities_from_geographical_region("Indo-Gangetic Plain"), #get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
+    "Stock price": get_a_list_of_growth_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
     "Airline passengers": ["all"],
     "list_of_tuples": ["random"],
     "Sun spots": ["All"],
 }
 
+__dataset_group_titles: dict[str, str] = {
+      "India city pollution": "Cities on the Indo-Gangetic Plain in India",
+      "Stock price": "Value stocks",
+  }
 
 # pick at least 2 methods from the list
 __methods = [
@@ -124,28 +136,29 @@ __methods = [
     # "FCNN_embedding",
     "SARIMA",
     # "auto_arima"
-    # "SES",
+    "SES",
     # "TsetlinMachine",
+    "TsetlinMachineSingle",
 ]
 
 if __dataset[0] == "India city pollution":
     __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
     "heatmap": plot_results_in_heatmap_from_csv,
-    "boxplot": plot_results_in_boxplot_from_csv,
-    "comparison_plot": comparison_plot,
-    "comparison_plot_multi": comparison_plot_multi,
-    "scatter_plot": plot_results_in_scatter_plot_from_csv,
-    "scatter_plot_multi": plot_results_in_scatter_plot_multi_from_csv_,
-    "correlation_plot": plot_correlation_Npoints_vs_MAPE,
+    # "boxplot": plot_results_in_boxplot_from_csv,
+    # "comparison_plot": comparison_plot,
+    # "comparison_plot_multi": comparison_plot_multi,
+    # "scatter_plot": plot_results_in_scatter_plot_from_csv,
+    # "scatter_plot_multi": plot_results_in_scatter_plot_multi_from_csv_,
+    # "correlation_plot": plot_correlation_Npoints_vs_MAPE,
 }
 elif __dataset[0] == "Stock price":
     __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
     "heatmap": plot_results_in_heatmap_from_csv,
     "boxplot": plot_results_in_boxplot_from_csv,
-    "comparison_plot": comparison_plot,
-    "comparison_plot_multi": comparison_plot_multi,
-    "scatter_plot": plot_results_in_scatter_plot_from_csv,
-    "scatter_plot_multi": plot_results_in_scatter_plot_multi_from_csv_,
+    # "comparison_plot": comparison_plot,
+    # "comparison_plot_multi": comparison_plot_multi,
+    # "scatter_plot": plot_results_in_scatter_plot_from_csv,
+    # "scatter_plot_multi": plot_results_in_scatter_plot_multi_from_csv_,
 }
 else:
     __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
@@ -368,7 +381,7 @@ def plot_data(filtered_dataframe, dataset_name):
 
         try:
             if plotter_name == "boxplot":
-                plotter(filtered_dataframe_r_squared, dataset_name)
+                plotter(filtered_dataframe, dataset_name)
             elif plotter_name == "comparison_plot":
                 run_plotting_pipeline(
                     filtered_dataframe, __testset_size, "comparison_plot"
@@ -387,10 +400,10 @@ def plot_data(filtered_dataframe, dataset_name):
                 )
             elif plotter_name == "scatter_plot_multi":
                 run_plotting_pipeline(
-                    filtered_dataframe_r_squared, __testset_size, "scatter_plot_multi"
+                    filtered_dataframe, __testset_size, "scatter_plot_multi"
                 )
             elif plotter_name == "heatmap":
-                plotter(filtered_dataframe_r_squared, dataset_name)
+                plotter(filtered_dataframe, dataset_name)
         except Exception as e:
             print(f"Error plotting {plotter_name}: {str(e)}")
 
