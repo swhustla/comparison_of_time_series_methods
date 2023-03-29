@@ -48,9 +48,9 @@ def __get_plot_metadata(
     current_time_string = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
     plot_file_name = f"{generic_file_name}_comparison_plot_multi_{current_time_string}"
     if "with" in prediction_data.title:
-        title = (prediction_data.title.split("with")[0]).strip()
+        title = (prediction_data.title.split("with")[0]).strip() + ' ' + prediction_data.plot_folder.split("/")[1]
     elif "using" in prediction_data.title:
-        title = prediction_data.title.split("using")[0].strip()
+        title = prediction_data.title.split("using")[0].strip() + ' ' + prediction_data.plot_folder.split("/")[1]
     else:
         title = prediction_data.title
     return plot_folder, plot_file_name, title
@@ -107,11 +107,13 @@ def __tidy_up_prediction_data_object(
             cleaned_pred_data.values = pd.DataFrame(eval(pred.values))
         except:
             cleaned_pred_data.values = __convert_string_to_series(pred.values)
-
-        cleaned_pred_data.in_sample_prediction = __convert_string_to_series(
-            pred.in_sample_prediction
-        )
-
+        try:
+            cleaned_pred_data.in_sample_prediction = __convert_string_to_series(
+                pred.in_sample_prediction
+            )
+        except:
+            cleaned_pred_data.in_sample_prediction = None
+            
         pred_data.append(cleaned_pred_data)
 
     return pred_data

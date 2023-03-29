@@ -153,9 +153,13 @@ def __tidy_up_prediction_data_object(
         cleaned_pred_data.values = pd.DataFrame(eval(predictions.values))
     except:
         cleaned_pred_data.values = __convert_string_to_series(predictions.values)
-    cleaned_pred_data.in_sample_prediction = __convert_string_to_series(
-        predictions.in_sample_prediction
-    )
+    try:
+        cleaned_pred_data.in_sample_prediction = __convert_string_to_series(
+            predictions.in_sample_prediction
+        )
+    except:
+        cleaned_pred_data.in_sample_prediction = None
+            
 
     return cleaned_pred_data
 
@@ -182,7 +186,7 @@ def __full_data_plus_prediction_plot(
         ground_truth_values = prediction.ground_truth_values
 
     ground_truth_values = prediction.ground_truth_values
-    title = prediction.title
+    title = prediction.title + ' ' + prediction.plot_folder.split("/")[1]
 
     ground_truth_values.plot(
         ax=axis, label="Ground truth", style="x", color="blue", alpha=0.5
@@ -313,7 +317,7 @@ def __plot(
         ground_truth_values = prediction.ground_truth_values
 
     ground_truth_values = prediction.ground_truth_values
-    title = prediction.title
+    title = prediction.title + ' ' + prediction.plot_folder.split("/")[1]
 
     ground_truth_values.plot(
         ax=axis, label="Ground truth", style="x", color="blue", alpha=0.5

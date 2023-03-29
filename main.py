@@ -67,15 +67,13 @@ if __name__ == "__main__":
 
     __dataset_row_items: dict[str, list[str]] = {
         # take first 3 from list of cities
+        "stock_prices":   get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
         "india_pollution": get_cities_from_geographical_region("Indo-Gangetic Plain"),
-        "stock_prices": [
-            "DIS"
-        ],  # get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
     }
 
     __dataset_group_titles: dict[str, str] = {
-        "india_pollution": "Coastal cities in India",
-        "stock_prices": "Value stocks",
+        "india_pollution": "Cities on the Indo-Gangetic Plain in India",
+        "stock_prices": "Growth stocks",
     }
 
     __predictors: dict[str, Predict[Dataset, Result]] = {
@@ -270,8 +268,8 @@ if __name__ == "__main__":
                 )
 
     __datasets = [
-        "india_pollution",
-        #  "stock_prices",
+        # "india_pollution",
+         "stock_prices",
         # "airline_passengers",
         # "list_of_tuples",
         #  "sun_spots",
@@ -279,12 +277,12 @@ if __name__ == "__main__":
     ]
 
     __methods = [
-        "AR",
-        # "linear_regression",
+        # "AR",
+        "linear_regression",
         # "ARIMA",
-        "HoltWinters",
-        "MA",
-        # "Prophet",
+        # "HoltWinters",
+        # "MA",
+        "Prophet",
         # "FCNN",
         # "FCNN_embedding",
         # "SARIMA",

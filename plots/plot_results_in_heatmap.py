@@ -15,7 +15,16 @@ Figure = TypeVar("Figure")
 from predictions.Prediction import PredictionData
 
 from data.report import Report
+from data.stock_prices import (
+    get_a_list_of_growth_stock_tickers,
+    get_a_list_of_value_stock_tickers,
+)
 
+
+__dataset_group_titles: dict[str, str] = {
+    "Indian city pollution": "Cities on the Indo-Gangetic Plain in India",
+    "stock_prices": "Value stocks",
+}
 
 from methods.plot_results_in_heatmap import plot_results_in_heatmap as method_report
 from methods.plot_results_in_heatmap import (
@@ -48,7 +57,10 @@ def __compile_results(
 
 def __get_dataset_name(results_dataframe: pd.DataFrame) -> str:
     """Get the name of the dataset"""
-    return results_dataframe["dataset"].unique()[0]
+    if results_dataframe["dataset"].unique()[0] in __dataset_group_titles:
+        return __dataset_group_titles[results_dataframe["dataset"].unique()[0]]
+    else:
+        return results_dataframe["dataset"].unique()[0]
 
 
 def __get_title(
@@ -81,8 +93,9 @@ def __plot_heatmap(
     colormap = sns.diverging_palette(220, 20, as_cmap=True)
 
     # condensed distance matrix must contain only finite values
-    results_dataframe[chosen_metric] = results_dataframe[chosen_metric].replace(
-        [np.inf, -np.inf], np.nan
+    results_dataframe = results_dataframe.copy()
+    results_dataframe.loc[:, chosen_metric] = results_dataframe[chosen_metric].replace(
+        ["none", "nan"], np.nan
     )
 
     pivoted_dataframe = results_dataframe.pivot(
@@ -108,7 +121,6 @@ def __plot_heatmap(
         )
         cluster_grid.ax_col_dendrogram.set_title(title)
         return cluster_grid
-    
 
     # reversing the colorbar for R2 case
     if chosen_metric == "R2":
@@ -142,6 +154,34 @@ def __get_time_stamp_for_file_name() -> str:
     return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
+def __get_plot_params(
+    figure: Figure, metric: str, data_to_plot: pd.DataFrame, dataset_name: str
+):
+    """Get the parameters for the plot"""
+    sub_category_name = data_to_plot["subset_row"][0]
+    input_map = {}
+    if dataset_name == "Stock price":
+        list_of_growth = get_a_list_of_growth_stock_tickers()
+        for ticker in list_of_growth:
+            input_map[(dataset_name, ticker)] = (figure, dataset_name, "growth", metric)
+        list_of_value = get_a_list_of_value_stock_tickers()
+        for ticker in list_of_value:
+            input_map[(dataset_name, ticker)] = (figure, dataset_name, "value", metric)
+    elif dataset_name in ["India city pollution", "Indian city pollution"]:
+        input_map[(dataset_name, sub_category_name)] = (
+            figure,
+            "Indian city pollution",
+            "_",
+            metric,
+        )
+    else:
+        raise ValueError("Invalid dataset_name: {}".format(dataset_name))
+    input_key = (dataset_name, sub_category_name)
+    input_value = input_map.get(input_key, "__")
+
+    return input_value
+
+
 def __save_heatmap(
     figure: Figure,
     dataset_name: str,
@@ -167,8 +207,8 @@ def __save_heatmap(
 
 
 plot_results_in_heatmap = method_report(
-    __compile_results, __plot_heatmap, __save_heatmap
+    __compile_results, __plot_heatmap, __get_plot_params, __save_heatmap
 )
 plot_results_in_heatmap_from_csv = method_report_from_csv(
-    __plot_heatmap, __save_heatmap
+    __plot_heatmap, __get_plot_params, __save_heatmap
 )

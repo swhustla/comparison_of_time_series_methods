@@ -27,12 +27,24 @@ import gzip
 from data.dataset import Dataset, Result
 from data.report import Report
 from methods.predict import Predict
+from data.india_pollution import (
+    india_pollution,
+    get_list_of_city_names,
+    get_list_of_coastal_indian_cities,
+    get_cities_from_geographical_region,
+    get_city_list_by_tier,
+)
 
 from plots.plot_results_in_heatmap import plot_results_in_heatmap_from_csv
 from plots.plot_results_in_box_plot import plot_results_in_boxplot_from_csv
 from plots.comparison_plot_multi import comparison_plot_multi
 from plots.comparison_plot import comparison_plot
 from plots.plot_results_in_scatter_plot import plot_results_in_scatter_plot_from_csv
+from plots.plot_results_in_scatter_plot import (
+    plot_results_in_scatter_plot_multi_from_csv_,
+)
+from plots.plot_correlation_n_points import plot_correlation_Npoints_vs_MAPE
+
 
 from predictions.AR import ar
 from predictions.MA import ma
@@ -57,6 +69,7 @@ from data.india_pollution import (
     india_pollution,
     get_list_of_city_names,
     get_list_of_coastal_indian_cities,
+    get_cities_from_geographical_region,
 )
 
 
@@ -88,8 +101,8 @@ __dataset_loaders: dict[str, Load[Dataset]] = {
 
 # pick one dataset from the list only
 __dataset = [
-    # "India city pollution",
-    "Stock price"
+    "India city pollution",
+    # "Stock price"
     # "Airline passengers",
     # "list_of_tuples",
     # "Sun spots",
@@ -99,17 +112,17 @@ __dataset = [
 
 # choose the subset rows for the dataset to be plotted
 __dataset_row_items: dict[str, list[str]] = {
-    "India city pollution": [
-        "Ahmedabad",
-        "Bengaluru",
-        "Chennai",
-    ],  # get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
-    "Stock price": get_a_list_of_value_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
+    "India city pollution": get_cities_from_geographical_region("Indo-Gangetic Plain"), #get_list_of_city_names(),  # ["Ahmedabad", "Bengaluru", "Chennai"],
+    "Stock price": get_a_list_of_growth_stock_tickers(),  # ["JPM", "AAPL", "MSFT"],# get_a_list_of_growth_stock_tickers()[:2],#get_a_list_of_value_stock_tickers(),
     "Airline passengers": ["all"],
     "list_of_tuples": ["random"],
     "Sun spots": ["All"],
 }
 
+__dataset_group_titles: dict[str, str] = {
+      "India city pollution": "Cities on the Indo-Gangetic Plain in India",
+      "Stock price": "Value stocks",
+  }
 
 # pick at least 2 methods from the list
 __methods = [
@@ -125,16 +138,34 @@ __methods = [
     # "auto_arima"
     "SES",
     # "TsetlinMachine",
+    "TsetlinMachineSingle",
 ]
 
-__plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
+if __dataset[0] == "India city pollution":
+    __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
+    "heatmap": plot_results_in_heatmap_from_csv,
+    # "boxplot": plot_results_in_boxplot_from_csv,
+    # "comparison_plot": comparison_plot,
+    # "comparison_plot_multi": comparison_plot_multi,
+    # "scatter_plot": plot_results_in_scatter_plot_from_csv,
+    # "scatter_plot_multi": plot_results_in_scatter_plot_multi_from_csv_,
+    # "correlation_plot": plot_correlation_Npoints_vs_MAPE,
+}
+elif __dataset[0] == "Stock price":
+    __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
     "heatmap": plot_results_in_heatmap_from_csv,
     "boxplot": plot_results_in_boxplot_from_csv,
+    # "comparison_plot": comparison_plot,
+    # "comparison_plot_multi": comparison_plot_multi,
+    # "scatter_plot": plot_results_in_scatter_plot_from_csv,
+    # "scatter_plot_multi": plot_results_in_scatter_plot_multi_from_csv_,
+}
+else:
+    __plotters: dict[str, Plot[Data, Prediction, ConfidenceInterval, Title]] = {
     "comparison_plot": comparison_plot,
     "comparison_plot_multi": comparison_plot_multi,
     "scatter_plot": plot_results_in_scatter_plot_from_csv,
 }
-
 __predictors: dict[str, Predict[Dataset, Result]] = {
     "linear_regression": linear_regression,
     "AR": ar,
@@ -244,10 +275,7 @@ dataset_name = __dataset[0]
 mask_low_r_squared = filtered_dataframe.loc[
     filtered_dataframe["R2"] < -10
 ].drop_duplicates(subset=["subset_row"])["subset_row"]
-# Filteres the above cities from the final list
-filtered_dataframe_r_squared = filtered_dataframe[
-    ~filtered_dataframe.subset_row.isin(mask_low_r_squared)
-]
+
 
 exception_datasets = {
     "Airline passengers": None,
@@ -300,10 +328,13 @@ def run_plotting_pipeline(filtered_dataframe, testset_size, plot_type="all"):
     # TODO: decide if need to run on lots of datasets or just one
 
     data_list = load_dataset(dataset_name)
+    list_training_data = []
     for dataset in data_list:
         training_index = dataset.values.index[
             : int(len(dataset.values.index) * (1 - testset_size))
         ]
+        # Append a list of training data for each dataset
+        list_training_data.append(dataset.values.loc[training_index, :])
         id_count = np.where(
             (filtered_dataframe["subset_row"] == dataset.subset_row_name)
             & (np.isfinite(filtered_dataframe["MAPE"]))
@@ -332,26 +363,49 @@ def run_plotting_pipeline(filtered_dataframe, testset_size, plot_type="all"):
             plot_results_in_scatter_plot_from_csv(
                 filtered_dataframe_per_dataset, dataset
             )
+    if plot_type == "scatter_plot_multi":
+        # plot scatter plot per dataset
+        plot_results_in_scatter_plot_multi_from_csv_(filtered_dataframe, dataset_name)
+    if plot_type == "plot_correlation":
+        # Plot the correlation between number of points and MAPE
+        plot_correlation_Npoints_vs_MAPE(list_training_data, filtered_dataframe)
 
 
-for plotter_name, plotter in __plotters.items():
-    print(f"Plotting {plotter_name} for dataset: {dataset_name}")
-    if plotter_name == "boxplot":
+def plot_data(filtered_dataframe, dataset_name):
+    # Filteres the above cities from the final list
+    filtered_dataframe_r_squared = filtered_dataframe[
+        ~filtered_dataframe.subset_row.isin(mask_low_r_squared)
+    ]
+    for plotter_name, plotter in __plotters.items():
+        print(f"Plotting {plotter_name} for dataset: {dataset_name}")
+
         try:
-            plotter(filtered_dataframe, dataset_name)
+            if plotter_name == "boxplot":
+                plotter(filtered_dataframe, dataset_name)
+            elif plotter_name == "comparison_plot":
+                run_plotting_pipeline(
+                    filtered_dataframe, __testset_size, "comparison_plot"
+                )
+            elif plotter_name == "comparison_plot_multi":
+                run_plotting_pipeline(
+                    filtered_dataframe, __testset_size, "comparison_plot_multi"
+                )
+            elif plotter_name == "correlation_plot":
+                run_plotting_pipeline(
+                    filtered_dataframe, __testset_size, "plot_correlation"
+                )
+            elif plotter_name == "scatter_plot":
+                run_plotting_pipeline(
+                    filtered_dataframe, __testset_size, "scatter_plot"
+                )
+            elif plotter_name == "scatter_plot_multi":
+                run_plotting_pipeline(
+                    filtered_dataframe, __testset_size, "scatter_plot_multi"
+                )
+            elif plotter_name == "heatmap":
+                plotter(filtered_dataframe, dataset_name)
         except Exception as e:
             print(f"Error plotting {plotter_name}: {str(e)}")
-            continue
-    elif plotter_name == "comparison_plot":
-        run_plotting_pipeline(filtered_dataframe, __testset_size, "comparison_plot")
-    elif plotter_name == "comparison_plot_multi":
-        run_plotting_pipeline(
-            filtered_dataframe, __testset_size, "comparison_plot_multi"
-        )
-    elif plotter_name == "scatter_plot":
-        run_plotting_pipeline(filtered_dataframe, __testset_size, "scatter_plot")
-    else:
-        try:
-            plotter(filtered_dataframe, dataset_name)
-        except Exception as e:
-            print(f"Error plotting {plotter_name}: {str(e)}")
+
+
+plot_data(filtered_dataframe, dataset_name)
