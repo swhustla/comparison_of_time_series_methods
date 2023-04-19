@@ -682,6 +682,34 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
+name = "imageio"
+version = "2.27.0"
+description = "Library for reading and writing a wide range of image, video, scientific, and volumetric data formats."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+numpy = "*"
+pillow = ">=8.3.2"
+
+[package.extras]
+all-plugins = ["astropy", "av", "imageio-ffmpeg", "psutil", "tifffile"]
+all-plugins-pypy = ["av", "imageio-ffmpeg", "psutil", "tifffile"]
+build = ["wheel"]
+dev = ["invoke", "pytest", "pytest-cov", "fsspec", "black", "flake8"]
+docs = ["sphinx (<6)", "numpydoc", "pydata-sphinx-theme"]
+ffmpeg = ["imageio-ffmpeg", "psutil"]
+fits = ["astropy"]
+full = ["astropy", "av", "black", "flake8", "fsspec", "gdal", "imageio-ffmpeg", "invoke", "itk", "numpydoc", "psutil", "pydata-sphinx-theme", "pytest", "pytest-cov", "sphinx (<6)", "tifffile", "wheel"]
+gdal = ["gdal"]
+itk = ["itk"]
+linting = ["black", "flake8"]
+pyav = ["av"]
+test = ["invoke", "pytest", "pytest-cov", "fsspec"]
+tifffile = ["tifffile"]
+
+[[package]]
 name = "ipykernel"
 version = "6.21.2"
 description = "IPython Kernel for Jupyter"
@@ -1108,6 +1136,18 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "lazy-loader"
+version = "0.2"
+description = "lazy_loader"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+lint = ["pre-commit (>=3.1)"]
+test = ["pytest (>=7.2)", "pytest-cov (>=4.0)"]
+
+[[package]]
 name = "lazy-object-proxy"
 version = "1.9.0"
 description = "A fast and thorough lazy object proxy."
@@ -1138,6 +1178,25 @@ scipy = "*"
 
 [package.extras]
 dask = ["dask[array] (>=2.0.0)", "dask[dataframe] (>=2.0.0)", "dask[distributed] (>=2.0.0)", "pandas"]
+
+[[package]]
+name = "lime"
+version = "0.2.0.1"
+description = "Local Interpretable Model-Agnostic Explanations for machine learning classifiers"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+matplotlib = "*"
+numpy = "*"
+scikit-image = ">=0.12"
+scikit-learn = ">=0.18"
+scipy = "*"
+tqdm = "*"
+
+[package.extras]
+dev = ["pytest", "flake8"]
 
 [[package]]
 name = "lunarcalendar"
@@ -1377,6 +1436,21 @@ description = "Patch asyncio to allow nested event loops"
 category = "main"
 optional = false
 python-versions = ">=3.5"
+
+[[package]]
+name = "networkx"
+version = "3.1"
+description = "Python package for creating and manipulating graphs and networks"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.extras]
+default = ["numpy (>=1.20)", "scipy (>=1.8)", "matplotlib (>=3.4)", "pandas (>=1.3)"]
+developer = ["pre-commit (>=3.2)", "mypy (>=1.1)"]
+doc = ["sphinx (>=6.1)", "pydata-sphinx-theme (>=0.13)", "sphinx-gallery (>=0.12)", "numpydoc (>=1.5)", "pillow (>=9.4)", "nb2plots (>=0.6)", "texext (>=0.6.7)"]
+extra = ["lxml (>=4.6)", "pygraphviz (>=1.10)", "pydot (>=1.4.2)", "sympy (>=1.10)"]
+test = ["pytest (>=7.2)", "pytest-cov (>=4.0)", "codecov (>=2.1)"]
 
 [[package]]
 name = "notebook"
@@ -1819,6 +1893,17 @@ python-versions = ">=3.6.8"
 diagrams = ["railroad-diagrams", "jinja2"]
 
 [[package]]
+name = "pyreadr"
+version = "0.4.7"
+description = "Reads/writes R RData and Rds files into/from pandas data frames."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+pandas = ">=1.2.0"
+
+[[package]]
 name = "pyrsistent"
 version = "0.19.3"
 description = "Persistent/Functional/Immutable data structures"
@@ -1886,6 +1971,17 @@ description = "World timezone definitions, modern and historical"
 category = "main"
 optional = false
 python-versions = "*"
+
+[[package]]
+name = "pywavelets"
+version = "1.4.1"
+description = "PyWavelets, wavelet transform module"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+numpy = ">=1.17.3"
 
 [[package]]
 name = "pywin32"
@@ -1984,6 +2080,34 @@ python-versions = ">=3.6,<4"
 
 [package.dependencies]
 pyasn1 = ">=0.1.3"
+
+[[package]]
+name = "scikit-image"
+version = "0.20.0"
+description = "Image processing in Python"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+imageio = ">=2.4.1"
+lazy_loader = ">=0.1"
+networkx = ">=2.8"
+numpy = ">=1.21.1"
+packaging = ">=20.0"
+pillow = ">=9.0.1"
+PyWavelets = ">=1.1.1"
+scipy = {version = ">=1.8", markers = "python_version > \"3.9\""}
+tifffile = ">=2019.7.26"
+
+[package.extras]
+build = ["meson-python (>=0.13.0rc0)", "wheel", "setuptools (>=67)", "packaging (>=20)", "ninja", "Cython (>=0.29.24)", "pythran", "numpy (>=1.21.1)", "build"]
+data = ["pooch (>=1.3.0)"]
+default = ["numpy (>=1.21.1)", "scipy (>=1.8,<1.9.2)", "scipy (>=1.8)", "networkx (>=2.8)", "pillow (>=9.0.1)", "imageio (>=2.4.1)", "tifffile (>=2019.7.26)", "PyWavelets (>=1.1.1)", "packaging (>=20.0)", "lazy_loader (>=0.1)"]
+developer = ["pre-commit", "rtoml"]
+docs = ["sphinx (>=5.2)", "sphinx-gallery (>=0.11)", "numpydoc (>=1.5)", "sphinx-copybutton", "pytest-runner", "scikit-learn", "matplotlib (>=3.6)", "dask[array] (>=2022.9.2)", "pandas (>=1.5)", "seaborn (>=0.11)", "pooch (>=1.6)", "tifffile (>=2022.8.12)", "myst-parser", "ipywidgets", "plotly (>=5.10)", "kaleido"]
+optional = ["simpleitk", "astropy (>=3.1.2)", "cloudpickle (>=0.2.1)", "dask[array] (>=1.0.0,!=2.17.0)", "matplotlib (>=3.3)", "pooch (>=1.3.0)", "pyamg"]
+test = ["asv", "codecov", "matplotlib (>=3.3)", "pooch (>=1.3.0)", "pytest (>=5.2.0)", "pytest-cov (>=2.7.0)", "pytest-localserver", "pytest-faulthandler"]
 
 [[package]]
 name = "scikit-learn"
@@ -2283,6 +2407,20 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "tifffile"
+version = "2023.4.12"
+description = "Read and write TIFF files"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+numpy = "*"
+
+[package.extras]
+all = ["imagecodecs (>=2023.1.23)", "matplotlib", "defusedxml", "lxml", "zarr", "fsspec"]
+
+[[package]]
 name = "tinycss2"
 version = "1.2.1"
 description = "A tiny CSS parser"
@@ -2468,6 +2606,26 @@ optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
 [[package]]
+name = "xgboost"
+version = "1.7.5"
+description = "XGBoost Python Package"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+numpy = "*"
+scipy = "*"
+
+[package.extras]
+dask = ["dask", "pandas", "distributed"]
+datatable = ["datatable"]
+pandas = ["pandas"]
+plotting = ["graphviz", "matplotlib"]
+pyspark = ["pyspark", "scikit-learn", "cloudpickle"]
+scikit-learn = ["scikit-learn"]
+
+[[package]]
 name = "y-py"
 version = "0.5.9"
 description = "Python bindings for the Y-CRDT built from yrs (Rust)"
@@ -2511,7 +2669,7 @@ test = ["mypy", "pre-commit", "pytest", "pytest-asyncio", "websockets (>=10.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "c860db202913e94c54b26967fa680bed8ad1d71ec5e107d4f28b1219ef10f545"
+content-hash = "448e207b4e0e3afae8e1cdf34cbc9a0f2ba8210d38520b4684fa34f668df8d3f"
 
 [metadata.files]
 absl-py = []
@@ -2572,6 +2730,7 @@ h5py = []
 hijri-converter = []
 holidays = []
 idna = []
+imageio = []
 ipykernel = []
 ipython = []
 ipython-genutils = []
@@ -2598,9 +2757,11 @@ kaggle = []
 keras = []
 kiwisolver = []
 korean-lunar-calendar = []
+lazy-loader = []
 lazy-object-proxy = []
 libclang = []
 lightgbm = []
+lime = []
 lunarcalendar = []
 lxml = []
 markdown = []
@@ -2617,6 +2778,7 @@ nbclient = []
 nbconvert = []
 nbformat = []
 nest-asyncio = []
+networkx = []
 notebook = []
 notebook-shim = []
 numpy = []
@@ -2655,6 +2817,7 @@ pygments = []
 pylint = []
 pymeeus = []
 pyparsing = []
+pyreadr = []
 pyrsistent = []
 pystan = []
 python-dateutil = []
@@ -2662,6 +2825,7 @@ python-json-logger = []
 python-slugify = []
 pytsetlinmachine = []
 pytz = []
+pywavelets = []
 pywin32 = []
 pywinpty = []
 pyyaml = []
@@ -2671,6 +2835,7 @@ requests-oauthlib = []
 rfc3339-validator = []
 rfc3986-validator = []
 rsa = []
+scikit-image = []
 scikit-learn = []
 scipy = []
 seaborn = []
@@ -2693,6 +2858,7 @@ termcolor = []
 terminado = []
 text-unidecode = []
 threadpoolctl = []
+tifffile = []
 tinycss2 = []
 tomli = []
 tomlkit = []
@@ -2710,6 +2876,7 @@ webencodings = []
 websocket-client = []
 werkzeug = []
 wrapt = []
+xgboost = []
 y-py = []
 yfinance = []
 ypy-websocket = []
