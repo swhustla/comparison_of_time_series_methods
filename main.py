@@ -32,6 +32,7 @@ if __name__ == "__main__":
     from data.airline_passengers import airline_passengers
     from data.sun_spots import sun_spots
     from data.data_from_csv import load_from_csv
+    from data.electricity_consumption import energy_demand
     from predictions.AR import ar
     from predictions.MA import ma
     from predictions.HoltWinters import holt_winters
@@ -63,6 +64,7 @@ if __name__ == "__main__":
         "airline_passengers": airline_passengers,
         "sun_spots": sun_spots,
         "csv": load_from_csv,
+        "electricity_consumption": energy_demand,
     }
 
     __dataset_row_items: dict[str, list[str]] = {
@@ -269,11 +271,12 @@ if __name__ == "__main__":
 
     __datasets = [
         # "india_pollution",
-         "stock_prices",
-        # "airline_passengers",
+        #  "stock_prices",
+        "airline_passengers",
         # "list_of_tuples",
         #  "sun_spots",
         # "csv",
+        # "electricity_consumption",
     ]
 
     __methods = [
