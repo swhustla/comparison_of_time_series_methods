@@ -15,10 +15,11 @@ def __get_root_mean_squared_error(
 
 
 def __get_r_squared(ground_truth: np.ndarray, prediction: np.ndarray) -> float:
-    return 1 - (
+    r_squared = 1 - (
         np.sum((ground_truth - prediction) ** 2)
         / np.sum((ground_truth - np.mean(ground_truth)) ** 2)
     )
+    return max(r_squared, 0)
 
 
 def __get_mean_absolute_error(
