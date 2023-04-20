@@ -19,3 +19,4 @@ write_up/*.fdb_latexmk
 write_up/*.log
 reports/full_data/*.gz
 notebooks/*.rda
+notebooks/data/*.rda
