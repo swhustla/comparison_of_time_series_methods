@@ -34,6 +34,10 @@ import zipfile
 # https://www.electricitymaps.com/
 # https://github.com/electricitymaps/electricitymaps-contrib#data-sources/blob/master/DATA_SOURCES.md#real-time-electricity-data-sources
 
+import sys
+__parent_folder = Path(sys.argv[0] if __name__ == "__main__" else "").resolve().parent
+__destination_folder = Path(__parent_folder) / "data"
+
 
 def __download_if_needed():
     """Download the data from Kaggle if it is not already downloaded."""
@@ -41,16 +45,19 @@ def __download_if_needed():
     full_path = Path("rohanrao/air-quality-data-in-india")
     owner_slug = str(full_path).split("/")[0]
     dataset_slug = str(full_path).split("/")[1]
-    path = Path(dataset_slug)
-    if not path.exists():
+
+    local_data_path = __destination_folder / dataset_slug
+
+    if not local_data_path.exists():
+        logging.info("Downloading data from Kaggle")
         import kaggle
 
         kaggle.api.datasets_download(owner_slug=owner_slug, dataset_slug=dataset_slug)
-        zipfile.ZipFile(f"{dataset_slug}.zip").extractall(dataset_slug)
+        zipfile.ZipFile(f"{dataset_slug}.zip").extractall(path=local_data_path)
     else:
-        print(f"Path {path} exists")
+        logging.info(f"Path {local_data_path} exists")
 
-    return path
+    return local_data_path
 
 
 def __load_data(path: Path) -> Data:
@@ -166,6 +173,7 @@ def india_pollution(
     city_list: list = __city_choice,
     pollution_columns: list = __column_choice,
     get_lat_long: bool = False,
+    raw: bool = False,
 ) -> Generator[Dataset, None, None]:
     """Load in India Pollution data."""
     path = __download_if_needed()
@@ -203,8 +211,9 @@ def india_pollution(
                 f"City {city} not in list of city names: {list_of_city_names}"
             )
         data_this_city = data[data["City"].isin([city])][pollution_columns]
-        data_this_city = __impute_data_if_needed(data_this_city)
-        data_this_city = __resample(data_this_city)
+        if not raw:
+            data_this_city = __impute_data_if_needed(data_this_city)
+            data_this_city = __resample(data_this_city)
         data_this_city = __add_inferred_freq_to_index(data_this_city)
         yield Dataset(
             name="Indian city pollution",
