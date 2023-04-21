@@ -70,13 +70,15 @@ def __get_energy_demand_all_zones(scale: bool = True) -> pd.DataFrame:
     return df
 
 def energy_demand(zone: list = __zone_choice,
-                  scale: bool = True) -> Dataset:
+                  scale: bool = True,
+                  raw: bool = False) -> Dataset:
     """Loads the energy demand dataset and optionally scales the data."""
     df = __get_energy_demand_all_zones(scale=scale)
     
     df_this_zone = df[zone]
-    df_this_zone = __impute_data_if_needed(df_this_zone)
-    df_this_zone = __resample(df_this_zone)
+    if not raw:
+        df_this_zone = __impute_data_if_needed(df_this_zone)
+        df_this_zone = __resample(df_this_zone)
     return Dataset(
         name=f"energy_demand_{zone}",
         values=df_this_zone,
