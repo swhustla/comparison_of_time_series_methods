@@ -21,6 +21,7 @@ def __get_r_squared(ground_truth: np.ndarray, prediction: np.ndarray) -> float:
     )
 
 
+
 def __get_mean_absolute_error(
     ground_truth: np.ndarray, prediction: np.ndarray
 ) -> float:

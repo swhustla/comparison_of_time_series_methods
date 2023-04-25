@@ -41,7 +41,7 @@ def __load_data_if_needed() -> pd.DataFrame:
     return __impute_data_if_needed(__add_inferred_freq_to_index(data))
 
 
-def airline_passengers() -> pd.DataFrame:
+def airline_passengers() -> Dataset:
     """Load in the airline passenger data."""
     return Dataset(
         "Airline passengers",

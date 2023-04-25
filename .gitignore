@@ -18,3 +18,8 @@ plots/*/*/*/*.png
 write_up/*.fdb_latexmk
 write_up/*.log
 reports/full_data/*.gz
+notebooks/*.rda
+notebooks/data/*.rda
+notebooks/.ipynb_checkpoints/*-checkpoint.ipynb
+data/*/*.csv
+notebooks/data/*.csv
