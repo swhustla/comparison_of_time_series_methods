@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "india_air_pollution_study"
+name = "comparison_of_time_series_methods"
 version = "0.1.0"
 description = ""
 authors = ["swhustla <fdkelly@gmail.com>"]
