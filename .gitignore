@@ -25,4 +25,6 @@ data/*/*.csv
 notebooks/data/*.csv
 notebooks/plots/*.png
 notebooks/plots/*/*.png
+notebooks/plots/*/*/*.png
+notebooks/plots/*/*/*/*.png
 
