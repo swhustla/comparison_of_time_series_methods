@@ -30,7 +30,7 @@ def __figure_out_confidence_interval_plot(
     prediction: PredictionData, prediction_series: pd.Series
 ) -> Tuple[pd.Series, pd.Series, str]:
     if prediction.confidence_columns is None:
-        print(
+        logging.info(
             f"\n\nPlotting {prediction.title} without pre-defined confidence intervals\n\n"
         )
         upper_limit = prediction_series + prediction.values.std()
@@ -38,14 +38,14 @@ def __figure_out_confidence_interval_plot(
         confidence_interval_label = "Confidence interval - 1 S.D."
     else:
         if prediction.confidence_on_mean == False:
-            print(
+            logging.info(
                 f"\n\nPlotting {prediction.title} with pre-defined confidence intervals\n\n"
             )
             upper_limit = prediction.values.loc[:, prediction.confidence_columns[1]]
             lower_limit = prediction.values.loc[:, prediction.confidence_columns[0]]
             confidence_interval_label = prediction.confidence_method
         elif prediction.confidence_on_mean == True:
-            print(
+            logging.info(
                 f"\n\nPlotting {prediction.title} with pre-defined confidence intervals\n\n"
             )
             upper_limit = prediction_series + (
@@ -110,15 +110,15 @@ def __convert_string_to_series(
         tidy_series = pd.Series(eval(data_string))
     except SyntaxError:
         try:
-            print("Series conversion failed; trying to convert to DataFrame")
+            logging.debug("Series conversion failed; trying to convert to DataFrame")
             tidy_series = pd.DataFrame(eval(data_string), index=[0])
         except SyntaxError:
-            print("DataFrame conversion failed; trying to convert to list")
+            logging.debug("DataFrame conversion failed; trying to convert to list")
             tidy_series = list(eval(data_string))
         except Exception as e:
-            print(f"Failed to convert to list: {e}")
+            logging.debug(f"Failed to convert to list: {e}")
     except Exception as e:
-        print(f"Failed to convert to series: {e}")
+        logging.debug(f"Failed to convert to series: {e}")
 
     return tidy_series
 

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 if __name__ == "__main__":
+    import sys
+    import os
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.append(parent_dir)
+
     from typing import (
         Any,
         Callable,
@@ -285,7 +290,7 @@ if __name__ == "__main__":
         # "ARIMA",
         # "HoltWinters",
         # "MA",
-        "Prophet",
+        # "Prophet",
         # "FCNN",
         # "FCNN_embedding",
         # "SARIMA",

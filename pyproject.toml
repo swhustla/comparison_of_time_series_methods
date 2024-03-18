@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "comparison_of_time_series_methods"
+name = "india_air_pollution_study"
 version = "0.1.0"
 description = ""
 authors = ["swhustla <fdkelly@gmail.com>"]
@@ -35,6 +35,7 @@ plotly = "5.12.0"
 lime = "^0.2.0"
 pyreadr = "^0.4.7"
 xgboost = "^1.7.5"
+notexbook-theme = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^22.6.0", allow-prereleases = true}

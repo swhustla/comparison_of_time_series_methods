@@ -23,3 +23,8 @@ notebooks/data/*.rda
 notebooks/.ipynb_checkpoints/*-checkpoint.ipynb
 data/*/*.csv
 notebooks/data/*.csv
+notebooks/plots/*.png
+notebooks/plots/*/*.png
+notebooks/plots/*/*/*.png
+notebooks/plots/*/*/*/*.png
+
