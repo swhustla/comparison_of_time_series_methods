@@ -2,7 +2,9 @@ install:
 	poetry shell
 	pip install pip --upgrade
 	pip install tensorflow-macos
-	pip install git+https://github.com/stan-dev/pystan2.git@master
+	pip install pystan==2.19.1.1
+	pip install pandas
+	pip install convertdate lunarcalendar holidays
 	pip install prophet==1.0      
 	pip install GDAL
 	pip install torch==1.13.1
